@@ -1,0 +1,2444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Woordle" />
+  <meta name="theme-color" content="#101218" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="description" content="Woordle — a 3-word mini crossword Wordle by Pocket Rivet." />
+  <title>Woordle — Pocket Rivet</title>
+  <style>
+/* Woordle — Pocket Rivet. Mobile-first, iPhone Safari portrait. */
+:root {
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --tile: 52px;
+  --gap: 5px;
+  --radius: 8px;
+  --font: ui-rounded, "SF Pro Rounded", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --flip: 0.5s;
+}
+
+/* —— Skins —— */
+html[data-skin="rivet"], :root {
+  --bg: #101218;
+  --bg-elev: #1a1d27;
+  --bg-elev-2: #232734;
+  --text: #f3efe6;
+  --muted: #9a9488;
+  --faint: #5c5a63;
+  --line: #2c3040;
+  --accent: #d7b15a;
+  --accent-text: #1a160c;
+  --correct: #3f8f6d;
+  --correct-text: #f3efe6;
+  --present: #d4a017;
+  --present-text: #1a160c;
+  --absent: #3a3d4a;
+  --absent-text: #c5c1b8;
+  --key: #3e4456;
+  --key-text: #f3efe6;
+  --tile-bg: #101218;
+  --tile-border: #4a5060;
+  --tile-filled: #cfc6b4;
+  --danger: #d46a6a;
+  --overlay: rgba(6, 7, 10, 0.62);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --pip-empty: #2c3040;
+  --focus: #d7b15a;
+}
+
+html[data-skin="midnight"] {
+  --bg: #07080c;
+  --bg-elev: #12141c;
+  --bg-elev-2: #1c1f2a;
+  --text: #eef1f7;
+  --muted: #8b90a0;
+  --faint: #4d5160;
+  --line: #262a36;
+  --accent: #8ab4ff;
+  --accent-text: #0b1220;
+  --correct: #3db88a;
+  --correct-text: #042016;
+  --present: #f0c14b;
+  --present-text: #1a1404;
+  --absent: #2a2d38;
+  --absent-text: #b8bcc8;
+  --key: #2c3142;
+  --key-text: #eef1f7;
+  --tile-bg: #07080c;
+  --tile-border: #3a4052;
+  --tile-filled: #d0d5e0;
+  --danger: #ef6b7b;
+  --overlay: rgba(0, 0, 0, 0.7);
+  --focus: #8ab4ff;
+}
+
+html[data-skin="dawn"] {
+  --bg: #f6f1e8;
+  --bg-elev: #ffffff;
+  --bg-elev-2: #efe8db;
+  --text: #1c1a16;
+  --muted: #6b655a;
+  --faint: #a39c90;
+  --line: #e2dacb;
+  --accent: #b8860b;
+  --accent-text: #fff8e8;
+  --correct: #2e7d5b;
+  --correct-text: #ffffff;
+  --present: #c4920a;
+  --present-text: #1a1404;
+  --absent: #78746c;
+  --absent-text: #ffffff;
+  --key: #e8e1d4;
+  --key-text: #1c1a16;
+  --tile-bg: #f6f1e8;
+  --tile-border: #c8c0b0;
+  --tile-filled: #1c1a16;
+  --danger: #b94a4a;
+  --overlay: rgba(40, 32, 18, 0.45);
+  --shadow: 0 12px 40px rgba(80, 60, 20, 0.18);
+  --pip-empty: #d9d1c3;
+  --focus: #b8860b;
+}
+
+html[data-skin="sunset"] {
+  --bg: #2a1518;
+  --bg-elev: #3a1d22;
+  --bg-elev-2: #4a262c;
+  --text: #ffeae4;
+  --muted: #c9a199;
+  --faint: #7a5552;
+  --line: #5a3036;
+  --accent: #ffb088;
+  --accent-text: #2a1518;
+  --correct: #e07a5f;
+  --correct-text: #2a1518;
+  --present: #f2cc8f;
+  --present-text: #2a1518;
+  --absent: #4a2a30;
+  --absent-text: #e8c9c2;
+  --key: #5a3038;
+  --key-text: #ffeae4;
+  --tile-bg: #2a1518;
+  --tile-border: #7a454c;
+  --tile-filled: #ffd4c8;
+  --danger: #ff8a9a;
+  --overlay: rgba(20, 6, 8, 0.62);
+  --focus: #ffb088;
+}
+
+html[data-skin="ocean"] {
+  --bg: #0b1c28;
+  --bg-elev: #122838;
+  --bg-elev-2: #173348;
+  --text: #e6f4fb;
+  --muted: #8aafc0;
+  --faint: #4c6d7c;
+  --line: #1d3a4c;
+  --accent: #5ec8d8;
+  --accent-text: #072028;
+  --correct: #2aa89a;
+  --correct-text: #04221e;
+  --present: #e0b44e;
+  --present-text: #1a1404;
+  --absent: #1c3544;
+  --absent-text: #c5d8e0;
+  --key: #1e3c50;
+  --key-text: #e6f4fb;
+  --tile-bg: #0b1c28;
+  --tile-border: #3a5c70;
+  --tile-filled: #cde8f0;
+  --danger: #ef7a8a;
+  --overlay: rgba(4, 12, 18, 0.64);
+  --focus: #5ec8d8;
+}
+
+html[data-skin="forest"] {
+  --bg: #121a14;
+  --bg-elev: #1a261c;
+  --bg-elev-2: #223226;
+  --text: #eaf3e6;
+  --muted: #93a88c;
+  --faint: #556653;
+  --line: #2a3a2c;
+  --accent: #c4d47c;
+  --accent-text: #1a2010;
+  --correct: #4a9a5c;
+  --correct-text: #f3fff4;
+  --present: #d4b44a;
+  --present-text: #1a1404;
+  --absent: #2a382c;
+  --absent-text: #d0dccb;
+  --key: #2c3e30;
+  --key-text: #eaf3e6;
+  --tile-bg: #121a14;
+  --tile-border: #4a5e48;
+  --tile-filled: #dce8d0;
+  --danger: #e08070;
+  --overlay: rgba(6, 12, 8, 0.64);
+  --focus: #c4d47c;
+}
+
+html[data-skin="candy"] {
+  --bg: #1c1224;
+  --bg-elev: #2a1a38;
+  --bg-elev-2: #38244a;
+  --text: #fdefff;
+  --muted: #c3a0d0;
+  --faint: #6e5480;
+  --line: #3e2a52;
+  --accent: #ff9ad5;
+  --accent-text: #2a1020;
+  --correct: #5ad0c8;
+  --correct-text: #08201e;
+  --present: #ffd166;
+  --present-text: #2a1e04;
+  --absent: #3a2a48;
+  --absent-text: #e8d0f0;
+  --key: #3e2c52;
+  --key-text: #fdefff;
+  --tile-bg: #1c1224;
+  --tile-border: #6a4a80;
+  --tile-filled: #f8d8ff;
+  --danger: #ff7aa2;
+  --overlay: rgba(12, 4, 18, 0.64);
+  --focus: #ff9ad5;
+}
+
+html[data-skin="contrast"] {
+  --bg: #000000;
+  --bg-elev: #111111;
+  --bg-elev-2: #222222;
+  --text: #ffffff;
+  --muted: #dddddd;
+  --faint: #888888;
+  --line: #444444;
+  --accent: #ffff00;
+  --accent-text: #000000;
+  --correct: #00e676;
+  --correct-text: #000000;
+  --present: #ffeb3b;
+  --present-text: #000000;
+  --absent: #555555;
+  --absent-text: #ffffff;
+  --key: #333333;
+  --key-text: #ffffff;
+  --tile-bg: #000000;
+  --tile-border: #ffffff;
+  --tile-filled: #ffffff;
+  --danger: #ff5252;
+  --overlay: rgba(0, 0, 0, 0.75);
+  --shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+  --pip-empty: #333333;
+  --focus: #ffff00;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-text-size-adjust: 100%;
+}
+button, input {
+  font-family: inherit;
+  color: inherit;
+}
+button {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+#app {
+  height: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--safe-t) 0 var(--safe-b);
+  position: relative;
+}
+
+/* Header */
+.header {
+  display: grid;
+  grid-template-columns: 88px 1fr 88px;
+  align-items: center;
+  height: 52px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.header-left, .header-right {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+.header-right { justify-content: flex-end; }
+.icon-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+}
+.icon-btn:active { background: var(--bg-elev-2); transform: scale(0.96); }
+.icon-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.brand { text-align: center; line-height: 1.05; }
+.logo {
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  font-size: 18px;
+  padding-left: 0.18em;
+  margin: 0;
+}
+.by {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--accent);
+  font-weight: 700;
+  padding-left: 0.22em;
+  margin-top: 2px;
+}
+
+/* Mode bar */
+.modebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px 2px;
+  flex-shrink: 0;
+}
+.modes {
+  display: flex;
+  background: var(--bg-elev);
+  border-radius: 999px;
+  padding: 3px;
+  border: 1px solid var(--line);
+}
+.mode-btn {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--muted);
+}
+.mode-btn.on {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+.mode-meta { display: none; }
+.tools { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px 6px;
+  flex-shrink: 0;
+  min-height: 22px;
+}
+.mode-date {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+.statusbar .pips { margin-left: auto; }
+.hint-btn, .new-btn {
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.hint-btn:active, .new-btn:active { transform: scale(0.97); background: var(--bg-elev-2); }
+.hint-btn .count {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-radius: 999px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+}
+.pips { display: flex; gap: 4px; align-items: center; }
+.pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2px solid var(--faint);
+}
+.pip.used { background: var(--accent); border-color: var(--accent); }
+.pip.left-warn { border-color: var(--present); }
+.pip.danger { border-color: var(--danger); }
+
+/* Board */
+.board-wrap {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 6px 16px;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, var(--tile));
+  gap: var(--gap);
+  perspective: 600px;
+}
+.tile {
+  width: var(--tile);
+  height: var(--tile);
+  position: relative;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+.tile-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  font-weight: 800;
+  font-size: calc(var(--tile) * 0.48);
+  letter-spacing: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 2px solid var(--tile-border);
+  background: var(--tile-bg);
+  text-transform: uppercase;
+}
+.tile-front { color: var(--text); }
+.tile.filled .tile-front { border-color: var(--tile-filled); }
+.tile-back { transform: rotateX(180deg); color: var(--correct-text); }
+.tile.flipped { transform: rotateX(180deg); transition: transform var(--flip) ease-in-out; }
+.tile.correct .tile-back { background: var(--correct); border-color: var(--correct); color: var(--correct-text); }
+.tile.present .tile-back { background: var(--present); border-color: var(--present); color: var(--present-text); }
+.tile.absent .tile-back { background: var(--absent); border-color: var(--absent); color: var(--absent-text); }
+.tile.known .tile-front {
+  background: var(--correct);
+  border-color: var(--correct);
+  color: var(--correct-text);
+}
+.tile.in-word .tile-front { box-shadow: 0 0 0 2px var(--focus); }
+.tile.in-word.known .tile-front,
+.tile.in-word.flipped { box-shadow: 0 0 0 2px var(--focus); }
+.tile.pop { animation: pop 0.12s var(--ease); }
+.tile.shake, .board.shake { animation: shake 0.46s ease; }
+.tile.win { animation: bounce 0.55s var(--ease); }
+.tile.hint-mark .tile-front::after,
+.tile.hint-mark .tile-back::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent-text);
+}
+
+@keyframes pop {
+  from { transform: scale(0.92); }
+  to { transform: scale(1); }
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  70% { transform: translateY(3px); }
+}
+
+/* Tabs + history */
+.tabs {
+  display: flex;
+  gap: 8px;
+  padding: 4px 12px 6px;
+  flex-shrink: 0;
+}
+.tab {
+  flex: 1;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--bg-elev);
+  border: 1.5px solid var(--line);
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.15;
+  gap: 1px;
+}
+.tab small { font-weight: 600; font-size: 10px; opacity: 0.8; }
+.tab.on { border-color: var(--focus); color: var(--text); box-shadow: 0 0 0 1px var(--focus); }
+.tab.solved { color: var(--correct); border-color: var(--correct); }
+.tab:active { transform: scale(0.98); }
+.history {
+  min-height: 40px;
+  max-height: 92px;
+  overflow-y: auto;
+  padding: 0 12px 6px;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.history:empty::after {
+  content: "Guesses for the selected word show up here.";
+  display: block;
+  text-align: center;
+  color: var(--faint);
+  font-size: 11px;
+  padding: 6px 0;
+}
+.hist-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+.hist-tile {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: var(--absent);
+  color: var(--absent-text);
+}
+.hist-tile.correct { background: var(--correct); color: var(--correct-text); }
+.hist-tile.present { background: var(--present); color: var(--present-text); }
+.hist-tile.pending { background: var(--bg-elev-2); color: var(--text); border: 1px solid var(--tile-border); }
+
+/* Keyboard */
+.keyboard {
+  padding: 4px 6px calc(8px + var(--safe-b));
+  flex-shrink: 0;
+}
+.kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+.key {
+  height: 52px;
+  min-width: 0;
+  flex: 1 1 0;
+  max-width: 36px;
+  border-radius: 8px;
+  background: var(--key);
+  color: var(--key-text);
+  font-weight: 750;
+  font-size: 15px;
+  display: grid;
+  place-items: center;
+  text-transform: uppercase;
+}
+.key.wide { max-width: 56px; flex: 1.6 1 0; font-size: 11px; letter-spacing: 0.04em; font-weight: 800; }
+.key:active { transform: scale(0.96); filter: brightness(1.1); }
+.key.correct { background: var(--correct); color: var(--correct-text); }
+.key.present { background: var(--present); color: var(--present-text); }
+.key.absent { background: var(--absent); color: var(--absent-text); }
+
+/* Toast */
+.toast {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translateX(-50%) translateY(-8px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 750;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 40;
+  box-shadow: var(--shadow);
+  white-space: nowrap;
+  max-width: calc(100% - 32px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Overlay + sheets */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--overlay);
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.overlay.show { opacity: 1; pointer-events: auto; }
+.sheet {
+  width: 100%;
+  max-height: 90%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg-elev);
+  border-radius: 22px 22px 0 0;
+  padding: 10px 20px calc(24px + var(--safe-b));
+  box-shadow: var(--shadow);
+  transform: translateY(16px);
+  transition: transform 0.28s var(--ease);
+}
+.overlay.show .sheet { transform: translateY(0); }
+.sheet-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--faint);
+  margin: 4px auto 12px;
+}
+.sheet h2 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  letter-spacing: -0.02em;
+}
+.sheet p, .sheet li { color: var(--muted); font-size: 15px; line-height: 1.45; }
+.sheet p { margin: 0 0 10px; }
+.how-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 650;
+}
+.swatch {
+  width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+  display: grid; place-items: center;
+  font-weight: 800; font-size: 13px; color: var(--correct-text);
+}
+.swatch.correct { background: var(--correct); }
+.swatch.present { background: var(--present); color: var(--present-text); }
+.swatch.absent { background: var(--absent); color: var(--absent-text); }
+.btn-row { display: flex; gap: 8px; margin-top: 16px; }
+.btn {
+  flex: 1;
+  height: 48px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 15px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--line);
+}
+.btn.primary { background: var(--accent); color: var(--accent-text); border-color: transparent; }
+.btn:active { transform: scale(0.98); }
+.close-x {
+  position: absolute;
+  right: 14px;
+  top: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+}
+.sheet { position: relative; }
+
+/* Stats */
+.stat-row {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin: 14px 0 18px;
+}
+.stat-num { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; }
+.stat-label { font-size: 10px; color: var(--muted); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.dist-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; font-weight: 700; font-size: 13px; }
+.dist-bar-wrap { flex: 1; height: 20px; background: var(--bg-elev-2); border-radius: 4px; overflow: hidden; }
+.dist-bar { height: 100%; background: var(--absent); min-width: 0; color: var(--absent-text); font-size: 11px; display: flex; align-items: center; justify-content: flex-end; padding: 0 6px; font-weight: 800; }
+.dist-bar.has { min-width: 20px; }
+.dist-bar.mine { background: var(--correct); color: var(--correct-text); }
+
+/* Store */
+.store-note {
+  background: var(--bg-elev-2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.store-section { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin: 8px 0 10px; }
+.store-item, .skin-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-elev-2);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.store-item h3, .skin-card h3 { margin: 0; font-size: 15px; }
+.store-item p, .skin-card p { margin: 2px 0 0; font-size: 12px; color: var(--muted); }
+.price-btn {
+  margin-left: auto;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 800;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.price-btn.off { background: var(--line); color: var(--muted); }
+.skin-dots { display: flex; gap: 4px; }
+.dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); }
+
+/* Results */
+.results-words {
+  display: flex;
+  justify-content: space-around;
+  margin: 12px 0 8px;
+  text-align: center;
+}
+.rw { font-weight: 800; letter-spacing: 0.12em; font-size: 18px; }
+.rw span { display: block; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
+.countdown {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 20px;
+  margin: 8px 0 4px;
+}
+.countdown label { display: block; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 2px; }
+
+@media (max-height: 720px) {
+  .key { height: 46px; }
+  .header { height: 46px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile.flipped, .sheet, .overlay, .toast, .tile.pop, .tile.win, .tile.shake { transition: none; animation: none; }
+}
+
+/* Keep desktop playable too */
+@media (min-width: 500px) {
+  #app { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .key { max-width: 42px; }
+  .key.wide { max-width: 64px; }
+}
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="header-left">
+        <button type="button" class="icon-btn" id="btn-help" aria-label="How to play">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.4 2.4 0 1 1 3.3 2.2c-.7.3-1.1.8-1.1 1.6"/><circle cx="12" cy="16.6" r=".8" fill="currentColor" stroke="none"/></svg>
+        </button>
+        <button type="button" class="icon-btn" id="btn-store" aria-label="Store">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></svg>
+        </button>
+      </div>
+      <div class="brand">
+        <h1 class="logo">WOORDLE</h1>
+        <div class="by">POCKET RIVET</div>
+      </div>
+      <div class="header-right">
+        <button type="button" class="icon-btn" id="btn-stats" aria-label="Statistics">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18V10"/><path d="M12 18V6"/><path d="M18 18v-7"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="modebar">
+      <div class="modes" role="tablist" aria-label="Game mode">
+        <button type="button" class="mode-btn on" id="btn-daily" aria-pressed="true">Daily</button>
+        <button type="button" class="mode-btn" id="btn-practice" aria-pressed="false">Practice</button>
+      </div>
+      <div class="tools">
+        <button type="button" class="new-btn" id="btn-new" style="display:none">New</button>
+        <button type="button" class="hint-btn" id="btn-hint" aria-label="Use a hint">Hint <span class="count" id="hint-count">3</span></button>
+      </div>
+    </div>
+    <div class="statusbar">
+      <div class="mode-date" id="mode-date"></div>
+      <div class="pips" id="pips" aria-label="Guesses remaining"></div>
+    </div>
+
+    <div class="board-wrap" id="board-wrap">
+      <div class="board" id="board" role="grid" aria-label="Crossword grid"></div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+    <div class="history" id="history" aria-live="polite"></div>
+    <div class="keyboard" id="keyboard" aria-label="Keyboard"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <div class="overlay" id="overlay-help">
+      <div class="sheet" role="dialog" aria-labelledby="help-title">
+        <div class="sheet-handle"></div>
+        <button type="button" class="close-x" data-close="overlay-help" aria-label="Close">×</button>
+        <h2 id="help-title">How to play</h2>
+        <p>Woordle is a mini crossword Wordle. Every puzzle has three words: a <strong style="color:var(--text)">5-letter word across</strong>, a <strong style="color:var(--text)">4-letter word down</strong>, and a <strong style="color:var(--text)">3-letter word down</strong>.</p>
+        <p>The two down words each cross the across word at one shared letter. Crossing spots are random — they can be any letter, not just the ends or the middle.</p>
+        <p>You have <strong style="color:var(--text)">7 guesses for the whole puzzle</strong>, not per word. Every try on any word uses one of those 7.</p>
+        <div class="how-swatch"><span class="swatch correct">A</span> Green — right letter, right spot.</div>
+        <div class="how-swatch"><span class="swatch present">A</span> Yellow — in <em>that</em> word, but in a different spot.</div>
+        <div class="how-swatch"><span class="swatch absent">A</span> Gray — not in that word.</div>
+        <p>Yellow only counts for the word you're guessing, not the other two.</p>
+        <p>When a letter turns green, that crossword cell fills in for the crossing word too — a free clue.</p>
+        <p>Tap a word (or its tiles) to guess it. There's a new Daily puzzle every day, the same for everyone in the same timezone. Practice anytime.</p>
+        <div class="btn-row"><button type="button" class="btn primary" data-close="overlay-help">Play</button></div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay-stats">
+      <div class="sheet" role="dialog" aria-labelledby="stats-heading">
+        <div class="sheet-handle"></div>
+        <button type="button" class="close-x" data-close="overlay-stats" aria-label="Close">×</button>
+        <div id="stats-body"></div>
+        <div class="btn-row"><button type="button" class="btn" data-close="overlay-stats">Close</button></div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay-store">
+      <div class="sheet" role="dialog" aria-labelledby="store-heading">
+        <div class="sheet-handle"></div>
+        <button type="button" class="close-x" data-close="overlay-store" aria-label="Close">×</button>
+        <div id="store-body"></div>
+        <div class="btn-row"><button type="button" class="btn" data-close="overlay-store">Close</button></div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay-end">
+      <div class="sheet" role="dialog" aria-labelledby="end-heading">
+        <div class="sheet-handle"></div>
+        <button type="button" class="close-x" data-close="overlay-end" aria-label="Close">×</button>
+        <div id="end-body"></div>
+        <div class="btn-row">
+          <button type="button" class="btn primary" id="btn-end-share">Share</button>
+          <button type="button" class="btn" id="btn-end-practice">Practice</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="overlay-confirm">
+      <div class="sheet" role="dialog" aria-labelledby="confirm-msg">
+        <div class="sheet-handle"></div>
+        <p id="confirm-msg" style="color:var(--text);font-size:17px;font-weight:650;margin:8px 0 4px"></p>
+        <div class="btn-row">
+          <button type="button" class="btn" id="btn-confirm-no">Cancel</button>
+          <button type="button" class="btn primary" id="btn-confirm-yes">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+// Auto-generated word lists for Woordle. Packed lowercase a-z, fixed width.
+const ANSWERS3 = unpack('notallnewcanouronemayoutuseanyseewebnowgethowtopdaytwobuyaddsetmapwayoffdidcarownendperbiglawartoldwhylowmanjobtoomenboxgayairyeshotsaytaxgotletactredkeyfewagepaywarfaxyetsunrunputtrylogfunlotaskdueproagoviabadfaroilbitbaybardoggassixsatbidinnwinbedseacuttelkitboysonmacmaxbinvanadspophiteyefeelasaidfatsawtomsubledfantencatdiepetguydevcupleebobfitmeticesecbusbagnorbugmiddeljoelabavepictagmixfixraydryspaconupsvarwonmomroweataimtipskiflyheyteaskytoyhipdotdoncapinkpinrawgnubenhatlibcamwetramfoxarmpubhopgunrefkidpansumoakvatsirspyressitwowfigtabbiosinmedlegjaygaproberaaspjetparmadkenpenjoyranilllaybetdadpatregeartiemodrepsritoedenlieampevepadrodsadpotpeeegglatrevjamarcionfedbanoddcryzooteecadhubengacesuechiinsoptfluraptinratdoscodgengelpalmattedgymtanaltpiebowhoncabdamsoxtubashmemtapbeepitmagrectonbraphicowonsdoeabssimridripsolbatlipsapayecoldigrimdiskayserpiglitduofogyeafurtarrughamjarcoswaxnutbyemillapantaptgemgigatefinmuddipyenlidhaynilcopdimsipwanpodwitmugadoaftahaailalealpapearkaukaweaxebahbapbegbibboabogboobopbotbudbumbuncawcobcogcotcoxcoycubcudcuecurdabdewdindubduddugdundyeebbeelegoekeelfelkelmemueonewefadfenfezfibfirfobfoefopfrofrygabgaggingitgobgodgoogumguthaghawhemhenhewhexhidhobhodhoghuehughumhuticyilkimpireirkivyjabjagjawjibjigjogjotjugjutkegkinladlaglaxlealeilobloploxluglyemawmoomopmowmumnabnagnapnibnipnitnixnobnodnuboafoaroatodeoftohmoohorboreovaoweowlpawpeapegpeppewplypowpoxprypugpunpupradragribrigroerotrubruerumrutryesacsagsaxsewshysisskaslysobsodsopsotsowsoystysuptadtattictottowtugtuxughurnvexvowwadwagweewigwoewokyakyamyapyawyepyewyinyonyowzapzig', 3);
+const ANSWERS4 = unpack('thatthiswithfromyourhavemorewillhomepagefreetimetheysitewhatnewsonlywhenherealsohelpviewbeenweresomelikethanfinddatebacklistnamejustoveryearintonextusedworklastmostdatamakethempostcitysuchbestthengoodwellinfohigheachverybookreadneedmanyusersaiddoesmailfulllifeknowdayspartrealitemmustmadelinesendtypetakeareawantlongcodeshowevenmuchsignfilelinkopencasesamebothgamecaredownsizeshoptextrateformlovejohnmaincallsavecardjobsfoodsaleteenroomjoinwestlookleftteamweeknoteliveplancosttestcomecartplaylessparksidegivesellbodyeastclubroadgifthardfourblueeasystarhandkeepbabytermfilmheadcellselfawayoncesurecarstellablegoldartspastfiveuponsayslanddoneeverwordbilltalkkidstrueelsemarkrocktipsplusautoeditfastfactunitmeetfeelbankrisktowngirltoysgolfloanwidesorthalfstepnonelakefirechatlossfacebasenearstayturnmeankingcopydrugpicscashseenportstopsoonheldmindlosttourmenuhopewishrolecamefinehourbushhugekindmovelogonicesentbandleadwentmodefundmaletooksonglatefallideatoolhillmapsdealholdsafefeedhallantishippaidhairtreethuswallwinevotewaysruletoldfeetdoorcoolusesjavapassfeesskinringboysdeeprestpoolminifishpackbornracedebtcoresetswoodrentdarkhostfairgetsdeadmiketrippooreyesfarmlordheargoeswifehitszonejackflatflowpathlawsskipdietarmygearlotsfirmjumpballgoalsoldwindpalmpainoralfordedgerootpinkshotcoldfootmassheatwildmisstasksoftfuelwalkwaitrosepickloadtagsguysdroprichseemhiregaveonesrankdiedinchsnowcampfillgonefortgenediscboaticonendscastfeltsoulaidsflagatomironvoiddiskdeskhongvicedutybeargainlackknewzoomblowclipwiretapeacidcentnullzerorollbathfontbetafailjazzbagswearrarebarsdualrisebirdladyfansdellseatbidstollcapeminewhommathdogsmoonfearwarskeptbeatarmshideslowninespotgrowrainontobassholepetsridepairrunsyeahevileuropeaksaltbelllanekillagesplugcookbikeloseseektonykitssoilmattexitkeyswaveholyactsmeshdeanpollbondjeanvisapurelensdrawwarmbabecrewlegsrearnodelockmilebowltanknavydishslotgraydemohatericeloopvarymilkbootpushalandearbeerjaneearntwinbitssuitchipcharechogridpullnickplotpumpexambedsgreyboldscanagedbulkcuteparaseedpeermeatbangbonebugsgatetonebusyneckwingtinyrailtubebeltluckdialgangcakesemicafetillshoesandsealliespipedeckthinsickdoseletscatsfolkokayhistliftmallfellyardpourdustkentaddswardroofkissrushyogalampgladwinsrackbossannasolotallnovawakedrumeasetabspinetendgulfrickhuntmillburnlabssolelaidclayweakwiseoddsmarcsonsleafsilkwolffitskickmealhurtslipcutsmarscapspillmetamintspinwashaimssoapaxisgunsheropunkdukepacewagedawncarlcoatdollreedmicetempvastwrapmoodquizbeamtopsshutthoumaskcoallionbeefhatssurfhookcordcroplitesingtonshanghoodfameeggsrubystemdrewtunecornputsgrewtrektiesbradjurytaillawnsoupbytenosethrujewstrimquitlungseesbullcolemarttaledocscoinfakecurearchbombharmdeerovennooncamsmatechefisleslimcompspecmiditieddaleoilsseptuntopayslangstudfoldpolebendmomsglenlipspondtirechadjoshdragriperelynutsnailspanjokepadsinnscupsfoampoemasksbeanbiasswimloudratsstatbiostheeruthpraypopejeepbarehungmonotileciaokneeprepproscantduckdiveraidvoltdirtgeeksinkgripwattpinspolohornfroglogssnapswapflipbuzznukeboomcalmforktroysimstraysagecavewooleyedgraboopstrapfooldiesjaillaceuglyhartrowsgodspolyearsfistmereconstaxiwornshawexpodenytriocuberugsfateovalsomatierearlcitemessropedumphosepubsmildclansyncmesahullshedmemotidefunkreelbindrandbuckacrelowsaquapestreefbethjillsofatenthackdarehawklambjunkpoetepicsakesansleandudealtogorecultdashcagejakepingfluxrageraysacnelibsundohalogaysexecdoombitemythweeddicequaddockmodshintbuysporkbarnfarebaldfujimolddameherbidlecovecasaflexhashlazycarbpenswormdeafmatsblahmimekeenpeasownszincgurulevygradbraspalegapstearnestgaleidolmosscorkdomeheelyangdumbfeatglowoaksnormwarejadefoulkenoseasposegoatsailboltgageurgeneonourslonecopelimekirkspasjetsyarnknitpikebenthellsuckbuttmamacoillilyjoeytiltbeadleakbulbirisbachkhanstirpilewadeponyleapswanscatnetsbashneatbumpauntcrowgramsitstoesbustcolagemsoutsfoilampstickvansglueconegalsoldsramppearclueduffscambecktomeprofsinshathpropmaidhaharodspigsmayadeedpapawarncopspesoventdotsmugsvaseverapiercotesagagranmayolispchinwonthubssodatombpromcubspulppotsslamlowecribcocanouncrabhikeborecowspeelbakefavehealtotealfasoursockbailteesmistverbchicvesttenspumarantgillrudesangcurldelivinevalelimorustavidbetscarrfademonkpoohtornheckbarklynxromskaneodorflewapexcurbdecocokewebsprodcanefuryworelimaduesgigspleapreylicknesswhipprogbinsbouthankfondsorefiatnoelcansaidelieuredsnoirdovemacksungallyalmaholtdullbeessighmockbatsmeltfauxpanthyperitealbadongturfbergmusetynelustlunalienveinhaletiffbaitdentmacssumslamefusepopsamidknotactayuantatecoopkrisregsplumloftlumphaltaeroburyductlendpansionsramsgownruinottotunawipehauldulymickobeymarekiteheapeatsfleapalshailherdcalfravejerkflapdivatapsoathgalatangriotfatsritzlushgrimfloptosspitywokecuffrepseddycuescoltoffsjarshipswigshunkchapteleharpphattacksackpeeksecssuedtobyaxlecobbopaltoonlarsvivablewhowelavavailenvyshahbotsstagrashboilvainmazerodeamenwarpzetabrewkerncoupforealpssubslimblimpmutedartrobemastcozycombalaschoponyxhoopnopediregullbritrimsshinflawpanevibemethteasanonribsnitebarbhunsaurasectnousmoleowedbuffcladfledbrosacesliedblochugsowlspimpgimphempinkswinkfifestubtortdamsmachconnspursithskispactluluvitaibiscoedmulekiwiduelmeadgongbaysgazehulkcyancoryaxeshazepitsantstuckslablurekartlingtubsmagshersgrinspitacmerovechowariadirkscardormpiessawscaincocodineslapjawsantebredsheatouthareplattoryveilpeckhelmjessjayssaulchewteaksanedunemanalestblurpuntmojotoridimecarpdusklentaloepuffclawtyrewandtacoweldwrittypodampfernloregymsaridjivespunlochbalmfigschitlaysdripmanspintmaxiliararesopusmagetealbardreaphasttidyvetsbowsbeaurangjeuxlapspongvowssoartikifleewoesstewhushlamaakindadshayssoakbahthymnquayweirdramabbaburrsluglirajamsdyesyellfinsrakesunsbunkstabdyerseamomitdarnammolinnvetoclamnerdgutsaxelalecbansbudssiredingcomathug', 4);
+const ANSWERS5 = unpack('aboutotherwhichtheirtherefirstwouldtheseclickpricestateworldmusicaftervideowherebookslinksyearsorderitemsgroupundergamescouldgreathotelstoretermsrightlocalthoseusingphoneforumbasedblackcheckindexbeingwomentodaysouthpagesfoundhousephotopowerwhilethreetotalplacethinknorthpostsmediawatersinceguideboardwhitesmalltimessiteslevelhoursimagetitleshallclassstillmoneyeveryvisittoolsreplyvaluepresslearnprintstockpointsaleslargetablestartmodelhumanmoviemarchgoingstudystaffagainneveruserstopicbelowpartylegalabovequotestoryratesyoungfieldpapergirlsnighttexaspokerissuerangecourtaudiolightwriteoffergivenfileseventchinaneedsmightmonthmajorareasspacecardschildentershareaddedradiountilcolortrackleasttradegreenclosedriveshortmeansdailybeachcostsstylefrontpartsearlymilessoundworksrulesfinaladultthingcheapthirdgiftscoveroftenwatchdealswordsjameshearterrorclearmakesindiatakenknowncasesquickwholelaterbasicshowsalongamongdeathspeedbrandstuffjapandoingloansshoesentrynotesforceriveralbumviewsplansbuildtypeslinesapplyaskedcrossweekslowerunionnamesleaveteenswomancablescoreshownflashideasallowhomessupercausefocusroomsvoicecomesbrownformsglasshappysmiththankpriorsportreadyroundbuiltbloodearthbasisawardpeterextraratedquitehorsestarslistsownertakesbringinputagentvalidgrandtrialunitswroteshipsmetalfundsguestseemstrustgradepanelfloormatchplantsensestagegoodsmaybespainyouthbreakdanceappleenjoyblockcivilsteelsongsfixedwronghandsparisfullyworthpeacecoastgrantagreescalestandframechiefgivesheardbeginroyalcleanbiblesuitevegaspiecesheetsevenoldercellslookscallswhoselivesstonetestsbuyerlabelcanonwastechairphasemotorshirtcrimecountclaimpatchalonejonessaintdrugsjointfreshdatesupperprimelimitbeganlouisstepsshopscreekurbantourslaborheavysolidthemetouchgoalsservemagicmountsmartavoidbirthvirusabusefactsfaithchainmovedreachsorrygammatruthfilmsowneddraftchartjesusclubsequalcodeskindsteamsfunnytriednamedlaserharrytaxesmousebraindreamfalsefallsstatscarryhelloclipsbriefendedeightwantsalertqueensweettruckvotesoceansignsdepthtrainfeedsroutefrankanimespeakqueryruraljudgebytesfightfiledbankskellyleadswalesminornotedspenthelpscyclesleepscenedrinkintelringshenryguessaheaddeveldeltaciscoalphabonusadobetreesdressreferbabeslayerspendclockratioproofemptyidealspecsparkscreamboxeshillsawareshapefirmsusagemixedexistwheelangelwidthnoisearraygreeksharpoccurknowscoachplatelogicsizesplaincostatrailbuddysetupbluesscopecrazybearsmouthmeterfruitlewissugarstickgenreslideexactboundstormmicrodollspaintdelaypilotnovelultraplaystrulylodgebroadswissfoodsguardnewlyraisedramabandslunchauditpollstoweryoursshellsolarcatchdoubttasksdoorsforthsplittwiceshiftmarkslovedbirdssavedshotstreatpianorisksportsteachrapidhairydutchbootsholdspulsemetrostrippearlheadslogosbillsoperaassetblankhumorlivedtightmeantplanemeetsgracevillainnerromantastetripssidesturnscacheleaseproudgiantseatsalarmusualanglevinylworsthonoreaglepantsnursequietcomiccrownmakercrackpickssmokecraftapartblindcoinsgrossactorfindsfifthprizedirtyaliveprovewingsridgemodemskillmovesthrowtrendworseboatstellsfibergraphtalksbondsfraudrogercrashintergrovesprayroadsfacesmayoryieldhenceradarlakesdiarykingsflagsbakershockwallsebonydrawnbeastdodgepizzayardswoodsjokesglobekerryghostpridechilemariabrassplazaquesttransacresvenuevitalexcelmodesenemywellsopensluckythickvistachipsterryfloodarenagrownjerrysmilelandsarmedlauracandypillstigerfolksboosticonsmoralkeepspoundrosesbreadtoughgonnachestbillycraigsolvenancytonessighttownsworryreadsrolesgloryfaultjimmyrugbyfluidbarrydevilgrasssizedtheftswingdatedshootelitepoemsrobotwindsgnomerootsnobleshoreloveslooseslotsrocksgeneshostsatlasfeelsralphcorpsliverdecortextsfailsagingintroclerkmillsjeansfontsfavorsigmaasideessaycampstracepacksspokearrowroughweirdholesblademealsrobinstrapcrowdcloudvalveknifeshelflikedadoptoutertalesnodesseedscitedtiredsteamacutestoodcarolstackcurveambertrunkwavescamellampsjuicechasesaucebeadsflowsfewerproxyvotedbikesgatesslavecombohavencharmbasinranchdrunktonerlatexalienbrokenylondiscsrockyfleetbunchcentsomegacivicsavergrillgrainwannaseeksgainsspotssalonturboaimedresetbrushspareskirthoneygaugefacedsixthfarmscheatsandymacrolaughpitchautosperrydozenteethclothstamplotuscargolikestapeszonesracesmapledepotblendprobedebugchuckebookbingomindssunnycedarhopesmasonburnspumpspairschoseblasttommybrakecongooliveclonerelaytearsoasisangryloverrollsdaddyferryloadsmotelrallydyingstuckstopsvocalorganlemontoxicbenchriderbuttsbobbysheepwinessaladpasterelaxswordsellscoralpixelfloatcolinpathsacidsdairyadmitfancysquadwagesmaleschaoswheatbasesunitybridebegunsocksfeverdrumsroverflametanksspellannexhintswiredarguearisechessoscarmenuscanalaminoherbslyingdrillhobbytriestrickdropswiderscrewblamefiftyunclerandybricknavaldonnacabinfiredtiresretroangersuitshandycropsguildtribebatchalteredgestwinsamendchickthongmedalwalksboothindiebonesbreedpolardannypatiobeanssnakeberryoughtfixessendstimertylerversehighsracksnastytumorwattsfortytubesqueueskinsexamswelshbellyeldersonicthumbtwistranksdebutpennyivoryremixaliasnewerspicedonortrashmanordianediscominusshadedigitlionspoolslyricgravedevonsaveslobbypunchgottakarmabettyshakehollysillymercyfenceshamefatalfleshjessesheerwitchcohenpuppysmellsatinpromotunesnerverenewlockseurosrebelhiredkillsslopenailswhatsridesrehabmeritdiskscondofairyshaftkittydrainmontefirespanicleoneonionbeatsmerryscubadriedderbystealfearstuneralikescoutdealtbucksbadgewristheathrealmjennybusesrougeyeastbrookwivesxeroxsortsarmorviralpipesladenmergecrapsfrostsallyyachtwhalesharkgrowsclifftractshinediffsozonepastaserumswiftfocalsambawoundbellelinedboxedcubicspieselectbunnychevyflyerbathsemacsclimbdovertokenkindabeltsburkeflushmosesjohnsjewelteddydryerruledfunkyjoinsscarycakesmixertoothstaysdroveupsetminesloganlancecolonlanespursealignblesscrestalloyplotsdrawsbloomloopssurgesoulsspankvaultwiresmailsorbitnigerbaconspinetroutfattyoxidebadlyscoopblinktilesfuzzygramsforgedensebraveawfulwagonknockpeersquiltmamboflourchoirblondburstfibredaisycrudeboredfareshopedsafermarshthetastakearbor', 5);
+const GUESSES3 = unpack('aahaalaasabaaboabsabyaceactaddadoadsadzaffaftagaageagoahaaidailaimainairaisaitalaalbaleallalpalsaltamaamiampamuanaandaneaniantanyapeaptarbarcarearfarkarmarsartashaskaspateattaukavaaveavoawaaweawlawnaxeayeaysazobaabadbagbahbalbambanbapbarbasbatbaybedbeebegbelbenbetbeybibbidbigbinbiobisbitbizboabobbodbogboobopbosbotbowboxboybrabrobrrbubbudbugbumbunburbusbutbuybyebyscabcadcamcancapcarcatcawcayceecelcepchiciscobcodcogcolconcoocopcorcoscotcowcoxcoycozcrycubcudcuecupcurcutcwmdabdaddagdahdakdaldamdapdawdaydebdeedeldendevdewdexdeydibdiddiedigdimdindipdisditdocdoedogdoldomdondordosdotdowdrydubdudduedugduidunduodupdyeeareateauebbecuedheeleffefsefteggegoekeeldelfelkellelmelsemeemfemsemuendengenseoneraereergernerrersessetaetheveeweeyefadfanfarfasfatfaxfayfedfeefehfemfenferfetfeufewfeyfezfibfidfiefigfilfinfirfitfixfizfluflyfobfoefogfohfonfopforfoufoxfoyfrofryfubfudfugfunfurgabgadgaegaggalgamgangapgargasgatgaygedgeegelgemgengetgeyghigibgidgiegiggingipgitgnugoagobgodgoogorgotgoxgoygulgumgungutguvguygymgyphadhaehaghahhajhamhaohaphashathawhayhehhemhenhepherheshethewhexheyhichidhiehimhinhiphishithmmhobhodhoghonhophothowhoyhubhuehughuhhumhunhuphuthypiceichickicyidsiffifsilkillimpinkinninsionireirkismitsivyjabjagjamjarjawjayjeejetjeujewjibjigjinjobjoejogjotjowjoyjugjunjusjutkabkaekafkaskatkaykeakefkegkenkepkexkeykhikidkifkinkipkirkitkoakobkoikopkorkoskuelablacladlaglamlaplarlaslatlavlawlaxlaylealedleelegleilekletleulevlexleylezliblidlielinliplislitlobloglooloplotlowloxluglumluvluxlyemacmadmaemagmanmapmarmasmatmawmaxmaymedmelmemmenmetmewmhomibmidmigmilmimmirmismixmoamobmocmodmogmolmommonmoomopmormosmotmowmudmugmummunmusmutnabnaenagnahnamnannapnawnaynebneenetnewnibnilnimnipnitnixnobnodnognohnomnoonornosnotnownthnubnunnusnutoafoakoaroatobeobiocaoddodeodsoesoffoftohmohoohsoilokaokeoldoleomsoneonsoohootopeopsoptoraorborcoreorsortoseoudouroutovaoweowlownoxooxypacpadpahpalpampanpapparpaspatpawpaxpaypeapecpedpeepegpehpenpepperpespetpewphiphtpiapicpiepigpinpippispitpiupixplypodpohpoipolpompoppotpowpoxproprypsipubpudpugpulpunpuppurpusputpyapyepyxqatquaradragrahrajramranraprasratrawraxrayrebrecredreerefregreiremrepresretrevrexrhoriaribridrifrigrimrinriprobrocrodroeromrotrowrubruerugrumrunrutryaryesabsacsadsaesagsalsapsatsausawsaxsayseasecseesegseiselsensersetsewshasheshhshysibsicsimsinsipsirsissitsixskaskiskyslysobsodsolsonsopsossotsousowsoxsoyspaspysristysubsuesumsunsupsuqsyntabtadtaetagtajtamtantaotaptartastattautavtawtaxteatedteetegteltentettewthethothytictietiltintiptistodtoetogtomtontootoptortottowtoytrytsktubtugtuituntuptuttuxtwatwotyeudoughukeuluummumpunsupoupsurburdurnuseutautsvacvanvarvasvatvauvavvawveevegvetvexviavievigvimvisvoevowvoxvugwabwadwaewagwanwapwarwaswatwawwaxwaywebwedweewenwetwhawhowhywigwinwiswitwizwoewogwokwonwoowoswotwowwrywudwyewynxisyahyakyamyapyaryawyayyeayehyenyepyesyetyewyidyinyipyobyodyokyomyonyouyowyukyumyupzagzapzaxzedzeezekzigzinzipzitzoazoo', 3);
+const GUESSES4 = unpack('aahsaalsabasabbaabbeabedabetableablyabosabriabutabyeabysacedacesacheachyacidacmeacneacreactaactsacyladdsaditadosadzeaeonaeroaeryafaragaragasagedageeageragesaghaaginagioaglyagmaagogagonagueahemahoyaideaidsailsaimsainsairnairsairtairyaitsajarajeeakeeakinalaealanalaralasalbaalbsalecaleealefalesalfaalgaalifalitalkyallsallyalmaalmealmsaloealowalpsalsoaltoaltsalumamahamasamboamenamiaamidamieaminamiramisammoamokampsamusamylanasandsanesanewangaanilanisankhannaanoaanonansaantaanteantiantsapedaperapesapexapodapseaquaarakarbsarcharcoarcsareaaresarfsariaaridarilarksarmsarmyartsartyarumarvoarylasciaseaashyasksaspsatapatesatmaatomatopauksauldauntauraautoaveravesavidavosavowawayawedaweeawesawlsawnsawnyawolawryaxalaxedaxelaxesaxilaxisaxleaxonayahayesayinazanazonbaalbaasbabababebabubabybachbackbadebadsbaffbagsbahtbailbaitbakebaldbalebalkballbalmbalsbamsbandbanebangbanibankbansbapsbarbbardbarebarfbarkbarmbarnbarsbasebashbaskbassbastbatebathbatsbattbaudbawdbawlbaysbeadbeakbeambeanbearbeatbeaubeckbedsbedubeefbeenbeepbeerbeesbeetbegsbellbelsbeltbemabendbenebensbentbergbermbestbetabethbetsbevybeysbhutbiasbibbbibsbicebidebidsbierbiffbigsbikebilebilkbillbimabindbinebinsbintbiosbirdbirkbirlbirrbisebiskbitebitsbittbizeblabblaeblahblamblatblawblebbledbletblewblinblipblobblocblotblowblubblueblurboarboasboatbobsbockbodebodsbodyboffbogsbogyboilbolaboldbolebollboloboltbombbondbonebongbonkbonybookboomboonboorboosbootbopsboraborebornbortboshboskbossbotabothbotsbottboutbowlbowsboxyboyoboysbozobradbraebragbranbrasbratbrawbraybredbreebrenbrewbriebrigbrimbrinbriobrisbritbroobrosbrowbrrrbrutbubobubsbuckbudsbuffbugsbuhlbuhrbulbbulkbullbumfbumpbumsbundbungbunkbunnbunsbuntbuoyburaburdburgburlburnburpburrbursburybushbuskbussbustbusybutebutsbuttbuysbuzzbyesbyrebyrlbytecabscacacadecadicadscafecaffcagecagycaidcaincakecakycalfcalkcallcalmcalocalxcamecampcamscanecanscantcapecaphcapocapscarbcardcarecarkcarlcarncarpcarrcarscartcasacasecashcaskcastcatecatscaulcavecavycawscayscecacedecediceesceilcellcelsceltcentcepecepscerecerocesscetechadchamchaochapcharchatchawchaychefchewchezchiachicchidchinchipchischitchonchopchowchubchugchumciaocinecioncirecistcitecitycladclagclamclanclapclawclayclefclewclipclodclogclonclopclotcloyclubcluecoalcoatcoaxcobbcobscocacococodacodecodscoedcoffcoftcogscohocoifcoilcoincoircokecolacoldcolecolscoltcolycomacombcomecompconeconiconkconnconsconycoofcookcoolcoopcooscootcopecopscopycordcorecorfcorkcormcorncorycoshcosscostcosycotecotscoupcovecowlcowscowycoxacoyscozycrabcragcramcrawcrewcribcriscroccropcrowcrudcruscruxcubecubscudscuedcuescuffcuifcukecullculmcultcupscurbcurdcurecurfcurlcurncurrcurscurtcuskcuspcusscutecutscwmscyancymacymecystczardabsdacedadadadodadsdaffdaftdagodagsdahldahsdaisdaksdaledalsdamedampdamsdangdankdapsdarbdaredarkdarndartdashdatadatedatodaubdautdavydawkdawndawsdawtdaysdazedeaddeafdealdeandeardebsdebtdeckdecodeeddeemdeepdeerdeesdeetdefideftdefydeildekedeledelfdelidelldelsdemedemodemydenedensdentdenyderedermdeskdevadevsdewsdewydexydeysdhakdhaldhowdialdibsdicedidodidydieddieldiesdietdigsdikedilldimedimsdinedingdinkdinsdintdioldipsdiptdiredirkdirldirtdiscdishdiskdissditaditeditsditzdivadivedjindoatdobydockdocsdododoerdoesdoffdogedogsdogydoitdojodoledolldolsdoltdomedomsdonadonedongdonsdoomdoordopadopedopydoredorkdormdorpdorrdorsdorydosedossdostdotedothdotsdotydoumdourdouxdovedowndowsdoxydozedozydrabdragdramdratdrawdraydreedregdrekdrewdribdripdropdrubdrugdrumdrysduaddualdubsduceduciduckductdudedudsduelduesduetduffdugsduitdukedulldulydumadumbdumpdunedungdunkdunsduntduosdupedupsduraduredurndurodurrduskdustdutydyaddyeddyerdyesdyneeachearlearnearseaseeasteasyeatheatseauxeaveebbsebonecheechoecruecuseddoeddyedgeedgyedhsediteelseelyeeryeffseftsegadegalegereggseggyegisegoseideekedekeselaneldselhielksellselmselmyelseemesemeuemfsemicemiremitemusemydendsengsenolenowenvyeonsepeeephaepiceposerasergoergserneernseroserrserstesesespyetasetchethseticetnaetuieuroeveneverevesevilewerewesexamexecexesexitexonexpoeyaseyedeyeneyereyeseyneeyraeyreeyryfacefactfadefadofadsfailfainfairfakefallfalxfamefanefangfanofansfardfarefarlfarmfarofashfastfatefatsfaunfauxfavafavefawnfaysfazefealfearfeatfeckfedsfeedfeelfeesfeetfehsfellfeltfemefemsfendfensfeodferefernfessfetafetefetsfeudfeusfiarfiatfibsficeficofidofidsfieffifefigsfilafilefillfilmfilofilsfindfinefinkfinofinsfirefirmfirnfirsfiscfishfistfitsfivefixtfizzflabflagflakflamflanflapflatflawflaxflayfleafledfleeflewflexfleyflicflipflitflocfloeflogflopflowflubflueflusfluxfoalfoamfobsfocifoesfogsfogyfohnfoilfoinfoldfolkfondfonsfontfoodfoolfootfopsforaforbfordforeforkformfortfossfoulfourfowlfoxyfoysfozyfraefragfrapfratfrayfreefretfrigfritfrizfroefrogfromfrowfrugfubsfucifudsfuelfugsfugufujifullfumefumyfundfunkfunsfurlfursfuryfusefussfutzfuzefuzzfycefykegabsgabygadigadsgaedgaengaesgaffgagagagegagsgaingaitgalagalegallgalsgamagambgamegampgamsgamyganeganggaolgapegapsgapygarbgarsgaspgastgategatsgaudgaumgaungaurgavegawkgawpgaysgazegeargeckgedsgeedgeekgeesgeezgeldgelsgeltgemsgenegensgentgenugermgestgetagetsgeumghatgheeghisgibegibsgidsgiedgiengiesgiftgigagigsgildgillgiltgimpginkginsgipsgirdgirlgirngirogirtgistgitsgivegladgledgleeglegglengleygliaglibglimglobglomglopglowglueglugglumglutgnargnatgnawgnusgoadgoalgoasgoatgobogobsgobygodsgoergoesgogogoldgolfgonegonggoodgoofgoongoopgoosgoregorpgorygoshgoutgowdgowkgowngoysgrabgradgramgrangratgraygreegrewgreygridgriggrimgringripgritgroggrotgrowgrubgruegrumguanguarguckgudeguffguidgulfgullgulpgulsgumsgunkgunsgurugushgustgutsguvsguysgybegymsgypsgyregyrigyrogyvehaafhaarhabuhackhadehadjhaedhaemhaenhaeshaethafthagshahahahshaikhailhairhajihajjhakehalehalfhallhalmhalohalthamehamshandhanghankhanthapshardhareharkharlharmharpharthashhasphasthatehathhatshaulhauthavehawkhawshayshazehazyheadhealheaphearheathebeheckheedheelhefthehsheilheirheldhellhelmhelohelphemehemphemshenshentherbherdhereherlhermhernherohershesthethhetshewnhewshickhidehiedhieshighhikehilahilihillhilthindhinshinthipshirehisnhisshisthitshivehoarhoaxhobohobshockhodshoedhoerhogghogshokeholdholeholkholmholpholsholtholyhomehomyhonehonghonkhonshoodhoofhookhoophoothopehopshorahornhosehosthotshourhovehowehowfhowkhowlhowshoyahoyshubshuckhuedhueshuffhugehugshuichulahulkhullhumphumshunghunhhunkhunshunthurlhurthushhuskhutshwanhylahymnhypehypohypshyteiambibexibisicedicesichsickyiconideaidemidesidleidlyidolidyliffyigluikatikonileailexiliailkailksillsillyimamimidimmyimpiimpsinbyinchinfoiniainksinkyinlyinnsinrointiintoionsiotairediresiridirisirksironisbaisleismsitchitemiwisixiaizarjabsjackjadejaggjagsjailjakejambjamsjanejapejarljarsjatojaukjaupjavajawsjaysjazzjeanjeedjeepjeerjeesjeezjefejehujelljeonjerkjessjestjetejetsjeuxjewsjiaojibbjibejibsjiffjigsjilljiltjimpjinkjinnjinsjinxjismjivejobsjockjoesjoeyjogsjohnjoinjokejokyjolejoltjoshjossjotajotsjoukjowljowsjoysjubajubejudojugajugsjujujukejumpjunkjupejurajuryjustjutejutskaaskabskadikaeskafskagukaifkailkainkakakakikalekamekamikanakanekaonkapakaphkarnkartkatakatskavakayokayskbarkeaskeckkeefkeekkeelkeenkeepkeetkefskegskeirkelpkempkenokenskentkepikepskeptkerbkerfkernketokeyskhafkhankhatkhetkhiskibekickkidskiefkierkifskillkilnkilokiltkinakindkinekingkinkkinokinskipskirkkirnkirskisskistkitekithkitskivakiwiknapknarkneeknewknitknopknotknowknurkoankoaskobokobskoelkohlkolakolokonkkookkophkopskorekorskosskotokriskudokudukueskurukvaskyakkyarkyatkytelabslacelacklacslacyladeladsladylagslaiclaidlainlairlakelakhlakylalllamalamblamelamplamslandlanelanglanklapslardlarilarklarslaselashlasslastlatelathlatilatslaudlavalavelavslawnlawslayslazelazyleadleafleaklealleanleaplearleaslechleekleerleesleetleftlegslehrleislekelekslekulendlenolenslentleptlesslestletsleudlevalevolevylewdleysliarlibslicelichlicklidolidsliedlieflienlierlieslieulifeliftlikeliltlilylimalimblimelimnlimolimplimylinelinglinklinnlinolinslintlinylionlipsliralirelirilisplistlitelitslituliveloadloafloamloanlobelobolobslocalochlocilocklocolodeloftlogelogologslogyloinlolllonelonglooflookloomloonlooplooslootlopelopslordlorelornloryloselosslostlotalothlotilotsloudlouplourloutlovelowelownlowsluaulubeluceluckludelueslufflugelugslulllululumplumslunalunelunglunkluntlunylurelurklushlustlutelutzluvsluxelweilyeslynxlyrelysemaarmabemacemachmackmacsmademadsmaesmagemagimagsmaidmailmaimmainmairmakemakomalemallmalmmaltmamamanamanemanomansmanymapsmarcmaremarkmarlmarsmartmashmaskmassmastmatemathmatsmattmaudmaulmaunmautmawnmawsmaximayamayomaysmazemazymeadmealmeanmeatmeedmeekmeetmeldmellmelsmeltmemomemsmendmenomenumeoumeowmeremerkmerlmesameshmessmetametemethmewlmewsmezemhosmibsmicamicemickmidimidsmienmiffmiggmigsmikemildmilemilkmillmilomilsmiltmimeminamindmineminiminkmintminxmiremirimirkmirsmirymisemisomissmistmitemittmitymixtmoanmoasmoatmobsmockmocsmodemodimodsmogsmoilmojomokemolamoldmolemollmolsmoltmolymomemomimomsmonkmonomonsmonymoodmoolmoonmoormoosmootmopemopsmopymoramoremornmorsmortmoskmossmostmotemothmotsmottmouemovemownmowsmoxamozomuchmuckmudsmuffmuggmugsmulemullmummmumpmumsmumumunimunsmuonmuramuremurkmurrmusemushmuskmussmustmutemutsmuttmynamythnaannabenabsnadanagsnaifnailnamenananansnaoinaosnapenapsnarcnardnarknarynavenavynaysneapnearneatnebsneckneedneemneepneifnemaneneneonnerdnessnestnetsnettneukneumnevenevinewsnewtnextnibsnicenicknidenidinighnillnilsnimsninenipanipsnisinitenitsnixenixynobsnocknodenodinodsnoelnoesnoggnogsnoilnoirnolonomanomenomsnonanonenooknoonnopenorinormnosenoshnosynotanotenounnousnovanowsnowtnubsnukenullnumbnunsnurdnurlnutsoafsoaksoarsoastoathoatsobesobeyobiaobisobitoboeobolocasoddsodeaodesodicodorodylofayoffsogamogeeogleogreohedohiaohmsoilsoilyoinkokasokayokehokesokraoldsoldyoleaoleoolesolioollaomenomeromitonceonesonlyontoonusonyxoohsoopsootsoozeoozyopahopalopedopenopesoptsopusoradoralorbsorbyorcaorcsordooresorleorraortsoryxorzoosarosesossaoticottoouchoudsouphoursoustoutsouzoovalovenoverovumowedowesowlsownsowseoxenoxesoxidoximoyeroyesoyezpacapacepackpacspactpadipadspagepaidpaikpailpainpairpalepallpalmpalppalspalypamspanepangpanspantpapapapsparapardpareparkparrparspartpasepashpasspastpatepathpatspatypavepawlpawnpawspayspeagpeakpealpeanpearpeaspeatpechpeckpecspedspeedpeekpeelpeenpeeppeerpeespegspehspeinpekepelepelfpeltpendpenspentpeonpepopepsperiperkpermpertpesopestpetspewspfftpfuiphatphewphisphizphonphotphutpialpianpiaspicapicepickpicspiedpierpiespigspikapikepikipilepilipillpilypimapimppinapinepingpinkpinspintpinypionpipepipspipypirnpishpisopitapithpitspitypixyplanplatplaypleaplebpledplewplieplodplopplotplowployplugplumpluspockpocopodspoempoetpogypoispokepokypolepollpolopolspolypomepomppomspondponepongponsponypoodpoofpoohpoolpoonpoorpopepopsporeporkportposeposhpostposypotspoufpourpoutpowsprampraopratpraupraypreeprepprexpreyprezprigprimproaprodprofprogprompropprosprowpsispsstpubspucepuckpudspuffpughpugspujapukepulapulepulipullpulppulspumapumppunapungpunkpunspuntpunypupapupspurepuripurlpurrpurspushpussputsputtputzpyaspyespyicpyinpyreqaidqatsqophquadquagquaiquayqueyquidquinquipquitquizquodracerackracyradsraffraftragarageragiragsraiaraidrailrainrajarakerakiraleramirampramsrandrangranirankrantrapsraptrareraserashraspraterathratoratsraverawsrayaraysrazerazzreadrealreamreaprearrebsreckrecsreddrederedoredsreedreefreekreelreesrefsreftregsreifreinreisrelyremsrendrentreporepprepsreshrestreteretsrevsrhearhosrhusrialriasribsricerichrickrideridsrielriferiffrifsriftrigsrilerillrimerimsrimyrindringrinkrinsriotriperipsriseriskriteritzriveroadroamroanroarroberobsrockrocsroderodsroesroilrolerolfrollrompromsroodroofrookroomrootroperopyroserosyrotaroterotirotlrotorotsrouerouproutrouxroverowsruberubsrubyruckruddruderuedruerruesruffrugarugsruinrulerulyrumprumsrunerungrunsruntruserushruskrustruthrutsryasryesrykeryndryotsabesabssacksacssadesadisafesagasagesagosagssagysaidsailsainsakesakisalesallsalpsalssaltsamesampsandsanesangsanksanssapssardsarisarksashsasssatesatisaulsavesawnsawssaysscabscadscagscamscanscarscatscopscotscowscryscudscumscupscutsealseamsearseasseatsecssectseedseekseelseemseenseepseerseessegosegsseifseisselfsellselssemesemisendsenesentseptserasereserfserssetasetssettsewnsewssextshadshagshahshamshatshawshaysheashedshesshewshimshinshipshivshmoshodshoeshogshooshopshotshowshrishulshunshutsialsibbsibssicesicksicssidesiftsighsignsikesildsilksillsilosiltsimasimpsimssinesingsinhsinksinssipesipssiresirssitesithsitssizesizyskagskasskatskeeskegskepskewskidskimskinskipskisskitskuaslabslamslapslatslawslaysledslewslidslimslipslitslobsloeslogslopslotslowslubslueslugslumslursmewsmitsmogsmugsmutsnagsnapsnawsnedsnibsnipsnitsnobsnogsnotsnowsnubsnugsnyesoaksoapsoarsobssocksodasodssofasoftsoilsojasokesolasoldsolesolisolosolssomasomesonesongsonssooksoonsootsophsopssorasorbsordsoresorisornsortsothsotssouksoulsoupsoursoussownsowssoyasoysspaespansparspasspatspayspecspedspewspikspinspitspivspotspryspudspuespunspursrisstabstagstarstatstawstaystemstepstetstewsteystirstoastobstopstowstubstudstumstunstyesubasubssuchsucksuddsudssuedsuersuessuetsughsuitsulksulusumosumpsumssungsunksunnsunssupesupssuqssurasurdsuresurfsussswabswagswamswanswapswatswayswigswimswobswopswotswumsybosycesykesylisyncsynesyphtabstabutacetachtacktacotacttadstaeltagstahrtailtaintakataketalatalctaletalitalktalltametamptamstangtanktanstaostapatapetapstaretarntarotarptarstarttasktasstatetatstaustauttavstawstaxataxiteaktealteamtearteasteattedsteedteelteemteenteestefftegstelateletelltelstemptendtenstenttepatermterntesttethtetstewstextthaethanthatthawtheethemthenthewtheythinthiothirthisthouthrothruthudthugthustickticstidetidytiedtiertiestifftiketikitiletilltilstilttimetinetingtinstinttinytipitipstiretirltirotititivytoadtobytodstodytoeatoedtoestofftofttofutogatogstoiltoittoketolatoldtoletolltolutombtometomstonetongtonstonytooktooltoomtoontoottopetophtopitopstoratorctoretoritorntorotorrtorstorttorytoshtosstosttotetotstourtouttowntowstowytoyotoystradtramtraptraytreetreftrektrettreytrigtrimtriotriptrodtroptrottrowtroytruetrugtsartskstubatubetubstucktufatufftufttugstuistuletumptunatunetungtunstupsturdturfturkturntushtusktutstututwaetwastweetwigtwintwittwostyeetyertyestyketynetypetypotypptypytyretyrotzarudosughsuglyukesulanulnaulusulvaumboumpsunaiunauunbeunciuncoundeundoundyunituntoupasupbyupdouponurbsurdsureaurgeuricurnsursaurususeduserusesutasuveavacsvagivailvainvairvalevampvanevangvansvaravarsvaryvasavasevastvatsvatuvausvavsvawsvealveepveerveesveilveinvelaveldvenavendventveraverbvertveryvestvetovetsvextvialvibevicevideviedvierviesviewvigavigsvilevillvimsvinavinevinovinyviolvirlvisavisevitavivavivevoesvoidvolevoltvotevowsvrowvuggvughvugswabswackwadewadiwadswadywaeswaffwaftwagewagswaifwailwainwairwaitwakewalewalkwallwalywamewandwanewanswantwanywapswardwarewarkwarmwarnwarpwarswartwarywashwaspwastwatswattwaukwaulwaurwavewavywawlwawswaxywaysweakwealweanwearwebswedsweedweekweelweenweepweerweesweetweftweirwekaweldwellweltwendwenswentweptwerewertwestwetswhamwhapwhatwheewhenwhetwhewwheywhidwhigwhimwhinwhipwhirwhitwhizwhoawhomwhopwhyswichwickwidewifewigswildwilewillwiltwilywimpwindwinewingwinkwinowinswinywipewirewirywisewishwispwisswistwitewithwitswivewoadwoeswogswokewokswoldwolfwombwonkwonswontwoodwoofwoolwooswordworeworkwormwornwortwostwotswovewowswrapwrenwritwusswychwyeswylewyndwynnwynswytexystyackyaffyagiyaksyaldyamsyangyankyapsyardyareyarnyaudyaupyawlyawnyawpyawsyaysyeahyeanyearyeasyechyeggyeldyelkyellyelpyensyerkyetiyettyeukyewsyidsyillyinsyipeyipsyirdyirrylemyobsyockyodhyodsyogayoghyogiyokeyoksyolkyondyoniyoreyouryoweyowlyowsyuanyucayuchyuckyugayuksyuleyupsyurtywiszagszanyzapszarfzealzebuzedszeeszeinzekszerkzerozestzetazigszillzinczingzinszipszitizitszoeazoiczonezonkzoomzoonzooszorizyme', 4);
+const GUESSES5 = unpack('aahedaaliiaarghaartiabacaabaciabackabacsabaftabakaabampabandabaseabashabaskabateabayaabbasabbedabbesabbeyabbotabceeabeamabearabeleabersabetsabhorabideabiesablerablesabletablowabmhoabodeabohmaboilabomaaboonabordaboreabortaboutaboveabramabrayabrimabrinabrisabseyabsitabunaabuneabuseabutsabuzzabyesabysmabyssacaisacariaccasaccoyacerbacersacetaacharachedachesachooacidsacidyacingaciniackeeackeracmesacmicacnedacnesacockacoldacornacredacresacridacrosactedactinactonactoracuteacylsadageadaptadawsadaysadbotaddaxaddedadderaddioaddleadeemadeptadhanadieuadiosaditsadmanadmenadmitadmixadobeadoboadoptadoreadornadownadozeadradadredadsumadukiadultaduncadustadvewadytaadzedadzesaeciaaedesaegisaeonsaerieaerosaesirafaldafaraafarsafearaffixafireaflajafootaforeafoulafritafrosafteragainagamaagamiagapeagarsagastagateagaveagazeageneagentagersaggeraggieaggriaggroaggryaghasagilaagileagingagiosagismagistagitaagleeagletagleyaglooaglowaglusagmasagogeagoneagonsagonyagoodagoraagreeagriaagrinagrosaguedaguesagunaagutiaheadaheapahentahighahindahingahintaholdahullahuruaidasaidedaideraidesaidoiaidosaieryaigasaightailedaimedaimeraineeaingaaioliairedairerairnsairthairtsaisleaitchaitusaiveraiyeeaizleajiesajivaajugaajwanakeesakelaakeneakingakitaakkasalaapalackalamoalandalanealangalansalantalapaalapsalarmalaryalatealaysalbasalbeealbumalcidalcosaldeaalderaldolaleckalecsalefsaleftalephalertalewsaleyealfasalgaealgalalgasalgidalginalgoralgumaliasalibialienalifsalignalikealinealistalivealiyaalkiealkosalkydalkylallayalleeallelalleyallisallodallotallowalloyallylalmahalmasalmehalmesalmudalmugalodsaloedaloesaloftalohaaloinalonealongaloofaloosaloudalowealphaaltaralteralthoaltosalulaalumsalurealvaralwayamahsamainamassamateamautamazeambanamberambitambleambosambryamebaameeramendameneamensamentamiasamiceamiciamideamidoamidsamiesamigaamigoamineaminoaminsamirsamissamityamlasammanammonammosamniaamnicamnioamoksamoleamongamortamouramoveamowtampedampleamplyampulamritamuckamuseamylsananaanataanchoancleanconandroanearaneleanentangasangelangerangleangloangryangstanighanileanilsanimaanimeanimianionaniseankerankhsankleankusanlasannalannasannatannexannoyannulanoasanodeanoleanomyansaeantaeantarantasantedantesanticantisantraantreantsyanuraanvilanyonaortaapaceapageapaidapartapaydapaysapeakapeekapersapertaperyapgaraphidaphisapianapingapiolapishapismapneaapodeapodsapoopaportappalappayappelappleapplyapproappuiappuyapresapronapsesapsisapsosaptedapteraptlyaquaeaquasarabaaraksarameararsarbasarborarcedarchiarcosarcusardebardorardriareadareaearealarearareasarecaareddaredearefyareicarenaarenearepaarerearetearetsarettargalarganargilargleargolargonargotargueargusarhatariasarielarikiarilsariotarisearisharkedarledarlesarmedarmerarmetarmilarmorarnasarnutarobaarohaaroidaromaarosearpasarpenarraharrasarrayarretarrisarrowarrozarsedarseyarsisarsonartalartelarticartisartsyaruhearumsarvalarveearvosarylsasanaasconascotascusasdicashedashenashesashetasideaskedaskeraskewaskoiaskosaspenasperaspicaspieaspisasproassaiassamassayassetassezassotasterastirastunasuraaswayaswimasylaatapsataxyatigiatiltatimyatlasatmanatmasatmosatocsatokeatoksatollatomsatomyatoneatonyatopyatriaatripattapattaratticatuasaudadaudioauditaugeraughtauguraulasaulicauloiaulosaumilaunesauntsauntyauraeauralauraraurasaureiauresauricaurisaurumautosauxinavailavaleavantavastavelsavensaversavertavgasavianavineavionaviseavisoavizeavoidavowsavyzeawaitawakeawardawareawarnawashawatoawaveawaysawdlsaweelawetoawfulawingawmryawnedawnerawokeawolsaworkaxelsaxialaxileaxilsaxingaxiomaxionaxiteaxledaxlesaxmanaxmenaxoidaxoneaxonsayahsayayaayelpaygreayinsayontayresayrieazansazideazidoazineazlonazoicazoleazonsazoteazothazukiazureazurnazuryazygyazymeazymsbaaedbaalsbabasbabelbabesbabkababoobabulbabusbaccabaccobaccybachabachsbacksbaconbaddybadgebadlybaelsbaffsbaffybaftsbagelbaggybaghsbagiebahtsbahusbahutbailsbairnbaisabaithbaitsbaizabaizebajanbajrabajribajusbakedbakenbakerbakesbakrabalasbaldsbaldybaledbalerbalesbalksbalkyballsballybalmsbalmybaloobalsabaltibalunbalusbambibanakbanalbancobancsbandabandhbandsbandybanedbanesbangsbaniabanjobanksbannsbantsbantubantybanyabapusbarbebarbsbarbybarcabardebardobardsbardybaredbarerbaresbarfibarfsbargebaricbarksbarkybarmsbarmybarnsbarnybaronbarpsbarrabarrebarrobarrybaryebasalbasanbasedbasenbaserbasesbashobasicbasijbasilbasinbasisbasksbasonbassebassibassobassybastabastebastibastobastsbatchbatedbatesbathebathsbatikbatonbattabattsbattubattybaudsbauksbaulkbaursbavinbawdsbawdybawksbawlsbawnsbawrsbawtybayedbayerbayesbaylebayoubaytsbazarbazoobeachbeadsbeadybeaksbeakybealsbeamsbeamybeanobeansbeanybeardbearebearsbeastbeathbeatsbeatybeausbeautbeauxbebopbecapbeckebecksbedadbedelbedesbedewbedimbedyebeechbeedibeefsbeefybeepsbeersbeerybeetsbefitbefogbegadbeganbegarbegatbegembegetbeginbegotbegumbegunbeigebeigybeingbeinsbekahbelahbelarbelaybelchbeleebelgabeliebellebellsbellybelonbelowbeltsbemadbemasbemixbemudbenchbendsbendybenesbenetbengabenisbennebennibennybentobentsbentybepatberayberesberetbergsberkoberksbermebermsberobberryberthberylbesatbesawbeseebesesbesetbesitbesombesotbestibestsbetasbetedbetelbetesbethsbetidbetonbettabettybevelbeverbevorbevuebevvybewetbewigbezelbezesbezilbezzybhaisbhajibhangbhatsbhelsbhootbhunabhutsbiachbialibialybibbsbibesbiblebiccybicesbiddybidedbiderbidesbidetbidisbidonbieldbiersbiffobiffsbiffybifidbigaebiggsbiggybighabightbiglybigosbigotbijoubikedbikerbikesbikiebilbobilbybiledbilesbilgebilgybilksbillsbillybimahbimasbimbobinalbindibindsbinerbinesbingebingobingsbingybinitbinksbintsbiogsbiomebiontbiotabipedbipodbirchbirdsbirksbirlebirlsbirosbirrsbirsebirsybirthbisesbisksbisombisonbiterbitesbitosbitoubitsybittebittsbittybiviabivvybizesbizzobizzyblabsblackbladebladsbladyblaerblaesblaffblagsblahsblainblameblamsblandblankblareblartblaseblashblastblateblatsblattblaudblawnblawsblaysblazebleakblearbleatblebsblechbleedbleepbleesblendblentblertblessblestbletsbleysblimpblimyblindblingbliniblinkblinsblinyblipsblissblistbliteblitsblitzblivebloatblobsblockblocsblogsblokeblondbloodblookbloombloopbloreblotsblownblowsblowyblubsbludebludsbludybluedbluerbluesbluetblueybluffbluidblumeblunkbluntblurbblursblurtblushblypeboabsboaksboardboarsboartboastboatsbobacbobakbobasbobbybobolbobosboccabocceboccibochebocksbodedbodesbodgebodhibodleboepsboetsboeufboffoboffsboganbogeyboggybogiebogleboguebogusboheabohosboilsboingboinkboitebokedbokehbokesbokosbolarbolasboldsbolesbolixbollsbolosboltsbolusbomasbombebombobombsboncebondsbonedbonerbonesboneybongobongsboniebonksbonnebonnybonusbonzabonzebooaibooayboodybooedboofyboogyboohsbooksbookyboolsboomsboomyboongboonsboordboorsbooseboostboothbootsboozeboozyboppyborakboralborasboraxbordebordsboredboreeborelborerboresborgoboricborksbormsbornaborneboronbortsbortybortzbosiebosksboskybosombosonbossybosunbotasbotchbotelbotesbothybottebottsbottybougeboughbouksbouleboultboundbounsbourdbourgbournbousebousyboutsbovidbowatbowedbowelbowerbowesbowetbowiebowlsbownebowrsbowseboxedboxenboxerboxesboxlaboxtyboyarboyauboyedboyfsboygsboylaboyosboysybozosbraaibracebrachbrackbractbradsbraesbragsbraidbrailbrainbrakebraksbrakybramebrandbranebrankbransbrantbrashbrassbrastbratsbravabravebravibravobrawlbrawnbrawsbraxybraysbrazabrazebreadbreakbreambredebredsbreedbreembreerbreesbreidbreisbremebrensbrentbrerebrersbrevebrewsbreysbriarbribebrickbridebriefbrierbriesbrigsbrikibriksbrillbrimsbrinebringbrinkbrinsbrinybriosbrisebriskbrissbrithbritsbrittbrizebroadbrochbrockbrodsbroghbrogsbroilbrokebromebromobroncbrondbroodbrookbroolbroombroosbrosebrosybrothbrownbrowsbrughbruinbruitbrulebrumebrungbruntbrushbruskbrustbrutebrutsbuatsbuazebubalbubasbubbabubbebubbybubusbuchubuckobucksbuckubudasbuddybudgebudisbudosbuffabuffebuffibuffobuffsbuffybufosbuftybuggybuglebuhlsbuhrsbuiksbuildbuiltbuistbukesbulbsbulgebulgybulksbulkybullabullsbullybulsebumbobumfsbumphbumpsbumpybunasbuncebunchbuncobundebundhbundsbundtbundubundybungsbungybuniabunjebunjybunkobunksbunnsbunnybuntsbuntybunyabuoysbuppyburanburasburbsburdsburetburfiburghburgsburinburkaburkeburksburlsburlyburnsburntburooburpsburqaburroburrsburrybursaburseburstbusbybusedbusesbushybusksbuskybussubustibustsbustybutchbuteobutesbutlebutohbuttebuttsbuttybututbutylbuxombuyerbuzzybwanabwazibydedbydesbykedbykesbylawbyresbyrlsbyssibytesbywaycaaedcabalcabascabbycabercabincablecabobcaboccabrecacaocacascachecackscackycacticaddycadeecadescadetcadgecadgycadiecadiscadrecaecacaesecafescaffscagedcagercagescageycagotcahowcaidscainscairdcairncajoncajuncakedcakescakeycalfscalidcalifcalixcalkscallacallscalmscalmycaloscalpacalpscalvecalyxcamancamascamelcameocamescamiscamoscampicampocampscampycamuscanalcandycanedcanehcanercanescangscanidcannacannscannycanoecanoncansocanstcantocantscantycapascapedcapercapescapexcaphscapizcaplecaponcaposcapotcapricapulcaputcarapcaratcarbocarbscarbycardicardscardycaredcarercarescaretcarexcargocarkscarlecarlscarnscarnycarobcarolcaromcaroncarpicarpscarrscarrycarsecartacartecartscarvecarvycasascascocasedcasescaskscaskycastecastscasuscatchcatercatescattycaudacaukscauldcaulkcaulscaumscaupscauricausacausecavascavedcavelcavercavescaviecavilcawedcawkscaxonceaseceazecebidcecalcecumcedarcededcedercedescedisceibaceiliceilscelebcellacellicellocellscelomceltscensecentocentscentuceorlcepescerciceredcerescergeceriacericcernecerocceroscertscertycessecestacesticetescetylcezvechacechackchacochadochadschafechaffchaftchainchairchaischalkchalschampchamschanachangchankchantchaoschapechapschaptcharachardcharecharkcharmcharrcharschartcharychasechasmchatschavechavschawkchawschayachayscheapcheatcheckcheekcheepcheerchefschekachelachelpchemochemscherechertchesschestchethchevychewschewychiaochiaschibschicachichchickchicochicschidechiefchielchikschildchilechilichillchimbchimechimochimpchinachinechingchinochinschipschirkchirlchirmchirochirpchirrchirtchiruchitschivechivschivychizzchockchocochocschodechogschoilchoirchokechokochokycholacholicholochompchonschoofchookchoomchoonchopschordchorechosechotachottchoutchouxchowkchowschubschuckchufachuffchugschumpchumschunkchurlchurnchurrchusechutechutschylechymechyndcibolcidedcidercidescielscigarciggyciliacillscimarcimexcinchcinctcinescinqscionscippicircacircscirescirlscirriciscocissycistscitalcitedcitercitescivescivetcivicciviecivilcivvyclachclackcladecladsclaesclagsclaimclameclampclamsclangclankclansclapsclaptclaroclartclaryclashclaspclassclastclatsclautclaveclaviclawsclayscleanclearcleatcleckcleekcleepclefscleftclegscleikclemsclepecleptclerkcleveclewsclickcliedcliescliffcliftclimbclimeclineclingclinkclintclipeclipscliptcloakcloamclockclodscloffclogsclokeclombclompcloneclonkclonscloopclootclopsclosecloteclothclotscloudclourclouscloutcloveclownclowscloyecloysclozeclubscluckcluedcluesclueyclumpclungclunkclypecnidacoachcoactcoadycoalacoalscoalycoaptcoarbcoastcoatecoaticoatscobbscobbycobiacoblecobracobzacocascoccicoccocockycocoacocoscodascodeccodedcodencodercodescodexcodoncoedscoffscogiecogoncoguecohabcohencohoecohogcohoscoifscoigncoilscoinscoirscoitscokedcokescolascolbycoldscoledcolescoleycoliccolincollscollycologcoloncolorcoltscolzacomaecomalcomascombecombicombocombscombycomercomescometcomfycomiccomixcommacommocommscommycompocompscomptcomtecomusconchcondoconedconesconeyconfscongacongecongoconiaconicconinconksconkyconneconnscontecontoconusconvocoochcooedcooeecooercooeycoofscookscookycoolscoolycoombcoomscoomycoopscooptcoostcootscoozecopalcopaycopedcopencopercopescoppycopracopsecopsycoquicoralcoramcorbecorbycordscoredcorercorescoreycorgicoriacorkscorkycormscornicornocornscornucornycorpscorsecorsocoseccosedcosescosetcoseycosiecostacostecostscotancotedcotescothscottacottscouchcoudecoughcouldcountcoupecoupscourbcourdcourecourscourtcoutacouthcovedcovencovercovescovetcoveycovincowalcowancowedcowercowkscowlscowpscowrycoxaecoxalcoxedcoxescoxibcoyaucoyedcoyercoylycoypucozedcozencozescozeycoziecraalcrabscrackcraftcragscraiccraigcrakecramecrampcramscranecrankcranscrapecrapscrapycrarecrashcrasscratecravecrawlcrawscrayscrazecrazycreakcreamcredocredscreedcreekcreelcreepcreescremecremscrenacrepecrepscreptcrepycresscrestcrewecrewscriascribscrickcriedcriercriescrimecrimpcrimscrinecrioscripecripscrisecrispcrithcritscroakcrocicrockcrocscroftcrogscrombcromecronecronkcronscronycrookcroolcrooncropscrorecrosscrostcroupcroutcrowdcrowncrowscrozecruckcrudecrudocrudscrudycruelcruescruetcruftcrumbcrumpcrunkcruorcruracrusecrushcrustcrusycruvecrwthcryercryptctenecubbycubebcubedcubercubescubiccubitcuddycuffocuffscuifscuingcuishcuitscukesculchculetculexcullscullyculmsculpaculticultscultycumeccumincundycuneicunitcupelcupidcuppacuppycuratcurbscurchcurdscurdycuredcurercurescuretcurfscuriacuriecuriocurlicurlscurlycurnscurnycurrscurrycursecursicurstcurvecurvycuseccushycuskscuspscuspycussocusumcutchcutercutescuteycutiecutincutiscuttocuttycutupcuveecuzescwtchcyanocyanscycadcycascyclecyclocydercylixcymaecymarcymascymescymolcyniccystscytescytonczarsdaalsdabbadacesdachadacksdadahdadasdaddydadosdaffsdaffydaggadaggydagosdahlsdaikodailydainedaintdairydaisydakerdaleddalesdalisdalledallydaltsdamandamardamesdammedampsdampydancedancydandydangsdaniodanksdannydantsdarafdarbsdarcydareddarerdaresdargadargsdaricdarisdarksdarkydarnsdarredartsdarzidashidashydataldateddaterdatesdatosdattodatumdaubedaubsdaubydaudsdaultdauntdaursdautsdavendavitdawahdawdsdaweddawendawksdawnsdawtsdayandaychdayntdazeddazerdazesdeadsdeairdealsdealtdeansdearedearndearsdearydeashdeathdeavedeawsdeawydebagdebardebbydebeldebesdebitdebtsdebuddebugdeburdebusdebutdebyedecaddecafdecaldecandecaydeckodecksdecordecosdecoydecrydedaldeedsdeedydeelydeemsdeensdeepsdeeredeersdeetsdeevedeevsdefatdeferdeffodefisdefogdegasdegumdegusdeicedeidsdeifydeigndeilsdeismdeistdeitydekeddekesdekkodelaydeleddelesdelfsdelftdelisdellsdellydelosdelphdeltadeltsdelvedemandemesdemicdemitdemobdemoidemondemosdemptdemurdenardenaydenchdenesdenetdenimdenisdensedentsdeoxydepotdepthderatderayderbyderedderesderigdermadermsdernsdernyderosderroderryderthdervsdesexdeshidesisdesksdessedeterdetoxdeucedevasdeveldevildevisdevondevosdevotdewandewardewaxdeweddexesdexiedhabadhaksdhalsdhikrdhobidholedholldholsdhotidhowsdhutidiactdialsdianediarydiazodibbsdiceddicerdicesdiceydichtdickydicotdictadictsdictydiddydidiedidosdidstdiebsdielsdienedietsdiffsdightdigitdikasdikeddikerdikesdikeydillidillsdillydimbodimerdimesdimlydimpsdinardineddinerdinesdingedingodingsdingydinicdinksdinkydinnadinosdintsdiodediolsdiotadippydipsodiramdirerdirgedirkedirksdirlsdirtsdirtydisasdiscidiscodiscsdishydisksdismeditalditasditchditedditesditsydittodittsdittyditzydivandivasdiveddiverdivesdivisdivnadivosdivotdivvydiwandixiedixitdiyasdizendizzydjinndjinsdoabsdoatsdobbydobesdobiedobladobradobrodochtdocksdocosdocusdoddydodgedodgydodosdoeksdoersdoestdoethdoffsdogandogesdogeydoggodoggydogiedogmadohyodoiltdoilydoingdoitsdojosdolcedolcidoleddolesdoliadollsdollydolmadolordolosdoltsdomaldomeddomesdomicdonahdonasdoneedonerdongadongsdonkodonnadonnedonnydonordonsydonutdoobsdoocedoodydooksdooledoolsdoolydoomsdoomydoonadoorndoorsdoozydopasdopeddoperdopesdopeydoraddorbadorbsdoreedoresdoricdorisdorksdorkydormsdormydorpsdorrsdorsadorsedortsdortydosaidosasdoseddosehdoserdosesdoshadotaldoteddoterdotesdottydouardoubtdoucedoucsdoughdouksdouladoumadoumsdoupsdouradousedoutsdoveddovendoverdovesdoviedowardowdsdowdydoweddoweldowerdowiedowledowlsdowlydownadownsdownydowpsdowrydowsedowtsdoxeddoxesdoxiedoyendoylydozeddozendozerdozesdrabsdrackdracodraffdraftdragsdraildraindrakedramadramsdrankdrantdrapedrapsdratsdravedrawldrawndrawsdraysdreaddreamdreardreckdreeddreerdreesdregsdreksdrentdreredressdrestdreysdribsdricedrieddrierdriesdriftdrilldrilydrinkdripsdriptdrivedroiddroildroitdrokedroledrolldromedronedronydroobdroogdrookdrooldroopdropsdroptdrossdroukdrovedrowndrowsdrubsdrugsdruiddrumsdrunkdrupedrusedrusydruxydryaddryasdryerdrylydsobodsomoduadsdualsduansduarsdubboducalducatducesduchyducksduckyductsduddydudeddudesduelsduetsduettduffsdufusduingduitsdukasdukeddukesdukkadulcedulesduliadullsdullydulsedumasdumbodumbsdumkadumkydummydumpsdumpydunamduncedunchdunesdungsdungydunksdunnodunnydunshduntsduomiduomodupedduperdupesdupleduplyduppyduraldurasduredduresdurgydurnsdurocdurosduroydurradurrsdurrydurstdurumdurzidusksduskydustsdustydutchduvetduxesdwaaldwaledwalmdwamsdwangdwarfdwaumdweebdwelldweltdwiledwinedyadsdyersdyingdykeddykeydykondyneldynesdzhoseagereagleeagreealedealeseanedeardsearedearlsearlyearnsearntearsteartheasedeaseleasereaseseasleeastseateneatereatheeavedeavesebbedebbetebonsebonyebookecadsechedechesechoseclatecrusedemaedgededgeredgesedictedifyedileeditseduceeducteejiteensyeerieeeveneevnseffedegadsegersegesteggareggedeggeregmasegretehingeidereidoseighteigneeikedeikoneildseiselejectejidoekingekkaselainelandelanselateelbowelchieldereldinelectelegyelemielfedelfineliadelideelinteliteelmenelogeelogyeloinelopeelopselpeeelsineludeeluteelvanelvenelverelvesemacsembarembayembedemberembogembowemboxembusemceeemeeremendemergemeryemeusemicsemirsemitsemmasemmeremmetemmewemmysemojiemongemoteemoveemptsemptyemuleemureemydeemydsenactenarmenateendedenderendewendowendueenemaenemyenewsenfixeniacenjoyenlitenmewennogennuienokienolsenormenowsenrolensewenskyensueenterentiaentryenureenurnenvoienvoyenzymeorlseosinepactepeesephahephasephodephorepicsepochepodeepoptepoxyeprisequalequesequidequiperaseerbiaerecterevsergonergosergoterhusericaerickericseringernederneserodeeroseerrederrorerseseructerugoerupteruvservenervilescarescotesileeskareskeresnesessayessesesterestocestopestroetageetapeetatsetensethaletherethicethneethosethyleticsetnasettinettleetudeetuisetweeetymaeughseukedeupadeuroseusolevadeevenseventeverteveryevetsevhoeevictevilseviteevoheevokeewersewestewhowewkedexactexaltexamsexcelexeatexecsexeemexemeexertexfilexiesexileexineexingexistexitsexodeexomeexonsexpatexpelexposextolextraexudeexulsexultexurbeyasseyerseyingeyotseyraseyreseyrieeyrirezinefabbyfablefacedfacerfacesfacetfaciafactafactsfaddyfadedfaderfadesfadgefadosfaenafaeryfaffsfaffyfaggyfaginfagotfaiksfailsfainefainsfaintfairsfairyfaithfakedfakerfakesfakeyfakiefakirfalajfallsfalsefamedfamesfanalfancyfandsfanesfangafangofangsfanksfannyfanonfanosfanumfaqirfaradfarcefarcifarcyfardsfaredfarerfaresfarlefarlsfarmsfarosfarrofarsefascifastifastsfatalfatedfatesfatlyfatsofattyfatwafaughfauldfaultfaunafaunsfaurdfautsfauvefavasfavelfaverfavesfavorfavusfawnsfawnyfaxedfaxesfayedfayerfaynefayrefazedfazesfealsfearefearsfeartfeasefeastfeatsfeazefecalfecesfechtfecitfecksfedexfeebsfeedsfeelsfeensfeersfeesefeezefehmefeignfeintfeistfelchfelidfellafellsfellyfelonfeltsfeltyfemalfemesfemmefemmyfemurfencefendsfendyfenisfenksfennyfentsfeodsfeoffferalfererferesferiaferlyfermifermsfernsfernyferryfessefestafestsfestyfetalfetasfetchfetedfetesfetidfetorfettafettsfetusfetwafeuarfeudsfeuedfeverfewerfeyedfeyerfeylyfezesfezzyfiarsfiatsfiberfibrefibroficesfichefichuficinficosficusfidesfidgefidosfiefsfieldfiendfientfierefiersfieryfiestfifedfiferfifesfifisfifthfiftyfiggyfightfigosfikedfikesfilarfilchfiledfilerfilesfiletfiliifilksfillefillofillsfillyfilmifilmsfilmyfilosfilthfilumfinalfincafinchfindsfinedfinerfinesfinisfinksfinnyfinosfiordfiqhsfiquefiredfirerfiresfiriefirksfirmsfirnsfirryfirstfirthfiscsfishyfisksfistsfistyfitchfitlyfitnafittefittsfiverfivesfixedfixerfixesfixitfizzyfjeldfjordflabsflackflaffflagsflailflairflakeflaksflakyflameflammflamsflamyflaneflankflansflapsflareflaryflashflaskflatsflavaflawnflawsflawyflaxyflaysfleamfleasfleckfleekfleerfleesfleetflegsflemefleshfleurflewsflexiflexofleysflickflicsfliedflierfliesflimpflimsflingflintflipsflirsflirtfliskfliteflitsflittfloatflobsflockflocsfloesflogsflongfloodfloorflopsfloraflorsfloryfloshflossflotafloteflourfloutflownflowsflubsfluedfluesflueyflufffluidflukeflukyflumeflumpflungflunkfluorflurrflushfluteflutyfluytflybyflyerflypeflytefoalsfoamsfoamyfocalfocusfoehnfogeyfoggyfogiefoglefogoufohnsfoidsfoilsfoinsfoistfoldsfoleyfoliafolicfoliefoliofolksfolkyfollyfomesfondafondsfondufonesfonlyfontsfoodsfoodyfoolsfootsfootyforamforayforbsforbyforcefordofordsforelforesforexforgeforgoforksforkyformeformsforteforthfortsfortyforumforzaforzefossafossefouatfoudsfouerfouetfoulefoulsfoundfountfoursfouthfoveafowlsfowthfoxedfoxesfoxiefoyerfoylefoynefrabsfrackfractfragsfrailfraimframefrancfrankfrapefrapsfrassfratefratifratsfraudfrausfraysfreakfreedfreerfreesfreetfreitfremdfrenafreonfrerefreshfretsfriarfribsfriedfrierfriesfrigsfrillfrisefriskfristfrithfritsfrittfritzfrizefrizzfrockfroesfrogsfrondfronsfrontfrorefrornfroryfroshfrostfrothfrownfrowsfrowyfrozefrugsfruitfrumpfrushfrustfryerfubarfubbyfubsyfucusfuddyfudgefudgyfuelsfuerofuffsfuffyfugalfuggyfugiefugiofuglefuglyfuguefugusfujisfullsfullyfumedfumerfumesfumetfundifundsfundyfungifungofungsfunksfunkyfunnyfuralfuranfurcafurlsfurolfurorfurrsfurryfurthfurzefurzyfusedfuseefuselfusesfusilfusksfussyfustsfustyfutonfuzedfuzeefuzesfuzilfuzzyfycesfykedfykesfylesfyrdsfyttegabbagabbygablegaddigadesgadgegadidgadisgadjegadjogadsogaffegaffsgagedgagergagesgaidsgailygainsgairsgaitagaitsgaittgajosgalahgalasgalaxgaleagaledgalesgallsgallygalopgalutgalvogamasgamaygambagambegambogambsgamedgamergamesgameygamicgamingammagammegammygampsgamutganchgandyganefganevgangsganjaganofgantsgaolsgapedgapergapesgaposgappygarbegarbogarbsgardagaresgarisgarmsgarnigarregarthgarumgasesgaspsgaspygassygastsgatchgatedgatergatesgathsgatorgauchgaucygaudsgaudygaugegaujegaultgaumsgaumygauntgaupsgaursgaussgauzegauzygavelgavotgawcygawdsgawksgawkygawpsgawsygayalgayergaylygazalgazargazedgazergazesgazongazoogealsgeansgearegearsgeatsgeburgeckogecksgeeksgeekygeepsgeesegeestgeistgeitsgeldsgeleegelidgellygeltsgemelgemmagemmygemotgenalgenasgenesgenetgenicgeniegeniigenipgennygenoagenomgenregenrogentsgentygenuagenusgeodegeoidgerahgerbegeresgerlegermsgermygernegessegessogestegestsgetasgetupgeumsgeyangeyerghastghatsghautghazigheesghestghostghoulghyllgiantgibedgibelgibergibesgibligibusgiddygiftsgigasgighegigotgiguegilasgildsgiletgillsgillygilpygiltsgimelgimmegimpsgimpyginchgingegingsginksginnyginzogipongippogippygipsygirdsgirlsgirlygirnsgirongirosgirrsgirshgirthgirtsgismogismsgistsgitchgitesgiustgivedgivengivergivesgizmoglacegladegladsgladyglaikglairglamsglandglansglareglaryglassglaumglaurglazeglazygleamgleanglebaglebeglebygledegledsgleedgleekgleesgleetgleisglensglentgleysglialgliasglibsglidegliffgliftglikeglimeglimsglintgliskglitsglitzgloamgloatglobeglobiglobsglobyglodegloggglomsgloomgloopglopsgloryglossglostgloutgloveglowsglozegluedgluergluesglueyglugsglumeglumsgluongluteglutsglyphgnarlgnarrgnarsgnashgnatsgnawngnawsgnomegnowsgoadsgoafsgoalsgoarygoatsgoatygobangobargobbigobbogobbygobisgobosgodetgodlygodsogoelsgoersgoestgoethgoetygofergoffsgoggagogosgoiergoinggojisgoldsgoldygolemgolesgolfsgollygolpegolpsgombogomergompagonadgonchgonefgonergongsgoniagonifgonksgonnagonofgonysgonzogoobygoodsgoodygooeygoofsgoofygoogsgookygooldgoolsgoolygoonsgoonygoopsgoopygoorsgoorygoosegoosygopakgopikgoralgorasgoredgoresgorgegorisgormsgormygorpsgorsegorsygoshtgossegotchgothsgothygottagouchgougegouksgouragourdgoutsgoutygowangowdsgowfsgowksgowlsgownsgoxesgoyimgoylegraalgrabsgracegradegradsgraffgraftgrailgraingraipgramagramegrampgramsgranagrandgransgrantgrapegraphgrapygraspgrassgrategravegravsgravygraysgrazegreatgrebegrebogrecegreedgreekgreengreesgreetgregegregogreingrensgresegrevegrewsgreysgricegridegridsgriefgriffgriftgrigsgrikegrillgrimegrimygrindgrinsgriotgripegripsgriptgripygrisegristgrisygrithgritsgrizegroangroatgrodygrogsgroingroksgromagronegroofgroomgropegrossgroszgrotsgroufgroupgroutgrovegrovygrowlgrowngrowsgrrlsgrrrlgrubsgruedgruelgruesgrufegruffgrumegrumpgrundgruntgrycegrydegrykegrypegryptguacoguanaguanoguansguardguarsguavagucksguckygudesguessguestguffsgugasguideguidsguildguileguiltguimpguiroguisegulaggulargulasgulchgulesguletgulfsgulfygullsgullygulphgulpsgulpygumbogummagummigummygumpsgundygungegungygunksgunkygunnyguppyguqingurdygurgegurlsgurlygurnsgurrygurshgurusgushyguslaguslegusligussygustogustsgustygutsyguttaguttyguyedguyleguyotguysegwinegyalsgyansgybedgybesgyeldgympsgynaegyniegynnygynosgyozagyposgyppogyppygypsygyralgyredgyresgyrongyrosgyrusgytesgyvedgyveshaafshaarshabithablehabushacekhackshadalhadedhadeshadjihadsthaemshaetshaffshafishafizhaftshaggshahashaickhaikahaikshaikuhailshailyhainshainthairshairyhaithhajeshajishajjihakamhakashakeahakeshakimhakushalalhaledhalerhaleshalfahalfshalidhallohallshalmahalmshalonhaloshalsehaltshalvahalvehalwahamalhambahamedhameshammyhamzahanaphancehanchhandshandyhangihangshankshankyhansahansehantshaolehaomahapaxhaplyhappihappyhapusharamhardshardyharedharemharesharimharksharlsharmsharnsharosharpsharpyharryharshhartshashyhaskshaspshastahastehastyhatchhatedhaterhateshathahaudshaufshaughhauldhaulmhaulshaulthaunshaunthausehautehavenhaverhaveshavochawedhawkshawmshawsehayedhayerhayeyhaylehazanhazedhazelhazerhazesheadsheadyhealdhealsheameheapsheapyheardhearehearsheartheastheathheatsheaveheavyhebenhebeshechtheckshederhedgehedgyheedsheedyheelsheezehefteheftsheftyheidsheighheilsheirsheisthejabhejraheledhelesheliohelixhellohellshelmsheloshelothelpshelvehemalhemeshemicheminhempshempyhencehenchhendshengehennahennyhenryhentsheparherbsherbyherdsheresherlshermahermshernsheronherosherryhersehertzheryehespshestsheteshethsheuchheughheveahewedhewerhewghhexadhexedhexerhexeshexylheyedhianthickshidedhiderhideshiemshighshighthijabhijrahikedhikerhikeshikoihilarhilchhillohillshillyhiltshilumhilushimbohinauhindshingehingshinkyhinnyhintshioishiplyhippohippyhiredhireehirerhireshissyhistshitchhithehivedhiverhiveshizenhoaedhoagyhoardhoarshoaryhoasthobbyhoboshockshocushodadhodjahoershoganhogenhoggshoghshohedhoickhoiedhoikshoinghoisehoisthokashokedhokeshokeyhokishokkuhokumholdsholedholesholeyholkshollahollohollyholmeholmsholonholosholtshomashomedhomerhomeshomeyhomiehommehonanhondahondshonedhonerhoneshoneyhongihongshonkshonkyhonorhoochhoodshoodyhooeyhoofshookahookshookyhoolyhoonshoopshoordhoorshooshhootshootyhoovehopakhopedhoperhopeshoppyhorahhoralhorashordehorishorkshormehornshorsehorsthorsyhosedhoselhosenhoserhoseshoseyhostahostshotchhotelhotenhotlyhottyhouffhoufshoughhoundhourihourshousehoutshoveahovedhovelhovenhoverhoveshowbehowdyhoweshowffhowfshowkshowlshowrehowsohoxedhoxeshoyashoyedhoylehubbyhuckshudnahududhuershuffshuffyhugerhuggyhuhushuiashulashuleshulkshulkyhullohullshullyhumanhumashumfshumichumidhumorhumphhumpshumpyhumushunchhunkshunkyhuntshurdshurlshurlyhurrahurryhursthurtshushyhuskshuskyhusoshussyhutchhutiahuzzahuzzyhwylshydrahydrohyenahyenshyggehyinghykeshylashyleghyleshylichymenhymnshyndehyoidhypedhyperhypeshyphahyphyhyposhyraxhysonhytheiambiiambsibrikicersichedichesichoriciericilyicingickerickleiconsictalicticictusidantidealideasideesidentidiomidiotidledidleridlesidolaidolsidyllidylsiftarigapoiggediglooiglusihramikansikatsikonsileacilealileumileusiliaciliadilialiliumillerillthimageimagoimamsimariimaumimbarimbedimbueimideimidoimidsimineiminoimmewimmitimmiximpedimpelimpisimplyimpotimproimshiimshyinaneinaptinarminbyeincelincleincogincurincusincutindewindexindiaindieindolindowindriindueineptinerminertinferinfixinfosinfrainganingleingotinioninkedinkerinkleinlayinletinnedinnerinnitinorbinputinruninsetinspointelinterintilintisintraintroinulainureinurninustinvarinwitiodiciodidiodinioniciotasipponiradeirateiridsiringirkedirokoironeironsironyisbasishesisledislesisletisnaeisseiissueistleitchyitemsitheriviediviesivoryixiasixnayixoraixtleizardizarsizzatjaapsjabotjacaljacksjackyjadedjadesjafasjaffajagasjagerjaggsjaggyjagirjagrajailsjakerjakesjakeyjalapjalopjambejambojambsjambujamesjammyjamonjanesjannsjannyjantyjapanjapedjaperjapesjarksjarlsjarpsjartajaruljaseyjaspejaspsjatosjauksjauntjaupsjavasjaveljawanjawedjaxiejazzyjeansjeatsjebeljedisjeelsjeelyjeepsjeersjeezejefesjeffsjehadjehusjelabjellojellsjellyjembejemmyjennyjeonsjeridjerksjerkyjerryjessejestsjesusjetesjetonjettyjeunejewedjeweljewiejhalajiaosjibbajibbsjibedjiberjibesjiffsjiffyjiggyjigotjihadjillsjiltsjimmyjimpyjingojinksjinnejinnijinnsjirdsjirgajirrejismsjivedjiverjivesjiveyjnanajobedjobesjockojocksjockyjocosjodeljoeysjohnsjoinsjointjoistjokedjokerjokesjokeyjokoljoledjolesjollsjollyjoltsjoltyjomonjomosjonesjongsjontyjooksjoramjorumjotasjottyjotunjoualjougsjouksjoulejoursjoustjowarjowedjowlsjowlyjoyedjubasjubesjucosjudasjudgejudgyjudosjugaljugumjuicejuicyjujusjukedjukesjukusjulepjumarjumbojumbyjumpsjumpyjuncojunksjunkyjuntajuntojupesjuponjuraljuratjureljuresjurorjustsjutesjuttyjuvesjuviekaamakababkabarkabobkachakackskadaikadeskadiskafirkagoskaguskahalkaiakkaidskaieskaifskaikakaikskailskaimskaingkainskakaskakiskalamkaleskalifkaliskalpakamaskameskamikkamiskammekanaekanaskandykanehkaneskangakangskanjikantskanzukaonskapaskaphskapokkapowkappakapuskaputkaraskaratkarkskarmakarnskarookaroskarrikarstkarsykartskarzykashakasmekatalkataskatiskattikaughkaurikaurukaurykavalkavaskawaskawaukawedkayakkaylekayoskaziskazookbarskebabkebarkebobkeckskedgekedgykeechkeefskeekskeelskeemakeenokeenskeepskeetskeevekefirkehuakeirskelepkelimkellskellykelpskelpykeltskeltykembokembskempskemptkempykenafkenchkendokenoskentekentskepiskerbskerelkerfskerkykermakernekernskeroskerrykervekesarkestsketasketchketesketolkevelkevilkexeskeyedkeyerkhadikhafskhakikhanskhaphkhatskhayakhazikhedakhethkhetskhojakhorskhoumkhudskiaatkiackkiangkibbekibbikibeikibeskiblakickskickykiddokiddykidelkidgekiefskierskievekievskightkikoikileykilimkillskilnskiloskilpskiltskiltykimbokinaskindakindskindykineskingskininkinkskinoskiorekioskkipeskippakippskirbykirkskirnskirrikisankissykistskitedkiterkiteskithekithskittykitulkivaskiwisklangklapsklettklickkliegkliksklongkloofklugeklutzknackknagsknapsknarlknarsknaurknaveknawekneadkneedkneelkneesknellkneltknifeknishknitskniveknobsknockknollknopsknospknotsknoutknoweknownknowsknubsknurlknurrknursknutskoalakoanskoapskobankoboskoelskoffskoftakogalkohaskohenkohlskoinekojiskokamkokaskokerkokrakokumkolaskoloskombukonbukondokonkskookskookykoorikopekkophskopjekoppakoraikoraskoratkoreskormakoroskorunkoruskoseskotchkotoskotowkourakraalkrabskraftkraiskraitkrangkranskranzkrautkrayskreepkrengkrewekrillkronakronekroonkrubikrunkksarskubiekudoskuduskudzukufiskugelkuiaskukrikukuskulakkulankulaskulfikumiskumyskuriskurrekurtakuruskussokutaskutchkutiskutuskuzuskvasskvellkwelakyackkyakskyangkyarskyatskyboskydstkyleskyliekylinkylixkyloekyndekyndskypeskyriekyteskythelaarilabdalabellabislaborlabralacedlacerlaceslacetlaceylacksladdyladedladenladerladesladlelaerslaevolaganlagerlahallaharlaichlaicslaidslaighlaikalaikslairdlairslairylaithlaitylakedlakerlakeslakhslakinlaksalaldylallslamaslambslambylamedlamerlameslamialammylampslanailanaslancelanchlandelandslaneslankslankylantslapellapinlapislapjelapselarchlardslardylareelareslargelargolarislarkslarkylarnslarntlarumlarvalasedlaserlaseslassilassolassulassylastslatahlatchlatedlatenlaterlatexlathelathilathslathylatkelattelatuslauanlauchlaudslaufslaughlaundlauralavallavaslavedlaverlaveslavralavvylawedlawerlawinlawkslawnslawnylaxedlaxerlaxeslaxlylayedlayerlayinlayuplazarlazedlazeslazoslazzilazzoleachleadsleadyleafsleafyleaksleakyleamsleansleantleanyleapsleaptlearelearnlearslearyleaseleashleastleatsleaveleavyleazelebenleccyledesledgeledgyledumleearleechleeksleepsleersleeryleeseleetsleezelefteleftsleftylegallegerlegesleggeleggoleggylegitlehrslehualeirsleishlemanlemedlemellemeslemmalemmelemonlemurlendsleneslengslenislenoslenselentilentoleoneleperlepidlepraleptaleredlereslerpslesboleseslestsletchletheletupleuchleucoleudsleughlevasleveelevelleverleveslevinlevislewislexeslexislezeslezzalezzylianalianeliangliardliarsliartlibelliberlibralibrilichilichtlicitlickslidarlidosliefsliegelienslierslieuslieveliferlifesliftsliganligerliggelightlignelikedlikenlikerlikeslikinlilaclillslilosliltslimanlimaslimaxlimbalimbilimbolimbslimbylimedlimenlimeslimeylimitlimmalimnslimoslimpalimpslinaclinchlindslindylinedlinenlinerlineslineylingalingolingslingylininlinkslinkylinnslinnylinoslintslintylinumlinuxlionslipaslipeslipidlipinliposlippyliraslirkslirotliskslislelispslistslitailitaslitedliterliteslithelitholithslitrelivedlivenliverliveslividlivorlivrellamallanoloachloadsloafsloamsloamyloansloastloathloavelobarlobbylobedlobesloboslobuslocallochelochslocielocislockslocoslocumlocuslodenlodeslodgeloessloftsloftyloganlogesloggylogialogiclogielogoilogonlogoslohanloidsloinsloipeloirslokeslollslollylologlomaslomedlomeslonerlongalongelongsloobylooedlooeyloofaloofslooielookslookyloomsloonsloonyloopsloopyloordlooselootslopedloperlopesloppyloralloranlordslordylorelloresloriclorislorrylosedlosellosenloserloseslossylotahlotaslotesloticlotoslotsalottalottelottolotuslouedloughlouielouisloumaloundlounsloupeloupslourelourslourylouselousyloutslovatlovedloverlovesloveylovielowanlowedlowerloweslowlylowndlownelownslowpslowrylowselowtsloxedloxesloyallozenluachluauslubedlubeslubraluceslucidlucksluckylucreludesludicludosluffaluffslugedlugerlugeslullsluluslumaslumbilumenlummelummylumpslumpylunarlunaslunchluneslunetlungelungilungslunksluntslupinlupuslurchluredlurerlureslurexlurgilurgyluridlurkslurrylurveluserlushyluskslustslustylususlutealutedluterlutesluvvyluxedluxerluxeslweislyamslyardlyartlyaselycealyceelycralyinglymeslymphlyneslyreslyriclysedlyseslysinlysislysollyssalytedlyteslythelyticlyttamaaedmaaremaarsmabesmacasmacawmacedmacermacesmachemachimachomachsmacksmaclemaconmacromadammadgemadidmadlymadremaerlmafiamaficmagesmaggsmagicmagmamagotmagusmahoemahuamahwamaidsmaikomaiksmailemaillmailsmaimsmainsmairemairsmaisemaistmaizemajormakarmakermakesmakismakosmalammalarmalasmalaxmalesmalicmalikmalismallsmalmsmalmymaltsmaltymalusmalvamalwamamasmambamambomameemameymamiemammamammymanasmanatmandimanebmanedmanehmanesmanetmangemangomangsmangymaniamanicmanismankymanlymannamanormanosmansemantamantomantymanulmanusmapaumaplemaquimaraemarahmarasmarchmarcsmardymaresmargemargsmariamaridmarkamarksmarlemarlsmarlymarmsmaronmarormarramarrimarrymarsemarshmartsmarvymasasmasedmasermasesmashymasksmasonmassamassemassymastsmastymasusmataimatchmatedmatermatesmateymathsmatinmatlomattemattsmatzamatzomaubymaudsmaulsmaundmaurimausymautsmauvemauzymavenmaviemavinmavismawedmawksmawkymawnsmawrsmaxedmaxesmaximmaxismayanmayasmaybemayedmayormayosmaystmazedmazermazesmazeymazutmbirameadsmealsmealymeanemeansmeantmeanymearemeasemeathmeatsmeatymebosmeccamechsmecksmedalmediamedicmediimedlemeedsmeersmeetsmeffsmeinsmeintmeinymeithmekkamelasmelbameldsmeleemelicmelikmellsmelonmeltsmeltymemesmemosmenadmendsmenedmenesmengemengsmensamensemenshmentamentomenusmeousmeowsmerchmercsmercymerdemeredmerelmerermeresmergemerilmerismeritmerksmerlemerlsmerrymersemesalmesasmeselmesesmeshymesicmesnemesonmessymestometalmetedmetermetesmethomethsmeticmetifmetismetolmetremetromeusemevedmevesmewedmewlsmeyntmezesmezzemezzomhorrmiaoumiaowmiasmmiaulmicasmichemichtmicksmickymicosmicramicromiddymidgemidgymidismidstmiensmievemiffsmiffymiftymiggsmightmihasmihismikedmikesmikramikvamilchmildsmilermilesmilfsmiliamilkomilksmilkymillemillsmilormilosmilpamiltsmiltymiltzmimedmimeomimermimesmimicmimsyminaeminarminasmincemincymindsminedminerminesmingemingsmingyminimminisminkeminksminnyminorminosmintsmintyminusmiredmiresmirexmiridmirinmirksmirkymirlymirosmirthmirvsmirzamischmisdomisermisesmisgomisosmissamissymistsmistymitchmitermitesmitismitremittsmixedmixenmixermixesmixtemixupmizenmizzymnememoansmoatsmobbymobesmobeymobiemoblemochamochimochsmochymocksmodalmodelmodemmodermodesmodgemodiimodusmoersmofosmoggymogulmohelmohosmohrsmohuamohurmoilemoilsmoiramoiremoistmoitsmojosmokesmokismokosmolalmolarmolasmoldsmoldymoledmolesmollamollsmollymoltomoltsmolysmomesmommamommymomusmonadmonalmonasmondemondomonermoneymongomongsmonicmoniemonksmonosmontemonthmontymoobsmoochmoodsmoodymooedmooksmoolamoolimoolsmoolymoongmoonsmoonymoopsmoorsmoorymoosemootsmoovemopedmopermopesmopeymoppymopsymopusmoraemoralmorasmoratmoraymorelmoresmoriamornemornsmoronmorphmorramorromorsemortsmosedmosesmoseymosksmossomossymostemostsmotedmotelmotenmotesmotetmoteymothsmothymotifmotismotormottemottomottsmottymotusmotzamouchmouesmouldmoulsmoultmoundmountmoupsmournmousemoustmousymouthmovedmovermovesmoviemowasmowedmowermowramoxasmoxiemoyasmoylemoylsmozedmozesmozosmpretmuchomucicmucidmucinmucksmuckymucormucromucusmuddymudgemudirmudramuffsmuftimuggamuggsmuggymuhlymuidsmuilsmuirsmuistmujikmulchmulctmuledmulesmuleymulgamuliemullamullsmulsemulshmummsmummymumpsmumsymumusmunchmungamungemungomungsmunismuntsmuntumuonsmuralmurasmuredmuresmurexmuridmurksmurkymurlsmurlymurramurremurrimurrsmurrymurtimurvamusarmuscamusedmusermusesmusetmushamushymusicmusitmusksmuskymusosmussemussymusthmustsmustymutchmutedmutermutesmuthamutismutonmuttsmuxedmuxesmuzakmuzzymvulemyallmylarmynahmynasmyoidmyomamyopemyopsmyopymyrrhmysidmythimythsmythymyxosmzeesnaamsnaansnabesnabisnabksnablanabobnachenachonacrenadasnadirnaevenaevinaffsnagasnaggynagornahalnaiadnaifsnaiksnailsnairanairunaivenakernakfanalasnalednallanamednamernamesnammanamusnanasnancenancynandunannanannynanosnanuanapasnapednapesnapoonappanappenappynarasnarconarcsnardsnaresnaricnarisnarksnarkynarrenasalnashinastynatalnatchnatesnatisnattynauchnauntnavalnavarnavelnavesnavewnavvynawabnazesnazirndujaneafenealsneapsnearsneathneatsnebeknebelnecksneddyneedsneedyneeldneeleneembneemsneepsneeseneezenegronegusneifsneighneistneivenelisnellynemasnemnsnemptnenesneonsnepernepitneralnerdsnerdynerkanerksnerolnertsnertznervenervynestsnetesnetopnettsnettyneuksneumeneumsnevelnevernevesnevusnewbsnewednewelnewernewienewlynewsynewtsnextsnexusngaionganangatingomangweenicadnicernichenichtnicksnicolnidalnidednidesnidornidusnieceniefsnievenifesniffsniffyniftynigernighsnightnihilnikabnikahnikaunillsnimbinimbsnimpsninerninesninjaninnyninonninthnipasnippyniqabnirlsnirlyniseinissenisusniternitesnitidnitonnitrenitronitrynittynivalnixednixernixesnixienizamnkosinoahsnobbynoblenoblynocksnodalnoddynodesnodusnoelsnoggsnohownoilsnoilynointnoirsnoisenoisynolesnollsnolosnomadnomasnomennomesnomicnomoinomosnonasnoncenonesnonetnongsnonisnonnynonylnoobsnooitnooksnookynoonsnoopsnoosenopalnorianorisnorksnormanormsnorthnosednosernosesnoseynotalnotchnotednoternotesnotumnouldnoulenoulsnounsnounynoupsnovaenovasnovelnovumnowaynowednowlsnowtsnowtynoxalnoxesnoyaunoyednoyesnubbynubianuchanuddynudernudgenudienudzhnuffsnugaenukednukesnullanullsnumbsnumennummynunnynurdsnurdynurlsnurrsnursenutsonutsynuttynyaffnyalanyingnylonnymphnyssaoakedoakenoakeroakumoaredoasesoasisoastsoatenoateroathsoavesobangobeahobeliobeseobeysobiasobiedobiitobitsobjetoboesoboleoboliobolsoccamoccuroceanocherochesochreochryockerocreaoctadoctaloctanoctasoctetoctyloculiodahsodalsodderoddlyodeonodeumodismodistodiumodorsodourodyleodylsofaysoffaloffedofferoffieoflagoftenofterogamsogeedogeesogginoghamogiveogledogleroglesogmicogresohiasohingohmicohoneoidiaoiledoileroinksointsojimeokapiokaysokehsokrasoktasoldenolderoldieoleicoleinolentoleosoleumoliosoliveollasollavollerollieologyolpaeolpesomasaomberombreombusomegaomensomersomitsomlahomovsomrahonceroncesoncetoncusonelyonersoneryoniononiumonkusonlayonnedonsetonticoobitoohedoomphoontsoopedoorieoosesootidoozedoozesopahsopalsopensopepeoperaopineopingopiumopposopsinoptedopteropticorachoracyoralsorangorantorateorbedorbitorcasorcinorderordosoreadorfesorganorgiaorgicorgueoribiorielorixaorlesorlonorlopormerornisorpinorrisorthoorvalorzososcaroshacosierosmicosmolossiaostiaotakuotaryotherottarotterottosoubitouchtouensoughtouijaoulksoumasounceoundyoupasoupedoupheouphsourieouseloustsoutbyoutdooutedouteroutgooutreoutroouttaouzelouzosovalsovaryovateovelsovensoversovertovineovistovoidovoliovoloovuleowcheowiesowingowledowlerowletownedownerowresowrieowsenoxbowoxersoxeyeoxideoxidsoxiesoximeoximsoxlipoxteroyersozekiozoneozziepaalspaanspacaspacedpacerpacespaceypachapackspacospactapactspaddypadispadlepadmapadrepadripaeanpaedopaeonpaganpagedpagerpagespaglepagodpagripaikspailspainspaintpairepairspaisapaisepakkapalaspalaypaleapaledpalerpalespaletpalispalkipallapallspallypalmspalmypalpipalpspalsapalsypampapanaxpancepandapandspandypanedpanelpanespangapangspanicpanimpankopannepannipansypantopantspantypaolipaolopapalpapaspapawpaperpapespappipappyparaeparasparchpardipardspardyparedparenpareoparerparespareuparevpargepargoparisparkaparkiparksparkyparleparlyparmaparolparpsparraparrsparryparsepartipartspartyparveparvopaseopasespashapashmpaskapaspypassepastapastepastspastypatchpatedpatenpaterpatespathspatinpatiopatkapatlypatsypattepattypatuspauaspaulspausepavanpavedpavenpaverpavespavidpavinpavispawaspawawpawedpawerpawkspawkypawlspawnspaxespayedpayeepayerpayorpaysdpeacepeachpeagepeagspeakspeakypealspeanspearepearlpearspeartpeasepeatspeatypeavypeazepebaspecanpechspeckepeckspeckypedalpedespedispedropeecepeekspeelspeenspeeoypeepepeepspeerspeerypeevepeggypeghspeinspeisepeizepekanpekespekinpekoepelaspelaupelespelfspellspelmapelonpeltapeltspenalpencependspendupenedpenespengopeniepenkspennapennepennipennypentspeonspeonypeplapepospeppypepsiperaiperceperchpercsperduperdypereaperesperilperisperksperkypermspernsperogperpsperryperseperstpertspervepervopervspervypeskypesospestopestspestypetalpetarpeterpetitpetrepetripettipettopettypeweepewitpeysephagephangpharepharmphasepheerphenepheonphesephialphishphizzphloxphocaphonephonophonsphonyphotophotsphphtphutsphylaphylepianipianopianspibalpicalpicaspiccypickspickypicotpicrapiculpiecepiendpierspiertpietapietspietypiezopiggypightpigmypiingpikaspikaupikedpikerpikespikeypikispikulpilaepilafpilaopilarpilaupilawpilchpileapiledpileipilerpilespilispillspilotpilowpilumpiluspimaspimpspinaspinchpinedpinespineypingopingspinkopinkspinkypinnapinnypinonpinotpintapintopintspinuppionspionypiouspioyepioyspipalpipaspipedpiperpipespipetpipispipitpippypipulpiquepiraipirlspirnspirogpiscopisespiskypisospistepitaspitchpithspithypitonpitotpittapiumspivotpixelpixespixiepizedpizespizzaplaasplaceplackplageplaidplainplaitplaneplankplansplantplapsplashplasmplastplateplatsplattplatyplayaplaysplazapleadpleaspleatplebeplebsplenapleonpleshplewsplicapliedplierpliesplimsplingplinkploatplodsplongplonkplookplopsplotsplotzploukplowsployeployspluckpluespluffplugsplumbplumeplumpplumsplumyplunkpluotplushplutoplyerpoachpoakapoakepoboypockspockypodalpoddypodexpodgepodgypodiapoemspoepspoesypoetspogeypoggepogospohedpoilupoindpointpoisepokalpokedpokerpokespokeypokiepolarpoledpolerpolespoleypoliopolispoljepolkapolkspollspollypolospoltspolyppolyspombepomespommypomospompsponceponcypondsponesponeypongapongopongspongyponkspontspontyponzupoochpoodspooedpoofspoofypoohspoojapookapookspoolspoonspoopspoopypooripoortpootspoovepoovypopespoppapoppypopsyporaeporalporchporedporerporesporgeporgyporinporksporkypornspornyportaportsportyposedposerposesposeyposhopositpossepostspotaepotchpotedpotespotinpotoopotsypottopottspottypouchpouffpoufspoukepoukspoulepoulppoultpoundpoupepouptpourspoutspoutypowanpowerpowinpowndpownspownypowrepoxedpoxespoyntpoyoupoysepozzypraampradsprahupramspranaprangprankpraosprasepratepratsprattpratyprausprawnprayspredypreedpreenpreespreifpremspremyprentpreonpreopprepspresapresepressprestpreveprexypreysprialpricepricypridepriedpriefprierpriesprigsprillprimaprimeprimiprimoprimpprimsprimyprinkprintprionpriorpriseprismprissprivyprizeproasprobeprobsprodsproemprofsprogsproinprokeproleprollpromopromsproneprongpronkproofpropsproreproseprosoprossprostprosyprotoproudproulproveprowlprowsproxyproynprudeprunepruntprutapryerprysepsalmpseudpshawpsionpsoaepsoaipsoaspsorapsychpsyoppubcopubespubispucanpucerpucespuckapuckspuddypudgepudgypudicpudorpudsypuduspuerspuffapuffspuffypuggypugilpuhaspujahpujaspukaspukedpukerpukespukeypukkapukuspulaopulaspuledpulerpulespulikpulispulkapulkspullipullspullypulmopulpspulpypulsepuluspumaspumiepumpspunaspuncepunchpungapungspunjipunkapunkspunkypunnypuntopuntspuntypupaepupalpupaspupilpuppypupuspurdapuredpureepurerpurespurgepurinpurispurlspurpypurrspursepursypurtypusespushypusleputidputonputtiputtoputtsputtypuzelpwnedpyatspyetspygalpygmypyinspylonpynedpynespyoidpyotspyralpyranpyrespyrexpyricpyrospyxedpyxespyxiepyxispzazzqadisqaidsqajaqqanatqapikqiblaqophsqormaquackquadsquaffquagsquailquairquaisquakequakyqualequalmquantquarequarkquartquashquasiquassquatequatsquaydquaysqubitqueanqueenqueerquellquemequenaquernqueryquestqueuequeynqueysquichquickquidsquietquiffquillquiltquimsquinaquinequinoquinsquintquipoquipsquipuquirequirkquirtquistquitequitsquoadquodsquoifquoinquoitquollquonkquopsquotaquotequothqurshquyterabatrabbirabicrabidrabisracedracerracesracheracksraconradarradgeradiiradioradixradonraffsraftsragasragderagedrageeragerragesraggaraggsraggyragisragusrahedrahuiraiasraidsraiksrailerailsrainerainsrainyrairdraiseraitaraitsrajahrajasrajesrakedrakeerakerrakesrakiarakisrakusralesrallyralphramalrameerametramieraminramisrammyrampsramusranasranceranchrandsrandyraneerangarangerangirangsrangyranidranisrankeranksrantsrapherapidrapperaredrareerarerraresrarksrasedraserrasesraspsraspyrasserastaratalratanratasratchratedratelraterratesratharatherathsratioratooratosrattyratusraunsrauporavedravelravenraverravesraveyravinrawerrawinrawlyrawnsraxedraxesrayahrayasrayedrayleraynerayonrazedrazeerazerrazesrazoorazorreachreactreaddreadsreadyreaisreaksrealmrealorealsreamereamsreamyreansreapsrearmrearsreastreatareatereaverebarrebberebecrebelrebidrebitreboprebusrebutrebuyrecalrecapreccereccoreccyrecitrecksreconrectarectirectorecurrecutredanreddsreddyrededredesrediaredidredipredlyredonredosredoxredryredubreduxredyereechreedereedsreedyreefsreefyreeksreekyreelsreensreestreeverefedrefelreferrefforefisrefitrefixreflyrefryregalregarregesreggoregieregmaregnaregosregurrehabrehemreifsreifyreignreikireiksreinkreinsreirdreistreiverejigrejonrekedrekesrekeyrelaxrelayreletrelicrelierelitrelloremanremapremenremetremexremitremixrenalrenayrendsrenewreneyrengarenigreninrennerenosrenterentsreoilreorgrepayrepegrepelrepinreplareplyreposrepotreppsreproreranrerigrerunresatresawresayreseeresesresetresewresidresinresitresodresowrestorestsrestyresusretagretaxretchretemretiaretieretoxretroretryreuserevelrevetrevierevuerewanrewaxrewedrewetrewinrewonrewthrexesrezesrheasrhemerheumrhiesrhimerhinerhinorhodyrhombrhonerhumbrhymerhynerhytariadsrialsriantriataribasribbyribesricedricerricesriceyrichtricinricksriderridesridgeridgyridicrielsriemsrieveriferriffsriflerifteriftsriftyriggsrightrigidrigolrigorriledrilesrileyrillerillsrimaerimedrimerrimesrimusrindsrindyrinesringsrinksrinseriojariotsripedripenriperripesrippsrisenriserrisesrishirisksriskyrispsrisusritesrittsritzyrivalrivasrivedrivelrivenriverrivesrivetriyalrizasroachroadsroamsroansroarsroaryroastroaterobedrobesrobinroblerobotrocksrockyrodedrodeorodesrogerrogueroguyrohesroidsroilsroilyroinsroistrojakrojisrokedrokerrokesrolagrolesrolfsrollsromalromanromeorompsronderondoroneoronesroninronneronterontsroodsroofsroofyrooksrookyroomsroomyroonsroopsroopyroosarooseroostrootsrootyropedroperropesropeyroqueroralroresroricroridrorierortsrortyrosedrosesrosetroshirosinrositrostirostsrotalrotanrotasrotchrotedrotesrotisrotlsrotonrotorrotosrotterouenrouesrougeroughrouleroulsroumsroundroupsroupyrouseroustrouterouthroutsrovedrovenroverrovesrowanrowdyrowedrowelrowenrowerrowierowmerowndrowthrowtsroyalroyneroystrozetrozitruanarubairubbyrubelrubesrubinrublerublirubusrucherucksrudasruddsruddyruderrudesrudierudisruedaruersrufferuffsrugaerugalrugbyruggyruingruinsrukhsruledrulerrulesrumalrumbarumborumenrumesrumlyrummyrumorrumporumpsrumpyrunchrundsrunedrunesrungsrunicrunnyruntsruntyrupeerupiaruralrurpsrurusrusasrusesrushyrusksrusmarusserustsrustyruthsrutinruttyryalsrybatrykedrykesrymmeryndsryotsrypersaagssabalsabedsabersabessabhasabinsabirsablesabotsabrasabresackssacrasaddosadessadhesadhusadissadlysadossadzasafedsafersafessagassagersagessaggysagossagumsahebsahibsaicesaicksaicssaidssaigasailssaimssainesainssaintsairssaistsaithsajousakaisakersakessakiasakissaktisaladsalalsalatsalepsalessaletsalicsalixsallesallysalmisalolsalonsalopsalpasalpssalsasalsesaltosaltssaltysaluesalutsalvesalvosamansamassambasambosameksamelsamensamessameysamfusammysampisampssandssandysanedsanersanessangasanghsangosangssankosansasantosantssaolasapansapidsaporsappysaransardssaredsareesargesargosarinsarissarkssarkysarodsarossarussasersasinsassesassysataisataysatedsatemsatessatinsatissatyrsaubasaucesauchsaucysaughsaulssaultsaunasauntsaurysautesautssavedsaversavessaveysavinsavorsavoysavvysawahsawedsawersaxessayedsayersayidsaynesayonsaystsazesscabsscadsscaffscagsscailscalascaldscalescallscalpscalyscampscamsscandscansscantscapascapescapiscarescarfscarpscarsscartscaryscathscatsscattscaudscaupscaurscawssceatscenascendscenescentschavschmoschulschwascionsclimscodyscoffscogsscoldsconescoogscoopscootscopascopescopsscorescornscotsscougscoupscourscoutscowlscowpscowsscrabscraescragscramscranscrapscratscrawscrayscreescrewscrimscripscrobscrodscrogscrowscrubscrumscubascudiscudoscudsscuffscuftscugssculkscullsculpsculsscumsscupsscurfscursscusescutascutescutsscuzzscyessdaynsdeinsealsseameseamsseamyseanssearesearsseaseseatsseazesebumseccosechssectssedansedersedessedgesedgysedumseedsseedyseeksseeldseelsseelyseemsseepsseepyseerssefersegarsegnisegnosegolsegosseguesehriseifsseilsseineseirsseiseseismseityseizaseizesekossektsselahselesselfssellasellesellsselvasemeesemessemiesemissenassendssenessengisennasenorsensasensesensisentesentisentssenvysenzasepadsepalsepiasepicsepoyseptaseptsseracseraiseralseredsererseresserfssergesericserifserinserksseronserowserraserreserrsserryserumserveservoseseysessasetaesetalsetonsettssetupsevenseversewansewarsewedsewelsewensewersewinsexedsexersexessextosextsseyenshackshadeshadsshadyshaftshagsshahsshakeshakoshaktshakyshaleshallshalmshaltshalyshamashameshamsshandshankshansshapeshapsshardsharesharksharnsharpshashshaulshaveshawlshawmshawnshawsshayashaysshchisheafshealshearsheasshedssheelsheensheepsheersheetsheikshelfshellshendshentsheolsherdsheresheroshetsshevashewnshewsshiaishiedshielshiershiesshiftshillshilyshimsshineshinsshinyshipsshireshirkshirrshirsshirtshishshisoshistshiurshivashiveshivsshlepshlubshmekshmoeshoalshoatshockshoedshoershoesshogishogsshojishojosholashoneshookshoolshoonshoosshootshopeshopsshoreshorlshornshortshoteshotsshottshoutshoveshowdshownshowsshowyshoyushredshrewshrisshrowshrubshrugshtikshtumshtupshuckshuleshulnshulsshunsshuntshurashushshuteshutsshwasshyershylysialssibbssibylsicessichtsickosickssickysidassidedsidersidessidhasidhesidlesiegesieldsienssientsiethsieursievesiftssighssightsigilsiglasigmasignasignssijossikassikersikessildssiledsilensilersilessilexsilkssilkysillssillysilossiltssiltysilvasimarsimassimbasimissimpssimulsincesindssinedsinessinewsingesingssinhssinkssinkysinussipedsipessippysiredsireesirensiressirihsirissirocsirrasirupsisalsisessissysistasistssitarsitedsitessithesitkasitupsitussiversixersixessixmosixtesixthsixtysizarsizedsizelsizersizesskagsskailskaldskankskartskateskatsskattskawsskeanskearskedsskeedskeefskeenskeerskeesskeetskeggskegsskeinskelfskellskelmskelpskeneskensskeosskepsskerssketsskewsskidsskiedskierskiesskieyskiffskillskimoskimpskimsskinkskinsskintskiosskipsskirlskirrskirtskiteskitsskiveskivysklimskoalskodyskoffskogsskolsskoolskortskoshskranskrikskuasskugsskulkskullskunkskyedskyerskyeyskyfsskyreskyrsskyteslabsslacksladeslaesslaidslainslakeslamsslaneslangslankslantslapsslartslashslateslatsslatyslaveslawsslaysslebssledssleeksleepsleersleetsleptslewssleyssliceslickslideslierslilyslimeslimsslimyslingslinkslipeslipssliptslishslitsslivesloanslobssloesslogssloidslojdslomosloomsloopslootslopeslopsslopyslormsloshslothslotssloveslowssloydslubbslubssluedsluessluffslugssluitslumpslumsslungslunkslurbslurpslurssluseslushslyerslylyslypesmaaksmacksmaiksmallsmalmsmaltsmarmsmartsmashsmazesmearsmeeksmeessmeiksmekesmellsmeltsmerksmewssmilesmirksmirrsmirssmitesmithsmitssmocksmogssmokesmokosmokysmoltsmoorsmootsmoresmorgsmotesmoutsmowtsmugssmurssmushsmutssnabssnacksnafusnagssnailsnakesnakysnapssnaresnarfsnarksnarlsnarssnarysnashsnathsnawssneadsneaksneapsnebssnecksnedssneedsneersneessnellsnibssnicksnidesniessniffsniftsnigssnipesnipssnipysnirtsnitssnobssnodssnoeksnoepsnogssnokesnoodsnooksnoolsnoopsnootsnoresnortsnotssnoutsnowksnowssnowysnubssnucksnuffsnugssnushsnyessoakssoapssoapysoaresoarssoavesobassobersocassocessockosockssoclesodassoddysodicsofarsofassoftasoftssoftysogersoggysohursoilssoilysojassojussokahsokensokessokolsolahsolansolarsolassoldesoldisoldosoldssoledsoleisolersolessolidsolonsolossolumsolussolvesomansomassonarsoncesondesonessongssonicsonlysonnesonnysonsesonsysooeysookssookysoolesoolssoomssoopssootesoothsootssootysophssophysoporsoppysoprasoralsorassorbosorbssordasordosordssoredsoreesorelsorersoressorexsorgosornssorrasorrysortasortssorussothssotolsoucesouctsoughsoukssoulssoumssoundsoupssoupysourssousesouthsoutssowarsowcesowedsowersowffsowfssowlesowlssowmssowndsownesowpssowsesowthsoyassoylesoyuzsozinspacespacyspadespadospaedspaerspaesspagsspahispailspainspaitspakespaldspalespallspaltspamsspanespangspankspansspardsparesparksparsspartspasmspatespatsspaulspawlspawnspawsspaydspaysspazaspazzspeakspealspeanspearspeatspeckspecsspectspeedspeelspeerspeilspeirspeksspeldspelkspellspeltspendspentspeosspetsspeugspewsspewyspialspicaspicespickspicyspidespiedspielspierspiesspiffspifsspikespiksspikyspilespillspiltspimsspinaspinespinkspinsspinyspirespirtspiryspitespitsspitzspivssplatsplaysplitsplogspodespodsspoilspokespoofspookspoolspoomspoonspoorspootsporesporksportsposhspotsspoutspradspragspratsprayspredspreesprewsprigspritsprodsprogspruesprugspudsspuedspuerspuesspugsspulespumespumyspunkspurnspursspurtsputaspyalspyresquabsquadsquatsquawsquegsquibsquidsquitsquizstabsstackstadestaffstagestagsstagystaidstaigstainstairstakestalestalkstallstampstandstanestangstankstaphstapsstarestarkstarnstarrstarsstartstashstatestatsstaunstavestawsstayssteadsteakstealsteamsteanstearsteddstedestedssteedsteeksteelsteemsteensteepsteersteilsteinstelastelestellstemestemsstendstenostensstentstepssteptsteresternstetsstewsstewysteysstichstickstiedstiesstiffstilbstilestillstiltstimestimsstimystingstinkstintstipastipestirestirkstirpstirsstivestivystoaestoaistoasstoatstobsstockstoepstogystoicstoitstokestolestolnstomastompstondstonestongstonkstonnstonystoodstookstoolstoopstoorstopestopsstoptstorestorkstormstorystossstotsstottstounstoupstourstoutstovestownstowpstowsstradstraestragstrakstrapstrawstraystrepstrewstriastrigstrimstripstropstrowstroystrumstrutstubsstuckstudestudsstudystuffstullstulmstummstumpstumsstungstunkstunsstuntstupastupesturesturtstyedstyesstylestylistylostymestymystyrestytesuavesubahsubassubbysubersubhasuccisuckssuckysucresuddssudorsudsysuedesuentsuerssuetesuetssuetysugansugarsughssugossuhursuidssuingsuintsuitesuitssujeesukhssukuksulcisulfasulfosulkssulkysullysulphsulussumacsumissummasumossumphsumpssunissunkssunnasunnssunnysunupsupersupessuprasurahsuralsurassuratsurdssuredsurersuressurfssurfysurgesurgysurlysurrasusedsusessushisusussutorsutrasuttaswabsswackswadsswageswagsswailswainswaleswalyswamiswampswamyswangswankswansswapsswaptswardswareswarfswarmswartswashswathswatsswaylswaysswealswearsweatswedesweedsweelsweepsweersweessweetsweirswellsweltsweptswerfsweysswiesswiftswigsswileswillswimsswineswingswinkswipeswireswirlswishswissswithswitsswiveswizzswobsswoleswolnswoonswoopswopsswoptswordsworeswornswotsswounswungsybbesybilsyboesybowsyceesycessyconsyenssykersykessylissylphsylvasymarsynchsyncssyndssynedsynessynodsynthsypedsypessyphssyrahsyrensyrupsysopsythesyvertaalstaatatabbytabertabestabidtabistablatabletabootabortabuntabustacantacestacettachetachotachstacittackstackytacostactstaelstaffytafiataggytagmatahastahrstaigataigstaikotailstainstainttairataishtaitstajestakastakentakertakestakhitakintakistakkytalaktalaqtalartalastalcstalcytaleatalertalestalkstalkytallstallytalmatalontalpataluktalustamaltamedtamertamestamintamistammytampstanastangatangitangotangstangytanhstankatankstankytannatansytantitantotantytapastapedtapentapertapestapettapirtapistappatapustarastardotardytaredtarestargatargetarnstaroctaroktarostarottarpstarretarrytarsitartstartytasartasedtasertasestaskstassatassetassotastetastytatartatertatestathstatietatoutattstattytatustaubetauldtaunttauontaupetautstavahtavastavertawaitawastawedtawertawietawnytawsetawtstaxedtaxertaxestaxistaxoltaxontaxortaxustayratazzatazzeteachteadeteadsteaedteakstealsteamstearstearyteaseteatsteazetechstechytectateddyteelsteemsteendteeneteensteenyteersteethteffsteggsteguategustehrsteiidteilsteindteinstelaetelcotelestelexteliatelictellstellyteloitelostemedtemestempitempotempstempttemsetenchtendstendutenestenettengeteniatennetennotennytenontenortensetenthtentstentytenuetepaltepastepeetepidtepoyteraiterasterceterekteresterfeterfstergatermsterneternsterraterrytersetertsteslatestatesteteststestytetestethstetratetriteuchteughtewedteweltewittexastexestextsthackthagithaimthalethalithanathanethangthankthansthanxtharmtharsthawsthawythebethecatheedtheektheestheftthegntheictheintheirthelfthemathemethenstheowtherethermthesethespthetathetethewsthewythickthiefthighthigsthilkthillthinethingthinkthinsthiolthirdthirlthofttholetholithongthornthorothorpthosethousthowlthraethrawthreethrewthridthripthrobthroethrowthrumthudsthugsthujathumbthumpthunkthurlthuyathymethymithymytianstiaratiarstibiaticalticcaticedticestichytickstickytidaltiddytidedtidestierstiffstifostiftstigertigestighttigontikastikestikistikkatilaktildetiledtilertilestillstillytilthtiltstimbotimedtimertimestimidtimontimpstinastincttindstineatinedtinestingetingstinkstinnytintstintytipistippytipsytiredtirestirlstirostirrstitantitchtitertithetitistitletitretituptiyintiynstizestizzytoadstoadytoasttoazetockstockytocostodaytoddetoddytoeastoffstoffytoftstofustogaetogastogedtogestoguetohostoiletoilstoingtoisetoitstokaytokedtokentokertokestokostolantolartolastoledtolestollstollytoltstolustolyltomantombstomestomiatommytomostonaltonditondotonedtonertonestoneytongatongstonictonkatonkstonnetonustoolstoomstoonstoothtootstopaztopedtopeetopektopertopestophetophitophstopictopistopoitopostoppytoquetorahtorantorastorchtorcstorestorictoriitorostorottorrstorsetorsitorsktorsotortatortetortstorustosastosedtosestoshytossytotaltotedtotemtotertotestottytouchtoughtoukstounstourstousetousytoutstouzetouzytowedtoweltowertowietownstownytowsetowsytowtstowzetowzytoxictoxintoyedtoyertoyontoyostozedtozestozietrabstracetracktracttradetradstragitraiktrailtraintraittramptramstranktranqtranstranttrapetrapstrapttrashtrasstratstratttravetrawltrayftraystreadtreattrecktreedtreentreestrefatreiftrekstrematremstrendtresstresttretstrewstreyftreystriactriadtrialtribetricetricktridetriedtriertriestrifftrigotrigstriketrildtrilltrimstrinetrinstrioltriortriostripetripstripytristtritetroadtroaktroattrocktrodetrodstrogstroistroketrolltromptronatronctronetronktronstrooptrooztropetrothtrotstrouttrovetrowstroystrucetrucktruedtruertruestrugotrugstrulltrulytrumptrunktrusstrusttruthtryertryketrymatrypstrysttsadetsaditsarstskedtsubatsubotuanstuarttuathtubaetubaltubartubastubbytubedtubertubestuckstufastuffetuffstuftstuftytugratuiletuinatuismtuktutulestuliptulletulpatulsitumidtummytumortumpstumpytunastundstunedtunertunestungstunictunnytupektupiktupletuqueturboturdsturfsturfyturksturmeturmsturnsturntturpsturrstushytuskstuskytuteetutortuttituttytutustuxestuyertwaestwaintwalstwangtwanktwaystweaktweedtweeltweentweeptweertweettwerktwerptwicetwiertwigstwilltwilttwinetwinktwinstwinytwiretwirltwirptwisttwitetwitstwixttwoertwyertyeestyerstyingtyiyntykestylertympstyndetynedtynestypaltypedtypestypeytypictypostyppstyptotyrantyredtyrestyrostythetzarsudalsudderudonsugaliuggeduhlanuhuruukaseulamaulansulcerulemaulminulnadulnaeulnarulnasulpanultraulvasulyieulzieumamiumbelumberumbleumbosumbraumbreumiacumiakumiaqummahummasummedumpedumphsumpieumptyumrahumrasunaisunaptunarmunaryunausunbagunbanunbarunbedunbidunboxuncapuncesunciauncleuncosuncoyuncusuncutundamundeeunderundidundosundueundugunethunfedunfitunfixungagungetungodungotungumunhatunhipunicaunifyunionuniteunitsunityunjamunkedunketunkidunlawunlayunledunletunlidunlitunmanunmetunmewunmixunpayunpegunpenunpinunredunridunrigunripunsawunsayunseeunsetunsewunsexunsoduntaxuntieuntiluntinunwedunwetunwitunwonunzipupbowupbyeupdosupdryupendupjetuplayupleduplituppedupperupranuprunupseeupsetupseyuptakupteruptieuraeiuraliuraosurareurariuraseurateurbanurbexurbiaurdeeurealureasuredoureicurenaurenturgedurgerurgesurialuriteurmanurnalurnedurpedursaeursidursonurubuurvasusageusersusherusingusneausqueusualusureusurpusuryuteriutileutteruvealuveasuvulavacuavadedvadesvagalvaguevagusvailsvairevairsvairyvakasvakilvalesvaletvalidvalisvalorvalsevaluevalvevampsvampyvandavanedvanesvangsvantsvapedvapervapesvapidvaporvaranvarasvardyvarecvaresvariavarixvarnavarusvarvevasalvasesvastsvastyvaticvatusvauchvaultvauntvautevautsvawtevaxesvealevealsvealyveenaveepsveersveeryveganvegasvegesvegievegosvehmeveilsveilyveinsveinyvelarveldsveldtvelesvellsvelumvenaevenalvendsvenduveneyvengeveninvenomventsvenuevenusverbsvergeverraverryverseversoverstvertsvertuvervevespavestavestsvetchvexedvexervexesvexilvezirvialsviandvibesvibexvibeyvicarvicedvicesvichyvideoviersviewsviewyvifdaviffsvigasvigiavigilvigorvildevilervillavillivillsvimenvinalvinasvincavinedvinervinesvinewvinicvinosvintsvinylviolavioldviolsviperviralviredvireoviresvirgavirgeviridvirlsvirtuvirusvisasvisedvisesvisievisitvisnevisonvisorvistavistovitaevitalvitasvitexvitrovittavivasvivatvivdavivervivesvividvixenvizirvizorvleisvliesvlogsvoarsvocabvocalvocesvoddyvodkavodouvodunvoemavogievoguevoicevoidsvoilavoilevoipsvolaevolarvoledvolesvoletvolksvoltavoltevoltivoltsvolvavolvevomervomitvotedvotervotesvouchvougevouluvowedvowelvowervoxelvozhdvraicvrilsvroomvrousvrouwvrowsvuggsvuggyvughsvughyvulgovulnsvulvavuttyvyingwaacswackewackowackswackywaddswaddywadedwaderwadeswadgewadiswadtswaferwaffswaftswagedwagerwageswaggawagonwagyuwahoowaidewaifswaiftwailswainswairswaistwaitewaitswaivewakaswakedwakenwakerwakeswakfswaldowaldswaledwalerwaleswaliewaliswalkswallawallswallywaltywaltzwamedwameswamuswandswanedwaneswaneywangswankswankywanlewanlywannawantswantywanzewaqfswarbswarbywardswaredwareswarezwarkswarmswarnswarpswarrewarstwartswartywaseswashywasmswaspswaspywastewastswatapwatchwaterwattswauffwaughwaukswaulkwaulswaurswavedwaverwaveswaveywawaswaweswawlswaxedwaxenwaxerwaxeswayedwazirwazoowealdwealsweambweanswearswearyweavewebbyweberwechtwedelwedgewedgyweedsweedyweekeweeksweelsweemsweensweenyweepsweepyweestweeteweetswefteweftsweidsweighweilsweirdweirsweiseweizewekaswelchweldswelkewelkswelktwellswellywelshweltswembswenchwendswengewennywentsweroswershwestswetaswetlywexedwexeswhackwhalewhamowhamswhangwhapswharewharfwhatawhatswhaupwhaurwhealwhearwheatwheelwheenwheepwheftwhelkwhelmwhelpwhenswherewhetswhewswheyswhichwhidswhiffwhiftwhigswhilewhilkwhimswhinewhinswhinywhioswhipswhiptwhirlwhirrwhirswhishwhiskwhisswhistwhitewhitswhitywhizzwholewhompwhoofwhoopwhootwhopswhorlwhortwhosewhosowhowswhumpwhupswhydawiccawickswickywiddywidenwiderwideswidowwidthwieldwielswifedwifeswifeywifiewiftywiganwiggawiggywightwikiswilcowildswiledwileswilgawiliswiljawillswillywiltswimpswimpywincewinchwindswindywinedwineswineywingewingswingywinkswinnawinnswinoswinzewipedwiperwipeswiredwirerwireswirrawisedwiserwiseswishawishtwispswispywistswitanwitchwitedwiteswithewithswithywittywivedwiverwiveswizenwizeswoadswoaldwockswodgewofulwojuswokenwokerwokkawoldswolfswollywolvewomanwombswombywomenwomynwongawongiwonkswonkywontswoodswoodywooedwooerwoofswoofywooldwoolswoolywoonswoopswoopywoosewooshwootzwoozywordswordyworksworldwormswormyworryworseworstworthwortswouldwoundwovenwowedwoweewoxenwrackwrangwrapswraptwrastwratewrathwrawlwreakwreckwrenswrestwrickwriedwrierwrieswringwristwritewritswrokewrongwrootwrotewrothwrungwryerwrylywuddywuduswullswurstwuseswushuwussywuxiawyledwyleswyndswynnswytedwytesxebecxeniaxenicxenonxericxeroxxerusxoanaxraysxylanxylemxylicxylolxylylxystixystsyaarsyabasyabbayabbyyaccayachtyackayacksyaffsyageryagesyagisyahooyairdyakkayakowyalesyamenyampyyamunyangsyanksyapokyaponyappsyappyyarakyarcoyardsyareryarfayarksyarnsyarrsyartayartoyatesyaudsyauldyaupsyawedyaweyyawlsyawnsyawnyyawpsyboreycladycledycondydradydredyeadsyeahsyealmyeansyeardyearnyearsyeastyecchyechsyechyyedesyeedsyeeshyeggsyelksyellsyelmsyelpsyeltsyentayenteyerbayerdsyerksyesesyesksyestsyestyyetisyettsyeuksyeukyyevenyevesyewenyexedyexesyfereyieldyikedyikesyillsyinceyipesyippyyirdsyirksyirrsyirthyitesyitieylemsylikeylkesymoltympesyobboyobbyyocksyodelyodhsyodleyogasyogeeyoghsyogicyoginyogisyoickyojanyokedyokelyokeryokesyokulyolksyolkyyomimyompsyonicyonisyonksyoofsyoopsyoresyorksyorpsyouksyoungyournyoursyourtyouseyouthyowedyowesyowieyowlsyowzayraptyrentyrivdyrnehysameytostyuansyucasyuccayucchyuckoyucksyuckyyuftsyugasyukedyukesyukkyyukosyulanyulesyummoyummyyumpsyuponyuppyyurtayurtsyuzuszabrazackszaidazaidyzairezakatzamanzambozamiazanjazantezanzazanzezappyzarfszariszatiszaxeszayinzazenzealszebeczebrazebubzebuszedaszeinszendozerdazerkszeroszestszestyzetaszexeszezeszhomozibetziffsziganzilaszilchzillazillszimbizimbszincozincszincyzinebzineszingszingyzinkezinkyzippozippyziramzitiszizelzizitzlotezlotyzoaeazoboszobuszoccozoeaezoealzoeaszoismzoistzombizonaezonalzondazonedzonerzoneszonkszooeazooeyzooidzookszoomszoonszootyzoppazoppozorilzoriszorrozoukszoweezowiezuluszupanzupaszuppazurfszuzimzygalzygonzymeszymic', 5);
+
+function unpack(str, n) {
+  const out = new Array(str.length / n);
+  for (let i = 0, j = 0; i < str.length; i += n, j++) out[j] = str.slice(i, i + n);
+  return out;
+}
+
+/* Woordle puzzle engine — browser + node */
+const MAX_GUESSES = 7;
+const LAUNCH_ISO = "2026-11-22";
+
+function unpack(str, n) {
+  const out = new Array(str.length / n);
+  for (let i = 0, j = 0; i < str.length; i += n, j++) out[j] = str.slice(i, i + n);
+  return out;
+}
+
+function hashString(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function mulberry32(a) {
+  return function () {
+    let t = (a += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function pick(arr, rng) {
+  return arr[Math.floor(rng() * arr.length)];
+}
+
+function shuffleInPlace(arr, rng) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+  return arr;
+}
+
+function todayISO(d) {
+  const dt = d || new Date();
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, "0");
+  const day = String(dt.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function parseISODate(iso) {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+function daysBetween(aISO, bISO) {
+  const a = parseISODate(aISO);
+  const b = parseISODate(bISO);
+  return Math.round((b - a) / 86400000);
+}
+
+function puzzleNumber(iso) {
+  return daysBetween(LAUNCH_ISO, iso) + 1;
+}
+
+function formatPrettyDate(iso) {
+  const dt = parseISODate(iso);
+  return dt.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function msUntilNextLocalMidnight(now) {
+  const n = now || new Date();
+  const next = new Date(n.getFullYear(), n.getMonth(), n.getDate() + 1);
+  return next - n;
+}
+
+function formatCountdown(ms) {
+  if (ms < 0) ms = 0;
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${h}h ${String(m).padStart(2, "0")}m ${String(sec).padStart(2, "0")}s`;
+}
+
+/** Standard Wordle scoring, scoped only to this guess vs this answer. */
+function scoreGuess(guess, answer) {
+  const g = guess.toLowerCase();
+  const a = answer.toLowerCase();
+  const n = a.length;
+  const result = new Array(n).fill("absent");
+  const counts = Object.create(null);
+  for (let i = 0; i < n; i++) counts[a[i]] = (counts[a[i]] || 0) + 1;
+  for (let i = 0; i < n; i++) {
+    if (g[i] === a[i]) {
+      result[i] = "correct";
+      counts[g[i]]--;
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    if (result[i] === "correct") continue;
+    if (counts[g[i]] > 0) {
+      result[i] = "present";
+      counts[g[i]]--;
+    }
+  }
+  return result;
+}
+
+function buildIndex(words, len) {
+  const idx = [];
+  for (let p = 0; p < len; p++) {
+    const by = Object.create(null);
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      const ch = w[p];
+      if (!by[ch]) by[ch] = [];
+      by[ch].push(w);
+    }
+    idx.push(by);
+  }
+  return idx;
+}
+
+function colPairsPreferred() {
+  const preferred = [];
+  const adjacent = [];
+  for (let a = 0; a < 5; a++) {
+    for (let b = 0; b < 5; b++) {
+      if (a === b) continue;
+      const item = { col4: a, col3: b, gap: Math.abs(a - b) };
+      if (item.gap >= 2) preferred.push(item);
+      else adjacent.push(item);
+    }
+  }
+  return { preferred, adjacent };
+}
+
+function layoutPuzzle(p) {
+  const acrossRow = Math.max(p.pos4, p.pos3);
+  const down4Start = acrossRow - p.pos4;
+  const down3Start = acrossRow - p.pos3;
+  const height = Math.max(acrossRow + 1, down4Start + 4, down3Start + 3);
+  const cells = [];
+  const map = Object.create(null);
+  function cell(r, c) {
+    const k = r + "," + c;
+    if (!map[k]) {
+      const obj = { r, c, acrossIndex: -1, down4Index: -1, down3Index: -1 };
+      map[k] = obj;
+      cells.push(obj);
+    }
+    return map[k];
+  }
+  for (let i = 0; i < 5; i++) {
+    const c = cell(acrossRow, i);
+    c.acrossIndex = i;
+  }
+  for (let i = 0; i < 4; i++) {
+    const c = cell(down4Start + i, p.col4);
+    c.down4Index = i;
+  }
+  for (let i = 0; i < 3; i++) {
+    const c = cell(down3Start + i, p.col3);
+    c.down3Index = i;
+  }
+  cells.sort((a, b) => a.r - b.r || a.c - b.c);
+  return {
+    width: 5,
+    height,
+    acrossRow,
+    down4Start,
+    down3Start,
+    cells,
+    map,
+  };
+}
+
+function validatePuzzle(p) {
+  if (!p || !p.across || !p.down4 || !p.down3) return "missing words";
+  if (p.across.length !== 5 || p.down4.length !== 4 || p.down3.length !== 3) return "bad lengths";
+  if (p.col4 === p.col3) return "same column";
+  if (p.col4 < 0 || p.col4 > 4 || p.col3 < 0 || p.col3 > 4) return "col range";
+  if (p.pos4 < 0 || p.pos4 > 3 || p.pos3 < 0 || p.pos3 > 2) return "pos range";
+  if (p.across[p.col4] !== p.down4[p.pos4]) return "down4 crossing mismatch";
+  if (p.across[p.col3] !== p.down3[p.pos3]) return "down3 crossing mismatch";
+  return null;
+}
+
+function generatePuzzle(rng, lists, opts) {
+  const answers3 = lists.ANSWERS3;
+  const answers4 = lists.ANSWERS4;
+  const answers5 = lists.ANSWERS5;
+  const index3 = lists._index3 || (lists._index3 = buildIndex(answers3, 3));
+  const index4 = lists._index4 || (lists._index4 = buildIndex(answers4, 4));
+  const { preferred, adjacent } = lists._pairs || (lists._pairs = colPairsPreferred());
+
+  const allowAdjacent = opts && opts.allowAdjacent;
+  const maxAttempts = (opts && opts.maxAttempts) || 400;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const across = pick(answers5, rng);
+    const useAdj = allowAdjacent || attempt > maxAttempts * 0.7;
+    const pool = useAdj ? preferred.concat(adjacent) : preferred;
+    const pair = pool[Math.floor(rng() * pool.length)];
+    const pos4 = Math.floor(rng() * 4);
+    const pos3 = Math.floor(rng() * 3);
+    const letter4 = across[pair.col4];
+    const letter3 = across[pair.col3];
+    const cands4 = index4[pos4][letter4];
+    const cands3 = index3[pos3][letter3];
+    if (!cands4 || !cands4.length || !cands3 || !cands3.length) continue;
+    const down4 = cands4[Math.floor(rng() * cands4.length)];
+    const down3 = cands3[Math.floor(rng() * cands3.length)];
+    const puzzle = {
+      across,
+      down4,
+      down3,
+      col4: pair.col4,
+      pos4,
+      col3: pair.col3,
+      pos3,
+      adjacent: pair.gap < 2,
+    };
+    if (validatePuzzle(puzzle)) continue;
+    return puzzle;
+  }
+  if (!allowAdjacent) return generatePuzzle(rng, lists, { allowAdjacent: true, maxAttempts: 400 });
+  return null;
+}
+
+function dailySeed(iso) {
+  return hashString("woordle-daily-v1-" + iso);
+}
+
+function generateDailyPuzzle(iso, lists) {
+  const rng = mulberry32(dailySeed(iso));
+  return generatePuzzle(rng, lists);
+}
+
+function generateRandomPuzzle(lists, seed) {
+  const s = seed == null ? (Math.random() * 0xffffffff) >>> 0 : seed >>> 0;
+  const rng = mulberry32(s);
+  const puzzle = generatePuzzle(rng, lists);
+  return { puzzle, seed: s };
+}
+
+function wordOf(puzzle, key) {
+  if (key === "across") return puzzle.across;
+  if (key === "down4") return puzzle.down4;
+  if (key === "down3") return puzzle.down3;
+  return null;
+}
+
+function wordLen(key) {
+  if (key === "across") return 5;
+  if (key === "down4") return 4;
+  if (key === "down3") return 3;
+  return 0;
+}
+
+function emptyGame(puzzle, mode, dateISO, seed) {
+  return {
+    version: 1,
+    mode: mode || "practice",
+    dateISO: dateISO || null,
+    seed: seed == null ? null : seed,
+    puzzle,
+    selected: "across",
+    guesses: { across: [], down4: [], down3: [] },
+    hints: { across: [null, null, null, null, null], down4: [null, null, null, null], down3: [null, null, null] },
+    guessesUsed: 0,
+    status: "playing",
+    startedAt: Date.now(),
+    finishedAt: null,
+  };
+}
+
+/** Letters confirmed green (by a guess or a hint) for a single word. */
+function greensForWord(game, key) {
+  const answer = wordOf(game.puzzle, key);
+  const n = answer.length;
+  const out = new Array(n).fill(null);
+  const hinted = game.hints[key];
+  for (let i = 0; i < n; i++) if (hinted && hinted[i]) out[i] = hinted[i];
+  const rows = game.guesses[key];
+  for (let g = 0; g < rows.length; g++) {
+    const row = rows[g];
+    for (let i = 0; i < n; i++) {
+      if (row.result[i] === "correct") out[i] = row.word[i];
+    }
+  }
+  return out;
+}
+
+/**
+ * Known letters to show on the grid for a word, including crossing
+ * letters that were confirmed green in the other word.
+ */
+function knownLetters(game, key) {
+  const out = greensForWord(game, key);
+  const p = game.puzzle;
+  if (key === "across") {
+    const d4 = greensForWord(game, "down4");
+    const d3 = greensForWord(game, "down3");
+    if (d4[p.pos4] && !out[p.col4]) out[p.col4] = d4[p.pos4];
+    if (d3[p.pos3] && !out[p.col3]) out[p.col3] = d3[p.pos3];
+  } else if (key === "down4") {
+    const ac = greensForWord(game, "across");
+    if (ac[p.col4] && !out[p.pos4]) out[p.pos4] = ac[p.col4];
+  } else if (key === "down3") {
+    const ac = greensForWord(game, "across");
+    if (ac[p.col3] && !out[p.pos3]) out[p.pos3] = ac[p.col3];
+  }
+  return out;
+}
+
+function isSolved(game, key) {
+  if (game.status !== "playing" && game.guesses[key].some((r) => r.word === wordOf(game.puzzle, key))) return true;
+  const rows = game.guesses[key];
+  const answer = wordOf(game.puzzle, key);
+  return rows.some((r) => r.word === answer);
+}
+
+function allSolved(game) {
+  return isSolved(game, "across") && isSolved(game, "down4") && isSolved(game, "down3");
+}
+
+function keyboardColors(game, key) {
+  // Colors are scoped to the selected word only (yellow means in THAT word).
+  const colors = Object.create(null);
+  const priority = { absent: 1, present: 2, correct: 3 };
+  const rows = game.guesses[key];
+  for (let g = 0; g < rows.length; g++) {
+    const row = rows[g];
+    for (let i = 0; i < row.word.length; i++) {
+      const ch = row.word[i];
+      const res = row.result[i];
+      if (!colors[ch] || priority[res] > priority[colors[ch]]) colors[ch] = res;
+    }
+  }
+  const known = knownLetters(game, key);
+  for (let i = 0; i < known.length; i++) {
+    if (known[i]) {
+      const ch = known[i];
+      if (!colors[ch] || priority.correct > priority[colors[ch]]) colors[ch] = "correct";
+    }
+  }
+  return colors;
+}
+
+function evaluateGuess(game, lists, key, raw) {
+  if (game.status !== "playing") return { ok: false, reason: "finished" };
+  if (game.guessesUsed >= MAX_GUESSES) return { ok: false, reason: "no-guesses" };
+  if (isSolved(game, key)) return { ok: false, reason: "already-solved" };
+  const word = (raw || "").toLowerCase().replace(/[^a-z]/g, "");
+  const n = wordLen(key);
+  if (word.length !== n) return { ok: false, reason: "short" };
+  const setName = n === 5 ? "GUESSES5" : n === 4 ? "GUESSES4" : "GUESSES3";
+  const set = lists["_" + setName] || (lists["_" + setName] = new Set(lists[setName]));
+  if (!set.has(word)) return { ok: false, reason: "not-in-list" };
+  if (game.guesses[key].some((r) => r.word === word)) return { ok: false, reason: "duplicate" };
+  const answer = wordOf(game.puzzle, key);
+  const result = scoreGuess(word, answer);
+  return { ok: true, word, result, key, correct: word === answer };
+}
+
+function applyGuess(game, evaluated) {
+  game.guesses[evaluated.key].push({ word: evaluated.word, result: evaluated.result });
+  game.guessesUsed += 1;
+  if (allSolved(game)) {
+    game.status = "won";
+    game.finishedAt = Date.now();
+  } else if (game.guessesUsed >= MAX_GUESSES) {
+    game.status = "lost";
+    game.finishedAt = Date.now();
+  }
+  return game;
+}
+
+function applyHint(game, key) {
+  if (game.status !== "playing") return { ok: false, reason: "finished" };
+  if (isSolved(game, key)) return { ok: false, reason: "already-solved" };
+  const answer = wordOf(game.puzzle, key);
+  const known = knownLetters(game, key);
+  const hidden = [];
+  for (let i = 0; i < answer.length; i++) {
+    if (!known[i]) hidden.push(i);
+  }
+  if (!hidden.length) return { ok: false, reason: "all-known" };
+  // Prefer a middle-ish letter for more information, but stay deterministic-ish: first hidden.
+  // Caller may shuffle; we pick a random hidden index via optional rng on game? Use first for tests,
+  // UI will pass an index or use Math.random.
+  return { ok: true, hidden };
+}
+
+function revealHintLetter(game, key, index) {
+  const answer = wordOf(game.puzzle, key);
+  game.hints[key][index] = answer[index];
+  // If hints completed the word, it is not "solved" until guessed — keep it that way
+  // so the player still spends a guess to lock it in? That's frustrating if all letters shown.
+  // If every letter is now known, auto-solve without spending a guess? Nicer.
+  const known = knownLetters(game, key);
+  if (known.every(Boolean) && known.join("") === answer) {
+    const result = new Array(answer.length).fill("correct");
+    // Auto-fill as a solved word without consuming a guess — it's already revealed.
+    if (!game.guesses[key].some((r) => r.word === answer)) {
+      game.guesses[key].push({ word: answer, result, auto: true });
+    }
+    if (allSolved(game)) {
+      game.status = "won";
+      game.finishedAt = Date.now();
+    }
+  }
+  return { index, letter: answer[index] };
+}
+
+function shareText(game) {
+  const p = game.puzzle;
+  const n = game.mode === "daily" && game.dateISO ? `#${puzzleNumber(game.dateISO)}` : "Practice";
+  const dateBit = game.mode === "daily" && game.dateISO ? formatPrettyDate(game.dateISO) : "";
+  const score = game.status === "won" ? `${game.guessesUsed}/${MAX_GUESSES}` : `X/${MAX_GUESSES}`;
+  const lines = [`Woordle ${n}${dateBit ? " · " + dateBit : ""}`, score, ""];
+
+  function emojiRow(key, label) {
+    const rows = game.guesses[key].filter((r) => !r.auto);
+    const mark = { correct: "🟩", present: "🟨", absent: "⬛" };
+    if (!rows.length && isSolved(game, key)) {
+      lines.push(`${label} ${"🟩".repeat(wordLen(key))}`);
+      return;
+    }
+    if (!rows.length) {
+      lines.push(`${label} ${"⬜".repeat(wordLen(key))}`);
+      return;
+    }
+    rows.forEach((r, i) => {
+      const prefix = i === 0 ? label : " ".repeat(label.length);
+      lines.push(prefix + " " + r.result.map((x) => mark[x]).join(""));
+    });
+  }
+  emojiRow("across", "ACROSS");
+  emojiRow("down4", "DOWN 4");
+  emojiRow("down3", "DOWN 3");
+  lines.push("");
+  // Mini crossword silhouette: green if that cell's letter is known/solved, else black if unsolved.
+  const layout = layoutPuzzle(p);
+  const acKnown = knownLetters(game, "across");
+  const d4Known = knownLetters(game, "down4");
+  const d3Known = knownLetters(game, "down3");
+  for (let r = 0; r < layout.height; r++) {
+    let row = "";
+    for (let c = 0; c < layout.width; c++) {
+      const cell = layout.map[r + "," + c];
+      if (!cell) {
+        row += "▪️"; // dark empty to keep alignment
+        continue;
+      }
+      let known = false;
+      if (cell.acrossIndex >= 0 && acKnown[cell.acrossIndex]) known = true;
+      if (cell.down4Index >= 0 && d4Known[cell.down4Index]) known = true;
+      if (cell.down3Index >= 0 && d3Known[cell.down3Index]) known = true;
+      row += known ? "🟩" : "⬛";
+    }
+    lines.push(row);
+  }
+  lines.push("");
+  lines.push("Pocket Rivet");
+  return lines.join("\n");
+}
+
+function winMessage(guessesUsed) {
+  if (guessesUsed <= 3) return "Genius!";
+  if (guessesUsed === 4) return "Magnificent!";
+  if (guessesUsed === 5) return "Impressive!";
+  if (guessesUsed === 6) return "Splendid!";
+  return "Phew!";
+}
+
+const WORD_LABELS = {
+  across: "Across · 5",
+  down4: "Down · 4",
+  down3: "Down · 3",
+};
+
+const ENGINE = {
+  MAX_GUESSES,
+  LAUNCH_ISO,
+  unpack,
+  hashString,
+  mulberry32,
+  pick,
+  shuffleInPlace,
+  todayISO,
+  parseISODate,
+  daysBetween,
+  puzzleNumber,
+  formatPrettyDate,
+  msUntilNextLocalMidnight,
+  formatCountdown,
+  scoreGuess,
+  buildIndex,
+  layoutPuzzle,
+  validatePuzzle,
+  generatePuzzle,
+  dailySeed,
+  generateDailyPuzzle,
+  generateRandomPuzzle,
+  wordOf,
+  wordLen,
+  emptyGame,
+  greensForWord,
+  knownLetters,
+  isSolved,
+  allSolved,
+  keyboardColors,
+  evaluateGuess,
+  applyGuess,
+  applyHint,
+  revealHintLetter,
+  shareText,
+  winMessage,
+  WORD_LABELS,
+};
+
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = ENGINE;
+}
+if (typeof window !== "undefined") {
+  window.WoordleEngine = ENGINE;
+}
+
+/* Woordle UI */
+(function () {
+  const E = window.WoordleEngine;
+  const LISTS = {
+    ANSWERS3,
+    ANSWERS4,
+    ANSWERS5,
+    GUESSES3,
+    GUESSES4,
+    GUESSES5,
+  };
+
+  const STORAGE = {
+    prefs: "woordle:v1:prefs",
+    daily: "woordle:v1:daily",
+    practice: "woordle:v1:practice",
+  };
+
+  const SKINS = [
+    { id: "rivet", name: "Rivet", price: 0, blurb: "Brass on ink — the original.", dots: ["#101218", "#d7b15a", "#3f8f6d"] },
+    { id: "midnight", name: "Midnight", price: 0, blurb: "Cool and late.", dots: ["#07080c", "#8ab4ff", "#3db88a"] },
+    { id: "contrast", name: "High Contrast", price: 0, blurb: "Maximum clarity.", dots: ["#000", "#ffff00", "#00e676"] },
+    { id: "dawn", name: "Dawn", price: 99, label: "$0.99", blurb: "Cream paper, morning light.", dots: ["#f6f1e8", "#b8860b", "#2e7d5b"] },
+    { id: "sunset", name: "Sunset", price: 99, label: "$0.99", blurb: "Warm dusk tones.", dots: ["#2a1518", "#ffb088", "#e07a5f"] },
+    { id: "ocean", name: "Ocean", price: 99, label: "$0.99", blurb: "Deep water and sand.", dots: ["#0b1c28", "#5ec8d8", "#e0b44e"] },
+    { id: "forest", name: "Forest", price: 99, label: "$0.99", blurb: "Moss, leaf, and amber.", dots: ["#121a14", "#c4d47c", "#4a9a5c"] },
+    { id: "candy", name: "Candy", price: 99, label: "$0.99", blurb: "Playful pink and mint.", dots: ["#1c1224", "#ff9ad5", "#5ad0c8"] },
+  ];
+  const HINT_PACKS = [
+    { id: "h5", n: 5, price: 99, label: "$0.99" },
+    { id: "h15", n: 15, price: 199, label: "$1.99" },
+    { id: "h40", n: 40, price: 399, label: "$3.99" },
+  ];
+  const BUNDLE_PRICE = "$2.99";
+  const FREE_SKINS = new Set(["rivet", "midnight", "contrast"]);
+  const KEYS = [
+    ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+    ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+    ["enter", "z", "x", "c", "v", "b", "n", "m", "back"],
+  ];
+
+  function defaultPrefs() {
+    return {
+      hintsRemaining: 3,
+      currentSkin: "rivet",
+      unlockedSkins: ["rivet", "midnight", "contrast"],
+      gamesPlayed: 0,
+      gamesWon: 0,
+      currentStreak: 0,
+      maxStreak: 0,
+      lastDailyDate: null,
+      lastDailyWinDate: null,
+      lastDailyResult: null,
+      distribution: { 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, fail: 0 },
+      practicePlayed: 0,
+      practiceWon: 0,
+      seenHowTo: false,
+    };
+  }
+
+  function loadPrefs() {
+    try {
+      const raw = localStorage.getItem(STORAGE.prefs);
+      if (!raw) return defaultPrefs();
+      return Object.assign(defaultPrefs(), JSON.parse(raw));
+    } catch (e) {
+      return defaultPrefs();
+    }
+  }
+  function savePrefs() {
+    localStorage.setItem(STORAGE.prefs, JSON.stringify(prefs));
+  }
+  function loadSlot(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function saveSlot(key, game) {
+    if (!game) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(game));
+  }
+
+  let prefs = loadPrefs();
+  let game = null;
+  let animating = false;
+  let toastTimer = 0;
+  let countdownTimer = 0;
+  let pendingPurchase = null;
+  let endStatsRecorded = false;
+
+  const $ = (id) => document.getElementById(id);
+
+  function shortDailyLabel(iso) {
+    const dt = E.parseISODate(iso);
+    const nice = dt.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    return nice + " · Daily #" + E.puzzleNumber(iso);
+  }
+
+  function applySkin() {
+    document.documentElement.setAttribute("data-skin", prefs.currentSkin || "rivet");
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+    if (meta) meta.setAttribute("content", bg || "#101218");
+  }
+
+  function sizeTiles() {
+    if (!game) return;
+    const layout = E.layoutPuzzle(game.puzzle);
+    const wrap = $("board-wrap");
+    const rect = wrap.getBoundingClientRect();
+    const gap = 5;
+    const maxW = Math.min(56, Math.floor((rect.width - 8) / 5 - gap));
+    const maxH = Math.min(56, Math.floor((rect.height - 8) / layout.height - gap));
+    const tile = Math.max(36, Math.min(maxW, maxH));
+    document.documentElement.style.setProperty("--tile", tile + "px");
+    document.documentElement.style.setProperty("--gap", gap + "px");
+  }
+
+  function currentKey() {
+    return game.selected;
+  }
+
+  function draftArr(key) {
+    if (!game.draft) game.draft = { across: [], down4: [], down3: [] };
+    const n = E.wordLen(key);
+    if (!game.draft[key] || game.draft[key].length !== n) {
+      game.draft[key] = new Array(n).fill(null);
+    }
+    const known = E.knownLetters(game, key);
+    for (let i = 0; i < n; i++) {
+      if (known[i]) game.draft[key][i] = known[i];
+    }
+    return game.draft[key];
+  }
+
+  function draftWord(key) {
+    const d = draftArr(key);
+    if (d.some((ch) => !ch)) return null;
+    return d.join("");
+  }
+
+  function persist() {
+    if (!game) return;
+    if (game.mode === "daily") saveSlot(STORAGE.daily, game);
+    else saveSlot(STORAGE.practice, game);
+  }
+
+  function toast(msg, ms) {
+    const el = $("toast");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove("show"), ms || 1400);
+  }
+
+  function closeOverlays() {
+    document.querySelectorAll(".overlay").forEach((o) => o.classList.remove("show"));
+    pendingPurchase = null;
+  }
+
+  function openOverlay(id) {
+    closeOverlays();
+    const el = $(id);
+    if (el) el.classList.add("show");
+    if (id === "overlay-stats") renderStats();
+    if (id === "overlay-store") renderStore();
+    if (id === "overlay-end") renderEnd();
+  }
+
+  function refreshCountdown() {
+    const node = document.querySelectorAll(".countdown-value");
+    const ms = E.msUntilNextLocalMidnight();
+    const text = E.formatCountdown(ms);
+    node.forEach((n) => (n.textContent = text));
+  }
+
+  function maybeResetStreak() {
+    const today = E.todayISO();
+    if (!prefs.lastDailyDate) return;
+    if (prefs.lastDailyDate === today) return;
+    const yesterday = E.todayISO(new Date(Date.now() - 86400000));
+    // More reliable yesterday:
+    const d = new Date();
+    const yest = E.todayISO(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
+    if (prefs.lastDailyDate !== yest) {
+      prefs.currentStreak = 0;
+      savePrefs();
+    }
+  }
+
+  /* ---------- game start / restore ---------- */
+  function startDaily() {
+    const today = E.todayISO();
+    const saved = loadSlot(STORAGE.daily);
+    if (saved && saved.dateISO === today && saved.puzzle) {
+      game = saved;
+      if (!game.draft) game.draft = { across: [], down4: [], down3: [] };
+      endStatsRecorded = game.status !== "playing";
+      afterStart();
+      if (game.status !== "playing") setTimeout(() => openOverlay("overlay-end"), 400);
+      return;
+    }
+    const puzzle = E.generateDailyPuzzle(today, LISTS);
+    game = E.emptyGame(puzzle, "daily", today, E.dailySeed(today));
+    game.draft = { across: [], down4: [], down3: [] };
+    endStatsRecorded = false;
+    persist();
+    afterStart();
+  }
+
+  function startPractice(forceNew) {
+    if (!forceNew) {
+      const saved = loadSlot(STORAGE.practice);
+      if (saved && saved.puzzle && saved.status === "playing") {
+        game = saved;
+        if (!game.draft) game.draft = { across: [], down4: [], down3: [] };
+        endStatsRecorded = false;
+        afterStart();
+        return;
+      }
+    }
+    const { puzzle, seed } = E.generateRandomPuzzle(LISTS);
+    game = E.emptyGame(puzzle, "practice", null, seed);
+    game.draft = { across: [], down4: [], down3: [] };
+    endStatsRecorded = false;
+    persist();
+    afterStart();
+  }
+
+  function afterStart() {
+    applySkin();
+    renderChrome();
+    renderAll();
+    sizeTiles();
+    renderAll();
+  }
+
+  function switchMode(mode) {
+    if (animating) return;
+    if (mode === "daily") startDaily();
+    else startPractice(false);
+  }
+
+  function requestNewPractice() {
+    if (!game || game.mode !== "practice") {
+      startPractice(true);
+      return;
+    }
+    if (game.status === "playing" && game.guessesUsed > 0) {
+      openConfirm("Start a new practice puzzle? Your current one will be lost.", () => startPractice(true));
+    } else startPractice(true);
+  }
+
+  /* ---------- rendering ---------- */
+  function renderChrome() {
+    const dailyOn = game && game.mode === "daily";
+    $("btn-daily").classList.toggle("on", dailyOn);
+    $("btn-practice").classList.toggle("on", !dailyOn);
+    $("btn-daily").setAttribute("aria-pressed", dailyOn ? "true" : "false");
+    $("btn-practice").setAttribute("aria-pressed", !dailyOn ? "true" : "false");
+    $("btn-new").style.display = dailyOn ? "none" : "";
+    const today = E.todayISO();
+    $("mode-date").textContent = dailyOn
+      ? shortDailyLabel(game.dateISO || today)
+      : "Practice · unlimited";
+    $("hint-count").textContent = String(prefs.hintsRemaining);
+  }
+
+  function renderPips() {
+    const el = $("pips");
+    const used = game ? game.guessesUsed : 0;
+    const left = E.MAX_GUESSES - used;
+    el.innerHTML = "";
+    for (let i = 0; i < E.MAX_GUESSES; i++) {
+      const s = document.createElement("span");
+      s.className = "pip";
+      if (i < used) s.classList.add("used");
+      else if (left <= 1) s.classList.add("danger");
+      else if (left <= 2) s.classList.add("left-warn");
+      s.title = i < used ? "Used" : "Remaining";
+      el.appendChild(s);
+    }
+  }
+
+  function cellState(cell) {
+    const key = currentKey();
+    const inSelected =
+      (key === "across" && cell.acrossIndex >= 0) ||
+      (key === "down4" && cell.down4Index >= 0) ||
+      (key === "down3" && cell.down3Index >= 0);
+    let letter = "";
+    let known = false;
+    let hinted = false;
+    let color = null; // last guess color if this word just... we show known greens on grid
+    const acK = E.knownLetters(game, "across");
+    const d4K = E.knownLetters(game, "down4");
+    const d3K = E.knownLetters(game, "down3");
+    if (cell.acrossIndex >= 0 && acK[cell.acrossIndex]) {
+      letter = acK[cell.acrossIndex];
+      known = true;
+    }
+    if (cell.down4Index >= 0 && d4K[cell.down4Index]) {
+      letter = d4K[cell.down4Index];
+      known = true;
+    }
+    if (cell.down3Index >= 0 && d3K[cell.down3Index]) {
+      letter = d3K[cell.down3Index];
+      known = true;
+    }
+    if (cell.acrossIndex >= 0 && game.hints.across[cell.acrossIndex]) hinted = true;
+    if (cell.down4Index >= 0 && game.hints.down4[cell.down4Index]) hinted = true;
+    if (cell.down3Index >= 0 && game.hints.down3[cell.down3Index]) hinted = true;
+
+    if (inSelected && !known) {
+      const d = draftArr(key);
+      const idx = key === "across" ? cell.acrossIndex : key === "down4" ? cell.down4Index : cell.down3Index;
+      if (d[idx]) letter = d[idx];
+    } else if (inSelected && known) {
+      const d = draftArr(key);
+      const idx = key === "across" ? cell.acrossIndex : key === "down4" ? cell.down4Index : cell.down3Index;
+      if (d[idx]) letter = d[idx];
+    }
+    return { letter, known, hinted, inSelected };
+  }
+
+  function renderBoard() {
+    const board = $("board");
+    const layout = E.layoutPuzzle(game.puzzle);
+    board.style.gridTemplateRows = `repeat(${layout.height}, var(--tile))`;
+    const html = [];
+    for (const cell of layout.cells) {
+      const st = cellState(cell);
+      const classes = ["tile"];
+      if (st.letter) classes.push("filled");
+      if (st.known) classes.push("known", "flipped", "correct");
+      if (st.inSelected) classes.push("in-word");
+      if (st.hinted) classes.push("hint-mark");
+      const ch = (st.letter || "").toUpperCase();
+      html.push(
+        `<button class="${classes.join(" ")}" type="button" data-r="${cell.r}" data-c="${cell.c}" aria-label="Row ${cell.r + 1} column ${cell.c + 1}${ch ? ", " + ch : ""}" style="grid-row:${cell.r + 1};grid-column:${cell.c + 1}">` +
+          `<span class="tile-face tile-front">${ch}</span>` +
+          `<span class="tile-face tile-back">${ch}</span>` +
+          `</button>`
+      );
+    }
+    board.innerHTML = html.join("");
+    board.querySelectorAll(".tile").forEach((el) => {
+      el.addEventListener("click", () => onCellTap(+el.dataset.r, +el.dataset.c));
+    });
+  }
+
+  function onCellTap(r, c) {
+    if (!game || game.status !== "playing" || animating) return;
+    const layout = E.layoutPuzzle(game.puzzle);
+    const cell = layout.map[r + "," + c];
+    if (!cell) return;
+    const owners = [];
+    if (cell.acrossIndex >= 0) owners.push("across");
+    if (cell.down4Index >= 0) owners.push("down4");
+    if (cell.down3Index >= 0) owners.push("down3");
+    if (!owners.length) return;
+    let next = owners[0];
+    if (owners.length > 1 && owners.includes(game.selected)) {
+      next = owners[(owners.indexOf(game.selected) + 1) % owners.length];
+    }
+    selectWord(next);
+  }
+
+  function selectWord(key) {
+    if (!game || animating) return;
+    if (E.isSolved(game, key) && game.status === "playing") {
+      // still allow viewing, and if solved maybe pick it to review
+    }
+    game.selected = key;
+    persist();
+    renderAll();
+  }
+
+  function renderTabs() {
+    const el = $("tabs");
+    const keys = ["across", "down4", "down3"];
+    const labels = { across: ["Across", "5 letters"], down4: ["Down", "4 letters"], down3: ["Down", "3 letters"] };
+    el.innerHTML = keys
+      .map((k) => {
+        const solved = E.isSolved(game, k);
+        const on = game.selected === k;
+        return `<button type="button" class="tab${on ? " on" : ""}${solved ? " solved" : ""}" data-key="${k}" aria-pressed="${on}">
+          <span>${labels[k][0]}${solved ? " ✓" : ""}</span><small>${labels[k][1]}</small>
+        </button>`;
+      })
+      .join("");
+    el.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => selectWord(b.dataset.key)));
+  }
+
+  function renderHistory() {
+    const el = $("history");
+    const key = game.selected;
+    const rows = game.guesses[key] || [];
+    const vis = rows.filter((r) => !r.auto);
+    if (!vis.length) {
+      el.innerHTML = "";
+      return;
+    }
+    el.innerHTML = vis
+      .map((row) => {
+        const tiles = row.word
+          .split("")
+          .map((ch, i) => `<span class="hist-tile ${row.result[i]}">${ch}</span>`)
+          .join("");
+        return `<div class="hist-row">${tiles}</div>`;
+      })
+      .join("");
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function renderKeyboard() {
+    const el = $("keyboard");
+    const colors = game ? E.keyboardColors(game, game.selected) : {};
+    el.innerHTML = KEYS.map((row) => {
+      const keys = row
+        .map((k) => {
+          if (k === "enter") return `<button type="button" class="key wide" data-key="enter" aria-label="Submit">Enter</button>`;
+          if (k === "back")
+            return `<button type="button" class="key wide" data-key="back" aria-label="Delete">Delete</button>`;
+          const col = colors[k] || "";
+          return `<button type="button" class="key ${col}" data-key="${k}" aria-label="${k}">${k}</button>`;
+        })
+        .join("");
+      return `<div class="kb-row">${keys}</div>`;
+    }).join("");
+    el.querySelectorAll(".key").forEach((b) => b.addEventListener("click", () => onKey(b.dataset.key)));
+  }
+
+  function renderAll() {
+    if (!game) return;
+    renderChrome();
+    renderPips();
+    renderBoard();
+    renderTabs();
+    renderHistory();
+    renderKeyboard();
+  }
+
+  /* ---------- input ---------- */
+  function onKey(k) {
+    if (!game || animating) return;
+    if (document.querySelector(".overlay.show")) return;
+    if (game.status !== "playing") {
+      openOverlay("overlay-end");
+      return;
+    }
+    if (k === "enter") return submit();
+    if (k === "back") return backspace();
+    if (/^[a-z]$/.test(k)) typeLetter(k);
+  }
+
+  function typeLetter(ch) {
+    const key = currentKey();
+    if (E.isSolved(game, key)) {
+      toast("That word is already solved");
+      return;
+    }
+    const known = E.knownLetters(game, key);
+    const d = draftArr(key);
+    for (let i = 0; i < d.length; i++) {
+      if (!known[i] && !d[i]) {
+        d[i] = ch;
+        persist();
+        renderBoard();
+        // pop that tile
+        const layout = E.layoutPuzzle(game.puzzle);
+        const cell = findCellForIndex(layout, key, i);
+        if (cell) {
+          const el = document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
+          if (el) {
+            el.classList.remove("pop");
+            void el.offsetWidth;
+            el.classList.add("pop");
+          }
+        }
+        return;
+      }
+    }
+  }
+
+  function backspace() {
+    const key = currentKey();
+    if (E.isSolved(game, key)) return;
+    const known = E.knownLetters(game, key);
+    const d = draftArr(key);
+    for (let i = d.length - 1; i >= 0; i--) {
+      if (!known[i] && d[i]) {
+        d[i] = null;
+        persist();
+        renderBoard();
+        return;
+      }
+    }
+  }
+
+  function findCellForIndex(layout, key, idx) {
+    return layout.cells.find((c) =>
+      key === "across" ? c.acrossIndex === idx : key === "down4" ? c.down4Index === idx : c.down3Index === idx
+    );
+  }
+
+  function submit() {
+    if (!game || animating || game.status !== "playing") return;
+    const key = currentKey();
+    const word = draftWord(key);
+    if (!word) {
+      shakeBoard();
+      toast("Not enough letters");
+      return;
+    }
+    const ev = E.evaluateGuess(game, LISTS, key, word);
+    if (!ev.ok) {
+      if (ev.reason === "not-in-list") {
+        shakeBoard();
+        toast("Not in word list");
+      } else if (ev.reason === "duplicate") {
+        shakeBoard();
+        toast("Already guessed");
+      } else if (ev.reason === "already-solved") {
+        toast("That word is already solved");
+      } else if (ev.reason === "no-guesses" || ev.reason === "finished") {
+        openOverlay("overlay-end");
+      }
+      return;
+    }
+    playFlip(ev);
+  }
+
+  function shakeBoard() {
+    const board = $("board");
+    board.classList.remove("shake");
+    void board.offsetWidth;
+    board.classList.add("shake");
+  }
+
+  function playFlip(ev) {
+    animating = true;
+    E.applyGuess(game, ev);
+    // Clear draft for this word if solved, else reset unknowns
+    if (E.isSolved(game, ev.key)) {
+      game.draft[ev.key] = new Array(E.wordLen(ev.key)).fill(null);
+    } else {
+      const known = E.knownLetters(game, ev.key);
+      game.draft[ev.key] = known.map((ch) => ch || null);
+    }
+    persist();
+    renderHistory();
+    renderPips();
+    renderTabs();
+
+    const layout = E.layoutPuzzle(game.puzzle);
+    const n = ev.word.length;
+    const tiles = [];
+    for (let i = 0; i < n; i++) {
+      const cell = findCellForIndex(layout, ev.key, i);
+      const el = cell && document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
+      tiles.push(el);
+    }
+    // Set faces and start unflipped, then flip to result colors
+    tiles.forEach((el, i) => {
+      if (!el) return;
+      const ch = ev.word[i].toUpperCase();
+      el.classList.remove("flipped", "known", "correct", "present", "absent");
+      el.classList.add("filled");
+      el.querySelector(".tile-front").textContent = ch;
+      el.querySelector(".tile-back").textContent = ch;
+      el.classList.add(ev.result[i]);
+    });
+
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const stagger = reduce ? 0 : 120;
+    const duration = reduce ? 0 : 500;
+    tiles.forEach((el, i) => {
+      setTimeout(() => {
+        if (el) el.classList.add("flipped");
+      }, i * stagger);
+    });
+
+    const after = n * stagger + duration + 80;
+    setTimeout(() => {
+      // Crossing reveals + keyboard
+      renderBoard();
+      renderKeyboard();
+      renderTabs();
+      if (ev.correct) {
+        celebrateWord(ev.key);
+      }
+      const done = game.status !== "playing";
+      setTimeout(() => {
+        animating = false;
+        if (done) {
+          recordFinish();
+          persist();
+          openOverlay("overlay-end");
+        } else {
+          // Auto-advance to another unsolved word if this one is solved
+          if (ev.correct) {
+            const next = ["across", "down4", "down3"].find((k) => !E.isSolved(game, k));
+            if (next) selectWord(next);
+            const left = E.MAX_GUESSES - game.guessesUsed;
+            if (left && left <= 2) toast(left === 1 ? "Last guess" : left + " guesses left");
+          }
+        }
+      }, ev.correct ? 600 : 60);
+    }, after);
+  }
+
+  function celebrateWord(key) {
+    const layout = E.layoutPuzzle(game.puzzle);
+    const n = E.wordLen(key);
+    for (let i = 0; i < n; i++) {
+      const cell = findCellForIndex(layout, key, i);
+      const el = cell && document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
+      if (!el) continue;
+      setTimeout(() => {
+        el.classList.remove("win");
+        void el.offsetWidth;
+        el.classList.add("win");
+      }, i * 70);
+    }
+  }
+
+  function recordFinish() {
+    if (endStatsRecorded) return;
+    endStatsRecorded = true;
+    if (game.mode !== "daily") {
+      prefs.practicePlayed += 1;
+      if (game.status === "won") prefs.practiceWon += 1;
+      savePrefs();
+      return;
+    }
+    const today = game.dateISO;
+    if (prefs.lastDailyDate === today) return; // already counted
+    maybeResetStreak();
+    prefs.gamesPlayed += 1;
+    prefs.lastDailyDate = today;
+    prefs.lastDailyResult = game.status;
+    if (game.status === "won") {
+      prefs.gamesWon += 1;
+      prefs.currentStreak = (prefs.currentStreak || 0) + 1;
+      prefs.lastDailyWinDate = today;
+      if (prefs.currentStreak > prefs.maxStreak) prefs.maxStreak = prefs.currentStreak;
+      const g = String(Math.max(3, game.guessesUsed));
+      prefs.distribution[g] = (prefs.distribution[g] || 0) + 1;
+    } else {
+      prefs.currentStreak = 0;
+      prefs.distribution.fail = (prefs.distribution.fail || 0) + 1;
+    }
+    savePrefs();
+  }
+
+  function isYesterdayOf(pastISO, todayISO) {
+    const d = E.parseISODate(todayISO);
+    const yest = E.todayISO(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
+    return pastISO === yest;
+  }
+
+  /* ---------- hints ---------- */
+  function requestHint() {
+    if (!game || animating) return;
+    if (game.status !== "playing") return openOverlay("overlay-end");
+    if (prefs.hintsRemaining <= 0) {
+      openConfirm("You're out of hints. Open the store to get a hint pack? (Purchases are simulated.)", () =>
+        openOverlay("overlay-store")
+      );
+      return;
+    }
+    let key = currentKey();
+    if (E.isSolved(game, key)) {
+      key = ["across", "down4", "down3"].find((k) => !E.isSolved(game, k));
+      if (!key) return;
+      selectWord(key);
+    }
+    const info = E.applyHint(game, key);
+    if (!info.ok) {
+      if (info.reason === "all-known") toast("Every letter in this word is already known");
+      return;
+    }
+    const label = E.WORD_LABELS[key];
+    openConfirm(`Use 1 hint to reveal a letter in ${label}? You have ${prefs.hintsRemaining}.`, () => {
+      const idx = info.hidden[Math.floor(Math.random() * info.hidden.length)];
+      E.revealHintLetter(game, key, idx);
+      prefs.hintsRemaining -= 1;
+      savePrefs();
+      persist();
+      renderAll();
+      toast("Letter revealed");
+      if (game.status !== "playing") {
+        recordFinish();
+        persist();
+        setTimeout(() => openOverlay("overlay-end"), 500);
+      }
+    });
+  }
+
+  /* ---------- share / end / stats / store ---------- */
+  async function shareResults() {
+    if (!game) return;
+    const text = E.shareText(game);
+    try {
+      if (navigator.share && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || "")) {
+        await navigator.share({ text });
+        return;
+      }
+    } catch (e) {
+      if (e && e.name === "AbortError") return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      toast("Copied results to clipboard");
+    } catch (e) {
+      // fallback
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        toast("Copied results to clipboard");
+      } catch (err) {
+        toast("Couldn't copy");
+      }
+      ta.remove();
+    }
+  }
+
+  function renderEnd() {
+    const el = $("end-body");
+    if (!game) return;
+    const won = game.status === "won";
+    const title = won ? E.winMessage(game.guessesUsed) : "So close";
+    const sub = won
+      ? `Solved in ${game.guessesUsed}/${E.MAX_GUESSES} guesses.`
+      : `You used all ${E.MAX_GUESSES} guesses. The words were:`;
+    const words = `
+      <div class="results-words">
+        <div><span>ACROSS</span><div class="rw">${game.puzzle.across.toUpperCase()}</div></div>
+        <div><span>DOWN 4</span><div class="rw">${game.puzzle.down4.toUpperCase()}</div></div>
+        <div><span>DOWN 3</span><div class="rw">${game.puzzle.down3.toUpperCase()}</div></div>
+      </div>`;
+    const daily = game.mode === "daily";
+    const cd = daily
+      ? `<div class="countdown"><label>Next daily</label><div class="countdown-value">${E.formatCountdown(
+          E.msUntilNextLocalMidnight()
+        )}</div></div>`
+      : "";
+    el.innerHTML = `<h2>${title}</h2><p>${sub}</p>${words}${cd}`;
+    $("btn-end-practice").textContent = daily ? "Practice" : "New puzzle";
+    refreshCountdown();
+  }
+
+  function renderStats() {
+    maybeResetStreak();
+    const p = prefs;
+    const played = p.gamesPlayed;
+    const winPct = played ? Math.round((p.gamesWon / played) * 100) : 0;
+    $("stats-body").innerHTML = `
+      <h2>Statistics</h2>
+      <div class="stat-row">
+        <div><div class="stat-num">${played}</div><div class="stat-label">Played</div></div>
+        <div><div class="stat-num">${winPct}</div><div class="stat-label">Win %</div></div>
+        <div><div class="stat-num">${p.currentStreak}</div><div class="stat-label">Streak</div></div>
+        <div><div class="stat-num">${p.maxStreak}</div><div class="stat-label">Max streak</div></div>
+      </div>
+      <div class="store-section">Daily guess distribution</div>
+      ${[3, 4, 5, 6, 7]
+        .map((n) => {
+          const v = p.distribution[n] || 0;
+          const max = Math.max(1, ...[3, 4, 5, 6, 7].map((k) => p.distribution[k] || 0), p.distribution.fail || 0);
+          const pct = Math.round((v / max) * 100);
+          const mine = game && game.mode === "daily" && game.status === "won" && game.guessesUsed === n;
+          return `<div class="dist-row"><div style="width:16px">${n}</div><div class="dist-bar-wrap"><div class="dist-bar ${v ? "has" : ""} ${mine ? "mine" : ""}" style="width:${v ? Math.max(pct, 8) : 0}%">${v || ""}</div></div></div>`;
+        })
+        .join("")}
+      <p style="margin-top:14px;font-size:13px">Practice record: ${p.practiceWon}/${p.practicePlayed || 0} won. Daily stats only count toward streaks.</p>
+    `;
+  }
+
+  function renderStore() {
+    const packs = HINT_PACKS.map(
+      (pk) => `
+      <div class="store-item">
+        <div><h3>${pk.n} hints</h3><p>Add to your hint bank.</p></div>
+        <button type="button" class="price-btn" data-buy="hints" data-n="${pk.n}" data-label="${pk.label}">${pk.label}</button>
+      </div>`
+    ).join("");
+    const skins = SKINS.map((s) => {
+      const owned = prefs.unlockedSkins.includes(s.id);
+      const on = prefs.currentSkin === s.id;
+      const btn = on
+        ? `<button type="button" class="price-btn off">Equipped</button>`
+        : owned
+        ? `<button type="button" class="price-btn" data-equip="${s.id}">Equip</button>`
+        : `<button type="button" class="price-btn" data-buy="skin" data-id="${s.id}" data-label="${s.label}">${s.label}</button>`;
+      const dots = s.dots.map((c) => `<span class="dot" style="background:${c}"></span>`).join("");
+      return `<div class="skin-card"><div class="skin-dots">${dots}</div><div style="flex:1;min-width:0"><h3>${s.name}</h3><p>${s.blurb}</p></div>${btn}</div>`;
+    }).join("");
+    const allPaid = SKINS.filter((s) => s.price > 0).every((s) => prefs.unlockedSkins.includes(s.id));
+    const bundle = allPaid
+      ? ""
+      : `<div class="store-item"><div><h3>Skin bundle</h3><p>Unlock every paid skin.</p></div><button type="button" class="price-btn" data-buy="bundle" data-label="${BUNDLE_PRICE}">${BUNDLE_PRICE}</button></div>`;
+    $("store-body").innerHTML = `
+      <h2>Store</h2>
+      <div class="store-note">This is a preview of in-app purchases. Nothing here charges real money — unlocking is simulated and saved on this device.</div>
+      <div class="store-section">Hints · you have ${prefs.hintsRemaining}</div>
+      ${packs}
+      <div class="store-section">Skins</div>
+      ${skins}
+      ${bundle}
+    `;
+    $("store-body").querySelectorAll("[data-buy]").forEach((b) => {
+      b.addEventListener("click", () => startPurchase(b.dataset));
+    });
+    $("store-body").querySelectorAll("[data-equip]").forEach((b) => {
+      b.addEventListener("click", () => {
+        prefs.currentSkin = b.dataset.equip;
+        savePrefs();
+        applySkin();
+        renderStore();
+        toast("Skin equipped");
+      });
+    });
+  }
+
+  function startPurchase(ds) {
+    let title = "";
+    if (ds.buy === "hints") title = `Add ${ds.n} hints for ${ds.label}?`;
+    else if (ds.buy === "skin") {
+      const s = SKINS.find((x) => x.id === ds.id);
+      title = `Unlock ${s.name} for ${ds.label}?`;
+    } else if (ds.buy === "bundle") title = `Unlock all paid skins for ${BUNDLE_PRICE}?`;
+    pendingPurchase = ds;
+    openConfirm(title + " You won't be charged in this prototype.", () => completePurchase(ds));
+  }
+
+  function completePurchase(ds) {
+    if (ds.buy === "hints") {
+      prefs.hintsRemaining += +ds.n;
+      toast(`+${ds.n} hints added`);
+    } else if (ds.buy === "skin") {
+      if (!prefs.unlockedSkins.includes(ds.id)) prefs.unlockedSkins.push(ds.id);
+      prefs.currentSkin = ds.id;
+      applySkin();
+      toast("Skin unlocked");
+    } else if (ds.buy === "bundle") {
+      SKINS.forEach((s) => {
+        if (!prefs.unlockedSkins.includes(s.id)) prefs.unlockedSkins.push(s.id);
+      });
+      toast("All skins unlocked");
+    }
+    savePrefs();
+    renderChrome();
+    renderStore();
+    // keep store open
+    $("overlay-store").classList.add("show");
+    $("overlay-confirm").classList.remove("show");
+  }
+
+  function openConfirm(message, onYes) {
+    $("confirm-msg").textContent = message;
+    const yes = $("btn-confirm-yes");
+    const no = $("btn-confirm-no");
+    const once = (fn) => {
+      const h = () => {
+        yes.removeEventListener("click", hy);
+        no.removeEventListener("click", hn);
+        $("overlay-confirm").classList.remove("show");
+        fn && fn();
+      };
+      const hy = () => h(onYes());
+      const hn = () => h();
+      yes.addEventListener("click", hy);
+      no.addEventListener("click", hn);
+    };
+    // simpler:
+    yes.onclick = () => {
+      $("overlay-confirm").classList.remove("show");
+      onYes && onYes();
+    };
+    no.onclick = () => {
+      $("overlay-confirm").classList.remove("show");
+    };
+    $("overlay-confirm").classList.add("show");
+  }
+
+  /* ---------- events ---------- */
+  function bind() {
+    $("btn-help").addEventListener("click", () => openOverlay("overlay-help"));
+    $("btn-stats").addEventListener("click", () => openOverlay("overlay-stats"));
+    $("btn-store").addEventListener("click", () => openOverlay("overlay-store"));
+    $("btn-daily").addEventListener("click", () => switchMode("daily"));
+    $("btn-practice").addEventListener("click", () => switchMode("practice"));
+    $("btn-new").addEventListener("click", requestNewPractice);
+    $("btn-hint").addEventListener("click", requestHint);
+    $("btn-end-share").addEventListener("click", shareResults);
+    $("btn-end-practice").addEventListener("click", () => {
+      closeOverlays();
+      startPractice(true);
+    });
+    document.querySelectorAll("[data-close]").forEach((b) => {
+      b.addEventListener("click", (e) => {
+        const id = b.getAttribute("data-close");
+        if (id) $(id).classList.remove("show");
+        else closeOverlays();
+      });
+    });
+    document.querySelectorAll(".overlay").forEach((o) => {
+      o.addEventListener("click", (e) => {
+        if (e.target === o) o.classList.remove("show");
+      });
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      const open = document.querySelector(".overlay.show");
+      if (open) {
+        if (e.key === "Escape") closeOverlays();
+        if (e.key === "Enter" && open.id === "overlay-confirm") $("btn-confirm-yes").click();
+        return;
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        onKey("enter");
+      } else if (e.key === "Backspace") {
+        e.preventDefault();
+        onKey("back");
+      } else if (/^[a-zA-Z]$/.test(e.key)) {
+        onKey(e.key.toLowerCase());
+      }
+    });
+    window.addEventListener("resize", () => {
+      sizeTiles();
+    });
+    countdownTimer = setInterval(refreshCountdown, 1000);
+  }
+
+  function boot() {
+    applySkin();
+    bind();
+    maybeResetStreak();
+    startDaily();
+    if (!prefs.seenHowTo) {
+      prefs.seenHowTo = true;
+      savePrefs();
+      setTimeout(() => openOverlay("overlay-help"), 250);
+    }
+  }
+
+  // Debug hooks for tests / screenshots
+  window.Woordle = {
+    get game() {
+      return game;
+    },
+    get prefs() {
+      return prefs;
+    },
+    lists: LISTS,
+    engine: E,
+    startDaily,
+    startPractice,
+    startPracticeNew: () => startPractice(true),
+    selectWord,
+    submit,
+    typeLetter,
+    onKey,
+    renderAll,
+    openOverlay,
+    closeOverlays,
+    toast,
+    applyGuess: (key, word) => {
+      const ev = E.evaluateGuess(game, LISTS, key, word);
+      if (!ev.ok) return ev;
+      E.applyGuess(game, ev);
+      const known = E.knownLetters(game, key);
+      game.draft[key] = known.map((ch) => ch || null);
+      if (game.status !== "playing") recordFinish();
+      persist();
+      renderAll();
+      if (game.status !== "playing") openOverlay("overlay-end");
+      return ev;
+    },
+    setSkin: (id) => {
+      prefs.currentSkin = id;
+      savePrefs();
+      applySkin();
+    },
+  };
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})();
+
+  </script>
+</body>
+</html>

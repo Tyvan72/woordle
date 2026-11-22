@@ -370,7 +370,14 @@ button {
   flex: 1;
   min-width: 0;
 }
-.statusbar .pips { margin-left: auto; }
+.try-count {
+  font-size: 13px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  margin-left: auto;
+}
+.statusbar .pips { margin-left: 8px; }
 .hint-btn, .new-btn {
   height: 36px;
   padding: 0 10px;
@@ -782,6 +789,116 @@ button {
   .key.wide { max-width: 64px; }
 }
 
+/* Theme */
+.theme-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 6px 16px 2px;
+  flex-shrink: 0;
+}
+.theme-emoji { font-size: 22px; line-height: 1; }
+.theme-text { text-align: left; }
+.theme-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.theme-name {
+  display: block;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  line-height: 1.1;
+}
+
+/* History of full-puzzle tries */
+.history {
+  min-height: 0;
+  max-height: 96px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 12px 6px;
+  flex-shrink: 0;
+  display: flex;
+  gap: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+.history:empty { display: none; }
+.hist-try {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+.hist-num {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+.hist-mini {
+  display: grid;
+  gap: 1px;
+}
+.hist-mini span {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+  background: transparent;
+}
+.hist-mini span.correct { background: var(--correct); }
+.hist-mini span.present { background: var(--present); }
+.hist-mini span.absent { background: var(--absent); }
+.hist-rows { display: flex; flex-direction: column; gap: 2px; }
+.hist-row { display: flex; gap: 2px; justify-content: center; }
+.hist-tile {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--absent);
+}
+.hist-tile.correct { background: var(--correct); }
+.hist-tile.present { background: var(--present); }
+
+.tile.cursor .tile-front {
+  box-shadow: 0 0 0 2px var(--focus), 0 0 8px var(--focus);
+}
+.tile.in-word .tile-front { box-shadow: 0 0 0 2px var(--focus); }
+.tile.cursor.in-word .tile-front {
+  box-shadow: 0 0 0 2px var(--focus), 0 0 8px var(--focus);
+}
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 10px 0 8px;
+}
+.theme-pick {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elev-2);
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 10px;
+  text-align: left;
+  font-weight: 800;
+  font-size: 14px;
+  min-height: 48px;
+}
+.theme-pick.on { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus); }
+.theme-pick .em { font-size: 20px; }
+.theme-pick.random { grid-column: 1 / -1; justify-content: center; background: var(--accent); color: var(--accent-text); border-color: transparent; }
+
   </style>
 </head>
 <body>
@@ -813,20 +930,21 @@ button {
       </div>
       <div class="tools">
         <button type="button" class="new-btn" id="btn-new" style="display:none">New</button>
+        <button type="button" class="new-btn" id="btn-theme" style="display:none">Themes</button>
         <button type="button" class="hint-btn" id="btn-hint" aria-label="Use a hint">Hint <span class="count" id="hint-count">3</span></button>
       </div>
     </div>
+    <div class="theme-banner" id="theme-banner"></div>
     <div class="statusbar">
       <div class="mode-date" id="mode-date"></div>
+      <div class="try-count" id="try-count" aria-label="Tries used">0/7</div>
       <div class="pips" id="pips" aria-label="Guesses remaining"></div>
     </div>
+    <div class="history" id="history" aria-live="polite"></div>
 
     <div class="board-wrap" id="board-wrap">
       <div class="board" id="board" role="grid" aria-label="Crossword grid"></div>
     </div>
-
-    <div class="tabs" id="tabs"></div>
-    <div class="history" id="history" aria-live="polite"></div>
     <div class="keyboard" id="keyboard" aria-label="Keyboard"></div>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -835,15 +953,14 @@ button {
         <div class="sheet-handle"></div>
         <button type="button" class="close-x" data-close="overlay-help" aria-label="Close">×</button>
         <h2 id="help-title">How to play</h2>
-        <p>Woordle is a mini crossword Wordle. Every puzzle has three words: a <strong style="color:var(--text)">5-letter word across</strong>, a <strong style="color:var(--text)">4-letter word down</strong>, and a <strong style="color:var(--text)">3-letter word down</strong>.</p>
-        <p>The two down words each cross the across word at one shared letter. Crossing spots are random — they can be any letter, not just the ends or the middle.</p>
-        <p>You have <strong style="color:var(--text)">7 guesses for the whole puzzle</strong>, not per word. Every try on any word uses one of those 7.</p>
+        <p>Woordle is a mini crossword Wordle. Every puzzle has three words: a <strong style="color:var(--text)">5-letter word across</strong>, a <strong style="color:var(--text)">4-letter word down</strong>, and a <strong style="color:var(--text)">3-letter word down</strong>, and all three fit a <strong style="color:var(--text)">theme</strong> — like Farm, Space, or Ocean — shown above the board as a clue.</p>
+        <p>The two down words each cross the across word at one shared letter. Crossing spots are random, and a letter you type in a crossing cell counts for both words.</p>
+        <p>Fill in the <strong style="color:var(--text)">entire crossword</strong>, then press Enter. That uses <strong style="color:var(--text)">1 of your 7 tries</strong>. You submit the whole puzzle at once, not one word at a time.</p>
         <div class="how-swatch"><span class="swatch correct">A</span> Green — right letter, right spot.</div>
         <div class="how-swatch"><span class="swatch present">A</span> Yellow — in <em>that</em> word, but in a different spot.</div>
         <div class="how-swatch"><span class="swatch absent">A</span> Gray — not in that word.</div>
-        <p>Yellow only counts for the word you're guessing, not the other two.</p>
-        <p>When a letter turns green, that crossword cell fills in for the crossing word too — a free clue.</p>
-        <p>Tap a word (or its tiles) to guess it. There's a new Daily puzzle every day, the same for everyone in the same timezone. Practice anytime.</p>
+        <p>Yellow is only about the word that letter sits in, not the other two. Green letters stay locked for the next try.</p>
+        <p>Tap a cell to type there. On a crossing, tap again to switch between across and down. There's a new themed Daily every day, the same for everyone in the same timezone. Practice anytime, and pick any theme you like.</p>
         <div class="btn-row"><button type="button" class="btn primary" data-close="overlay-help">Play</button></div>
       </div>
     </div>
@@ -878,6 +995,14 @@ button {
       </div>
     </div>
 
+    <div class="overlay" id="overlay-themes">
+      <div class="sheet" role="dialog" aria-labelledby="themes-heading">
+        <div class="sheet-handle"></div>
+        <button type="button" class="close-x" data-close="overlay-themes" aria-label="Close">×</button>
+        <div id="themes-body"></div>
+      </div>
+    </div>
+
     <div class="overlay" id="overlay-confirm">
       <div class="sheet" role="dialog" aria-labelledby="confirm-msg">
         <div class="sheet-handle"></div>
@@ -903,6 +1028,184 @@ function unpack(str, n) {
   for (let i = 0, j = 0; i < str.length; i += n, j++) out[j] = str.slice(i, i + n);
   return out;
 }
+
+// Themed answer lists for Woordle. Answers are themed; guesses still use the full dictionary.
+const THEMES = [
+  {
+    id: 'farm', name: 'Farm', emoji: '🚜',
+    answers3: unpack('haycowpighenrameweoatryehogstymudpeapodearcobsowvetkidleayew', 3),
+    answers4: unpack('barncornfarmsilowoolcalflambgoatplowseedsoilherdcropfeedbullduckmuleponyfoalvinebeanyokeacrelandrakecoopmilkoatseggshenspensbalestudcoltewesramspigscows', 4),
+    answers5: unpack('wheatsheephorsegrainranchflockgoosechickfarmsbarnsseedscropsstallfielddairygoatslambsbalesciderapplegeeseherds', 5),
+  },
+  {
+    id: 'space', name: 'Space', emoji: '🚀',
+    answers3: unpack('sunskyorbgasionsolrayreddip', 3),
+    answers4: unpack('starmoonmarsbeamvoidnovaglowaurabeltdarkrocklunaaxispolespinfluxdustraysdiskpaleblue', 4),
+    answers5: unpack('orbitcometlunarsolarearthspacestarsmoonsvenusalienprobetitanringsquarkplutoflaredwarfskiesvoidsbelts', 5),
+  },
+  {
+    id: 'ocean', name: 'Ocean', emoji: '🌊',
+    answers3: unpack('seabayebbeelrayfincodoilice', 3),
+    answers4: unpack('wavefishreeftideshipsurfsandkelpcrabboatportdockdeepsaltclamtunasolebassorcawindgulfcoveflowfoamweedpier', 4),
+    answers5: unpack('oceansharkwhalecoralbeachcoastwaterswellpearlshellfleetscubadiverwreckwavestidesreefsshipsboatsportsbrine', 5),
+  },
+  {
+    id: 'food', name: 'Food', emoji: '🍕',
+    answers3: unpack('piehamjamteanutfigryeeggoilbunpeacobsoydip', 3),
+    answers4: unpack('cakesoupricemeatmealtacocornmilkbeefporkstewpearplumfoodforkdishtartwrapchiprollbitedietcookbakecrabtunaclamsaltherb', 4),
+    answers5: unpack('breadpizzaapplebaconcandycreampastasaladsteakfruitsugartoastsaucelemonberryoniongravydonutmangopeachmelonolivegrainwheatsnack', 5),
+  },
+  {
+    id: 'animals', name: 'Animals', emoji: '🐾',
+    answers3: unpack('catdogpighencowrameweelkantapebatbeefoxcubpupsowyakowlkid', 3),
+    answers4: unpack('lionbearwolffrogbirdmuleponyduckgoatcrabfishcalflambtoadharedeerfawnboarbullsealswandovemolepumalynxorca', 4),
+    answers5: unpack('tigerhorsemousesheepsnakewhalesharkeaglecamelzebramoosegoosechickpandallamakoalahyenaslothrhinohippobisonotter', 5),
+  },
+  {
+    id: 'sports', name: 'Sports', emoji: '⚽',
+    answers3: unpack('gymrunskibatteenetboxlapwin', 3),
+    answers4: unpack('ballgoalteamracegolfswimjumpheatplayclubgamekickpassshotyardmeetdiveboutpoolringpark', 4),
+    answers5: unpack('trackscorecourtsportcoachmatchrugbyboxerskatecyclemedalpitchfieldriderracerteamsgamesballsgoals', 5),
+  },
+  {
+    id: 'weather', name: 'Weather', emoji: '☔',
+    answers3: unpack('sunfogiceskydewwethoticydry', 3),
+    answers4: unpack('rainwindsnowhailheatwarmcoldmistgalegustthawdamphazesmogdropdrip', 4),
+    answers5: unpack('stormcloudsunnyrainywindysnowyfrostsleetvaporhumidblazefloodshinewindsrains', 5),
+  },
+  {
+    id: 'music', name: 'Music', emoji: '🎵',
+    answers3: unpack('rappopjamhitduosaxamppitbarkey', 3),
+    answers4: unpack('songbeatdrumnotebandtunejazzrockbasshymnsoloharpgongoboeariafolksingplaykeys', 4),
+    answers5: unpack('pianomusicchoirfluteorgantempoverseaudiooperadancebluescelloalbumlyricnotessongsdrumsbeatstunesbands', 5),
+  },
+  {
+    id: 'kitchen', name: 'Kitchen', emoji: '🍳',
+    answers3: unpack('panpotlidcupmugjarwokoilbunhamdip', 3),
+    answers4: unpack('ovenforkdishbowlchefsinkwhipbakecookfoodmealricesoupstewsalttrayrack', 4),
+    answers5: unpack('stoveplateknifemixergrilltoastsauceladleapronwhiskbakerroastbowlsforksmeals', 5),
+  },
+  {
+    id: 'garden', name: 'Garden', emoji: '🌱',
+    answers3: unpack('peapodivyoakelmyewhaybudsap', 3),
+    answers4: unpack('roseleafseedsoilvineweedlawnfernbushtwigrootbulbmossherblilypotsbedsplot', 4),
+    answers5: unpack('bloomplantgrassflorapetalshrubtulipdaisyprunestemsgreenrosesseedsvinesweeds', 5),
+  },
+  {
+    id: 'camping', name: 'Camping', emoji: '⛺',
+    answers3: unpack('buglogmappitashhutnaprodmugpanpot', 3),
+    answers4: unpack('tentfirecamphikepacklampwoodpathhilllakecookgearropemosssiteparktrek', 4),
+    answers5: unpack('trailcanoewoodsrivercabinscoutembersleepnightblazecampstentslampshikessites', 5),
+  },
+  {
+    id: 'pirates', name: 'Pirates', emoji: '🏴\u200d☠️',
+    answers3: unpack('rumseabaymapeyepegcaphatgun', 3),
+    answers4: unpack('shipgoldsailcrewdeckflagboatportlootmatecoinmastahoygrogcoveraid', 4),
+    answers5: unpack('swordchestskullplankavastbrineshipssailsflagsboatscrewsdecksraidscovesreefsstormocean', 5),
+  },
+  {
+    id: 'winter', name: 'Winter', emoji: '❄️',
+    answers3: unpack('iceskysunfogicyskiniphat', 3),
+    answers4: unpack('snowcoldcoatsledhailwindbootthawwrapwoolcozycapemufffireglow', 4),
+    answers5: unpack('frostsleetstormsnowyscarfskateflakechillsnowscoatssledsbootswindsskier', 5),
+  },
+  {
+    id: 'body', name: 'Body', emoji: '🧠',
+    answers3: unpack('eyeeararmleglipjawhipribtoegum', 3),
+    answers4: unpack('handfootheadnosebonehairskinneckbackfacechinkneelungvein', 4),
+    answers5: unpack('hearttoothbloodbrainchestwaistthumbelboworgannervespineliverbellyanklewrist', 5),
+  },
+  {
+    id: 'colors', name: 'Colors', emoji: '🎨',
+    answers3: unpack('redtanhuedyeinkskyashpea', 3),
+    answers4: unpack('bluepinkgoldgrayteallimenavyrustplumrosecyangreypaledark', 4),
+    answers5: unpack('greenblackwhitebrowncoralivoryoliveamberbeigekhakipeachcolortones', 5),
+  },
+  {
+    id: 'school', name: 'School', emoji: '📚',
+    answers3: unpack('peninkpadmapbaglabsumkid', 3),
+    answers4: unpack('bookdesktestquizexamclubhallpagenotereadtermpassfailmarkyearworkroom', 4),
+    answers5: unpack('classchalkgradestudytutorpaperruleressaybookstestspupilteachfinallearnnotesdesksexams', 5),
+  },
+  {
+    id: 'city', name: 'City', emoji: '🏙️',
+    answers3: unpack('buscabvanmapcaraveelmway', 3),
+    answers4: unpack('roadtaxiparkshopcurblanemallcafetowntramwalksign', 4),
+    answers5: unpack('blocklighthotelplazatowermetrocivicurbanalleyroadsshopsparks', 5),
+  },
+  {
+    id: 'forest', name: 'Forest', emoji: '🌲',
+    answers3: unpack('oakelmyewivyfirsaplog', 3),
+    answers4: unpack('treepinedeermosspathwoodferntwigvineleafbearwolf', 4),
+    answers5: unpack('woodstrailtreespinesgrovecedarmaplebirchflorafaunaglade', 5),
+  },
+  {
+    id: 'beach', name: 'Beach', emoji: '🏖️',
+    answers3: unpack('sunseabaytanwetdipebbdry', 3),
+    answers4: unpack('sandwavesurftidepalmboatdockpierswimheatcove', 4),
+    answers5: unpack('beachoceancoastcoraltowelshoresunnywavestidespalmsboats', 5),
+  },
+  {
+    id: 'magic', name: 'Magic', emoji: '✨',
+    answers3: unpack('elforbheximpfayhagjin', 3),
+    answers4: unpack('wandrunemagemythbrewtomesagejinxpactveilmoonstardarkoathwishluck', 4),
+    answers5: unpack('magiccharmspellwitchfairystaffrunesghosthauntwandshexescursedemondevilangelmages', 5),
+  },
+  {
+    id: 'cars', name: 'Cars', emoji: '🚗',
+    answers3: unpack('carvanbuscabramoilgaspitrod', 3),
+    answers4: unpack('tireroadjeephoodgearparkrampaxlefuelautomilehornlockseatbeltdentrustidlepump', 4),
+    answers5: unpack('brakewheelsedanmotordrivecrashshiftroadstiresjeepscoupepedalspeedgaugecabintrunkwagonturbo', 5),
+  },
+  {
+    id: 'clothes', name: 'Clothes', emoji: '👕',
+    answers3: unpack('hatcaptiebowfurhembibsoxrag', 3),
+    answers4: unpack('sockcoatshoebeltvestgownrobesilkwoolcufflacewrap', 4),
+    answers5: unpack('shirtpantsdressscarfbootsjeansskirtsocksclothcoatsshoesbelts', 5),
+  },
+  {
+    id: 'house', name: 'House', emoji: '🏠',
+    answers3: unpack('bedmatrugdenhutcotpadtub', 3),
+    answers4: unpack('doorwallroofroomlampsofaloftstephallyardhomebathsink', 4),
+    answers5: unpack('atticporchfloorhousestoolcouchroomsdoorswallsroofslampsyards', 5),
+  },
+  {
+    id: 'nature', name: 'Nature', emoji: '🌍',
+    answers3: unpack('sunskyoakivydewfogiceseamudsapelmyewfir', 3),
+    answers4: unpack('hilllakerocktreewindrainmossfernleafpondglen', 4),
+    answers5: unpack('earthplantriveroceanwoodsflorastonecreekbloomlakeshillsrockstreeswinds', 5),
+  },
+  {
+    id: 'birds', name: 'Birds', emoji: '🐦',
+    answers3: unpack('owlhenjayemucobaukpiedaw', 3),
+    answers4: unpack('hawkdoveswancrowduckfowlbeakwingnestbirdlarkwren', 4),
+    answers5: unpack('eaglegoosechickstorkheronrobincranequailbirdsnestswingsbeaksducksswans', 5),
+  },
+  {
+    id: 'insects', name: 'Insects', emoji: '🐛',
+    answers3: unpack('antbeebugflynitwebegg', 3),
+    answers4: unpack('mothwaspwormfleatickgnatgrubmitepestsilkbitehill', 4),
+    answers5: unpack('roachlarvamothsflieswaspswormsticksfleasgrubsstingswarmdronequeenaphid', 5),
+  },
+  {
+    id: 'tools', name: 'Tools', emoji: '🔧',
+    answers3: unpack('sawaxepinnutawlbitjigtapdiekeyrod', 3),
+    answers4: unpack('nailtoolboltfileraspvicetaperuleplugworkshopweldhookringlockgear', 4),
+    answers5: unpack('drillscrewbladepunchtoolsnailsboltsfilestapesgrindleveranvillathelevel', 5),
+  },
+  {
+    id: 'sweets', name: 'Sweets', emoji: '🍬',
+    answers3: unpack('piejambunfigicenutpop', 3),
+    answers4: unpack('caketartmintchewpuffbitesodacolawhipdropfizz', 4),
+    answers5: unpack('candyfudgecocoasugaricingdonutsweetcakestartsmints', 5),
+  },
+  {
+    id: 'holiday', name: 'Holiday', emoji: '🎉',
+    answers3: unpack('bowtoyelfjoyfireve', 3),
+    answers4: unpack('giftcardcaketreebellwishnoelyulesnow', 4),
+    answers5: unpack('partyfeastcarolcandycheergiftscardscakestreesbellsmerrytoast', 5),
+  },
+];
 
 /* Woordle puzzle engine — browser + node */
 const MAX_GUESSES = 7;
@@ -1144,18 +1447,6 @@ function dailySeed(iso) {
   return hashString("woordle-daily-v1-" + iso);
 }
 
-function generateDailyPuzzle(iso, lists) {
-  const rng = mulberry32(dailySeed(iso));
-  return generatePuzzle(rng, lists);
-}
-
-function generateRandomPuzzle(lists, seed) {
-  const s = seed == null ? (Math.random() * 0xffffffff) >>> 0 : seed >>> 0;
-  const rng = mulberry32(s);
-  const puzzle = generatePuzzle(rng, lists);
-  return { puzzle, seed: s };
-}
-
 function wordOf(puzzle, key) {
   if (key === "across") return puzzle.across;
   if (key === "down4") return puzzle.down4;
@@ -1170,20 +1461,141 @@ function wordLen(key) {
   return 0;
 }
 
-function emptyGame(puzzle, mode, dateISO, seed) {
+function listsForTheme(theme, baseLists) {
+  if (!theme) return baseLists;
+  if (theme._lists) return theme._lists;
+  theme._lists = {
+    ANSWERS3: theme.answers3,
+    ANSWERS4: theme.answers4,
+    ANSWERS5: theme.answers5,
+    GUESSES3: baseLists.GUESSES3,
+    GUESSES4: baseLists.GUESSES4,
+    GUESSES5: baseLists.GUESSES5,
+  };
+  return theme._lists;
+}
+
+function themeById(id) {
+  if (typeof THEMES === "undefined" || !THEMES) return null;
+  return THEMES.find((t) => t.id === id) || null;
+}
+
+function shuffledThemeOrder() {
+  if (typeof THEMES === "undefined" || !THEMES) return [];
+  if (THEMES._order) return THEMES._order;
+  const idx = THEMES.map((_, i) => i);
+  shuffleInPlace(idx, mulberry32(hashString("woordle-themes-v1")));
+  THEMES._order = idx;
+  return idx;
+}
+
+function themeForDay(iso) {
+  const order = shuffledThemeOrder();
+  if (!order.length) return null;
+  const day = daysBetween(LAUNCH_ISO, iso);
+  const n = order.length;
+  const i = ((day % n) + n) % n;
+  return THEMES[order[i]];
+}
+
+function puzzleKey(p) {
+  return p.across + "|" + p.down4 + "|" + p.down3 + "|" + p.col4 + "," + p.pos4 + "|" + p.col3 + "," + p.pos3;
+}
+
+function catalogForTheme(theme, lists, target) {
+  if (theme._catalog) return theme._catalog;
+  const themed = listsForTheme(theme, lists);
+  const seen = Object.create(null);
+  const catalog = [];
+  const want = target || 600;
+  for (let i = 0; i < 20000 && catalog.length < want; i++) {
+    const rng = mulberry32(hashString("woordle-cat-v1-" + theme.id + "-" + i));
+    const p = generatePuzzle(rng, themed);
+    if (!p) continue;
+    const k = puzzleKey(p);
+    if (seen[k]) continue;
+    seen[k] = 1;
+    catalog.push(p);
+  }
+  theme._catalog = catalog;
+  return catalog;
+}
+
+function generateDailyPuzzle(iso, lists) {
+  const theme = themeForDay(iso);
+  const catalog = catalogForTheme(theme, lists, 600);
+  const order = shuffledThemeOrder();
+  const day = daysBetween(LAUNCH_ISO, iso);
+  const occ = Math.floor(day / order.length);
+  const puzzle = catalog[occ % catalog.length];
+  return { puzzle, theme, seed: dailySeed(iso) };
+}
+
+function generateRandomPuzzle(lists, seed, themeId) {
+  const s = seed == null ? (Math.random() * 0xffffffff) >>> 0 : seed >>> 0;
+  let theme = null;
+  if (typeof THEMES !== "undefined" && THEMES && THEMES.length) {
+    if (themeId === "random" || themeId == null) {
+      const rngT = mulberry32((s ^ 0x9e3779b9) >>> 0);
+      theme = THEMES[Math.floor(rngT() * THEMES.length)];
+    } else {
+      theme = themeById(themeId) || THEMES[0];
+    }
+  }
+  const themed = listsForTheme(theme, lists);
+  const rng = mulberry32(s);
+  const puzzle = generatePuzzle(rng, themed);
+  return { puzzle, seed: s, theme };
+}
+
+function emptyGame(puzzle, mode, dateISO, seed, theme) {
   return {
-    version: 1,
+    version: 2,
     mode: mode || "practice",
     dateISO: dateISO || null,
     seed: seed == null ? null : seed,
+    theme: theme
+      ? { id: theme.id, name: theme.name, emoji: theme.emoji }
+      : null,
     puzzle,
     selected: "across",
-    guesses: { across: [], down4: [], down3: [] },
-    hints: { across: [null, null, null, null, null], down4: [null, null, null, null], down3: [null, null, null] },
+    cursorIndex: 0,
+    draft: {
+      across: [null, null, null, null, null],
+      down4: [null, null, null, null],
+      down3: [null, null, null],
+    },
+    guesses: [],
+    hints: {
+      across: [null, null, null, null, null],
+      down4: [null, null, null, null],
+      down3: [null, null, null],
+    },
     guessesUsed: 0,
     status: "playing",
     startedAt: Date.now(),
     finishedAt: null,
+  };
+}
+
+const WORD_KEYS = ["across", "down4", "down3"];
+
+function syncCrossing(draft, puzzle, key, index, letter) {
+  draft[key][index] = letter;
+  if (key === "across" && index === puzzle.col4) draft.down4[puzzle.pos4] = letter;
+  if (key === "across" && index === puzzle.col3) draft.down3[puzzle.pos3] = letter;
+  if (key === "down4" && index === puzzle.pos4) draft.across[puzzle.col4] = letter;
+  if (key === "down3" && index === puzzle.pos3) draft.across[puzzle.col3] = letter;
+}
+
+function draftWords(game) {
+  const d = game.draft;
+  const complete = (arr) => arr.every(Boolean);
+  return {
+    across: complete(d.across) ? d.across.join("") : null,
+    down4: complete(d.down4) ? d.down4.join("") : null,
+    down3: complete(d.down3) ? d.down3.join("") : null,
+    allFilled: complete(d.across) && complete(d.down4) && complete(d.down3),
   };
 }
 
@@ -1194,11 +1606,14 @@ function greensForWord(game, key) {
   const out = new Array(n).fill(null);
   const hinted = game.hints[key];
   for (let i = 0; i < n; i++) if (hinted && hinted[i]) out[i] = hinted[i];
-  const rows = game.guesses[key];
-  for (let g = 0; g < rows.length; g++) {
-    const row = rows[g];
+  const tries = game.guesses || [];
+  for (let g = 0; g < tries.length; g++) {
+    const t = tries[g];
+    const word = t[key];
+    const result = t.results && t.results[key];
+    if (!word || !result) continue;
     for (let i = 0; i < n; i++) {
-      if (row.result[i] === "correct") out[i] = row.word[i];
+      if (result[i] === "correct") out[i] = word[i];
     }
   }
   return out;
@@ -1227,59 +1642,112 @@ function knownLetters(game, key) {
 }
 
 function isSolved(game, key) {
-  if (game.status !== "playing" && game.guesses[key].some((r) => r.word === wordOf(game.puzzle, key))) return true;
-  const rows = game.guesses[key];
   const answer = wordOf(game.puzzle, key);
-  return rows.some((r) => r.word === answer);
+  const tries = game.guesses || [];
+  if (tries.some((t) => t[key] === answer && t.results && t.results[key] && t.results[key].every((r) => r === "correct"))) {
+    return true;
+  }
+  const known = knownLetters(game, key);
+  return known.every(Boolean) && known.join("") === answer;
 }
 
 function allSolved(game) {
   return isSolved(game, "across") && isSolved(game, "down4") && isSolved(game, "down3");
 }
 
-function keyboardColors(game, key) {
-  // Colors are scoped to the selected word only (yellow means in THAT word).
-  const colors = Object.create(null);
+function bestStatus(a, b) {
   const priority = { absent: 1, present: 2, correct: 3 };
-  const rows = game.guesses[key];
-  for (let g = 0; g < rows.length; g++) {
-    const row = rows[g];
-    for (let i = 0; i < row.word.length; i++) {
-      const ch = row.word[i];
-      const res = row.result[i];
-      if (!colors[ch] || priority[res] > priority[colors[ch]]) colors[ch] = res;
+  if (!a) return b;
+  if (!b) return a;
+  return priority[a] >= priority[b] ? a : b;
+}
+
+function cellResultForTry(cell, tryObj) {
+  const parts = [];
+  if (cell.acrossIndex >= 0) parts.push(tryObj.results.across[cell.acrossIndex]);
+  if (cell.down4Index >= 0) parts.push(tryObj.results.down4[cell.down4Index]);
+  if (cell.down3Index >= 0) parts.push(tryObj.results.down3[cell.down3Index]);
+  return parts.reduce((acc, s) => bestStatus(acc, s), null);
+}
+
+/** Keyboard colors: best status of that letter across all words and tries. */
+function keyboardColors(game) {
+  const colors = Object.create(null);
+  const tries = game.guesses || [];
+  for (let g = 0; g < tries.length; g++) {
+    const t = tries[g];
+    for (let k = 0; k < WORD_KEYS.length; k++) {
+      const key = WORD_KEYS[k];
+      const word = t[key];
+      const result = t.results && t.results[key];
+      if (!word || !result) continue;
+      for (let i = 0; i < word.length; i++) {
+        const ch = word[i];
+        colors[ch] = bestStatus(colors[ch], result[i]);
+      }
     }
   }
-  const known = knownLetters(game, key);
-  for (let i = 0; i < known.length; i++) {
-    if (known[i]) {
-      const ch = known[i];
-      if (!colors[ch] || priority.correct > priority[colors[ch]]) colors[ch] = "correct";
+  for (let k = 0; k < WORD_KEYS.length; k++) {
+    const known = knownLetters(game, WORD_KEYS[k]);
+    for (let i = 0; i < known.length; i++) {
+      if (known[i]) colors[known[i]] = bestStatus(colors[known[i]], "correct");
     }
   }
   return colors;
 }
 
-function evaluateGuess(game, lists, key, raw) {
-  if (game.status !== "playing") return { ok: false, reason: "finished" };
-  if (game.guessesUsed >= MAX_GUESSES) return { ok: false, reason: "no-guesses" };
-  if (isSolved(game, key)) return { ok: false, reason: "already-solved" };
-  const word = (raw || "").toLowerCase().replace(/[^a-z]/g, "");
-  const n = wordLen(key);
-  if (word.length !== n) return { ok: false, reason: "short" };
+function isValidWord(lists, word, n) {
   const setName = n === 5 ? "GUESSES5" : n === 4 ? "GUESSES4" : "GUESSES3";
   const set = lists["_" + setName] || (lists["_" + setName] = new Set(lists[setName]));
-  if (!set.has(word)) return { ok: false, reason: "not-in-list" };
-  if (game.guesses[key].some((r) => r.word === word)) return { ok: false, reason: "duplicate" };
-  const answer = wordOf(game.puzzle, key);
-  const result = scoreGuess(word, answer);
-  return { ok: true, word, result, key, correct: word === answer };
+  return set.has(word);
 }
 
-function applyGuess(game, evaluated) {
-  game.guesses[evaluated.key].push({ word: evaluated.word, result: evaluated.result });
+function evaluatePuzzle(game, lists, words) {
+  if (game.status !== "playing") return { ok: false, reason: "finished" };
+  if (game.guessesUsed >= MAX_GUESSES) return { ok: false, reason: "no-guesses" };
+  const cleaned = {};
+  for (let i = 0; i < WORD_KEYS.length; i++) {
+    const key = WORD_KEYS[i];
+    const word = (words[key] || "").toLowerCase().replace(/[^a-z]/g, "");
+    const n = wordLen(key);
+    if (word.length !== n) return { ok: false, reason: "short" };
+    cleaned[key] = word;
+  }
+  const invalid = WORD_KEYS.filter((key) => !isValidWord(lists, cleaned[key], wordLen(key)));
+  if (invalid.length) return { ok: false, reason: "not-in-list", invalid, words: cleaned };
+  const prev = game.guesses || [];
+  if (prev.some((t) => t.across === cleaned.across && t.down4 === cleaned.down4 && t.down3 === cleaned.down3)) {
+    return { ok: false, reason: "duplicate", words: cleaned };
+  }
+  const results = {
+    across: scoreGuess(cleaned.across, game.puzzle.across),
+    down4: scoreGuess(cleaned.down4, game.puzzle.down4),
+    down3: scoreGuess(cleaned.down3, game.puzzle.down3),
+  };
+  const correct =
+    cleaned.across === game.puzzle.across &&
+    cleaned.down4 === game.puzzle.down4 &&
+    cleaned.down3 === game.puzzle.down3;
+  return { ok: true, words: cleaned, results, correct };
+}
+
+function applyPuzzleGuess(game, evaluated) {
+  game.guesses.push({
+    across: evaluated.words.across,
+    down4: evaluated.words.down4,
+    down3: evaluated.words.down3,
+    results: evaluated.results,
+  });
   game.guessesUsed += 1;
-  if (allSolved(game)) {
+  // Lock greens into the draft for the next try.
+  for (let k = 0; k < WORD_KEYS.length; k++) {
+    const key = WORD_KEYS[k];
+    const known = knownLetters(game, key);
+    for (let i = 0; i < known.length; i++) {
+      if (known[i]) syncCrossing(game.draft, game.puzzle, key, i, known[i]);
+    }
+  }
+  if (evaluated.correct || allSolved(game)) {
     game.status = "won";
     game.finishedAt = Date.now();
   } else if (game.guessesUsed >= MAX_GUESSES) {
@@ -1289,72 +1757,81 @@ function applyGuess(game, evaluated) {
   return game;
 }
 
-function applyHint(game, key) {
-  if (game.status !== "playing") return { ok: false, reason: "finished" };
-  if (isSolved(game, key)) return { ok: false, reason: "already-solved" };
-  const answer = wordOf(game.puzzle, key);
-  const known = knownLetters(game, key);
+function hiddenHintCells(game) {
   const hidden = [];
-  for (let i = 0; i < answer.length; i++) {
-    if (!known[i]) hidden.push(i);
+  const seen = Object.create(null);
+  const layout = layoutPuzzle(game.puzzle);
+  for (let i = 0; i < layout.cells.length; i++) {
+    const cell = layout.cells[i];
+    let known = false;
+    let key = null;
+    let index = 0;
+    if (cell.acrossIndex >= 0) {
+      key = "across";
+      index = cell.acrossIndex;
+      if (knownLetters(game, "across")[index]) known = true;
+    }
+    if (cell.down4Index >= 0) {
+      if (!key) {
+        key = "down4";
+        index = cell.down4Index;
+      }
+      if (knownLetters(game, "down4")[cell.down4Index]) known = true;
+    }
+    if (cell.down3Index >= 0) {
+      if (!key) {
+        key = "down3";
+        index = cell.down3Index;
+      }
+      if (knownLetters(game, "down3")[cell.down3Index]) known = true;
+    }
+    const id = cell.r + "," + cell.c;
+    if (!known && key && !seen[id]) {
+      seen[id] = true;
+      hidden.push({ key, index, r: cell.r, c: cell.c });
+    }
   }
+  return hidden;
+}
+
+function applyHint(game) {
+  if (game.status !== "playing") return { ok: false, reason: "finished" };
+  const hidden = hiddenHintCells(game);
   if (!hidden.length) return { ok: false, reason: "all-known" };
-  // Prefer a middle-ish letter for more information, but stay deterministic-ish: first hidden.
-  // Caller may shuffle; we pick a random hidden index via optional rng on game? Use first for tests,
-  // UI will pass an index or use Math.random.
   return { ok: true, hidden };
 }
 
 function revealHintLetter(game, key, index) {
   const answer = wordOf(game.puzzle, key);
   game.hints[key][index] = answer[index];
-  // If hints completed the word, it is not "solved" until guessed — keep it that way
-  // so the player still spends a guess to lock it in? That's frustrating if all letters shown.
-  // If every letter is now known, auto-solve without spending a guess? Nicer.
-  const known = knownLetters(game, key);
-  if (known.every(Boolean) && known.join("") === answer) {
-    const result = new Array(answer.length).fill("correct");
-    // Auto-fill as a solved word without consuming a guess — it's already revealed.
-    if (!game.guesses[key].some((r) => r.word === answer)) {
-      game.guesses[key].push({ word: answer, result, auto: true });
-    }
-    if (allSolved(game)) {
-      game.status = "won";
-      game.finishedAt = Date.now();
-    }
+  syncCrossing(game.draft, game.puzzle, key, index, answer[index]);
+  if (allSolved(game)) {
+    game.status = "won";
+    game.finishedAt = Date.now();
   }
-  return { index, letter: answer[index] };
+  return { index, letter: answer[index], key };
 }
 
 function shareText(game) {
-  const p = game.puzzle;
+  const themeBit = game.theme ? ` · ${game.theme.name} ${game.theme.emoji}` : "";
   const n = game.mode === "daily" && game.dateISO ? `#${puzzleNumber(game.dateISO)}` : "Practice";
   const dateBit = game.mode === "daily" && game.dateISO ? formatPrettyDate(game.dateISO) : "";
   const score = game.status === "won" ? `${game.guessesUsed}/${MAX_GUESSES}` : `X/${MAX_GUESSES}`;
-  const lines = [`Woordle ${n}${dateBit ? " · " + dateBit : ""}`, score, ""];
-
-  function emojiRow(key, label) {
-    const rows = game.guesses[key].filter((r) => !r.auto);
-    const mark = { correct: "🟩", present: "🟨", absent: "⬛" };
-    if (!rows.length && isSolved(game, key)) {
-      lines.push(`${label} ${"🟩".repeat(wordLen(key))}`);
-      return;
-    }
-    if (!rows.length) {
-      lines.push(`${label} ${"⬜".repeat(wordLen(key))}`);
-      return;
-    }
-    rows.forEach((r, i) => {
-      const prefix = i === 0 ? label : " ".repeat(label.length);
-      lines.push(prefix + " " + r.result.map((x) => mark[x]).join(""));
+  const lines = [`Woordle ${n}${themeBit}${dateBit ? " · " + dateBit : ""}`, score, ""];
+  const mark = { correct: "🟩", present: "🟨", absent: "⬛" };
+  const tries = (game.guesses || []).filter((t) => !t.auto);
+  if (!tries.length) {
+    lines.push("(no guesses)");
+  } else {
+    tries.forEach((t, i) => {
+      const a = t.results.across.map((x) => mark[x]).join("");
+      const b = t.results.down4.map((x) => mark[x]).join("");
+      const c = t.results.down3.map((x) => mark[x]).join("");
+      lines.push(`${i + 1}  ${a}  ${b}  ${c}`);
     });
   }
-  emojiRow("across", "ACROSS");
-  emojiRow("down4", "DOWN 4");
-  emojiRow("down3", "DOWN 3");
   lines.push("");
-  // Mini crossword silhouette: green if that cell's letter is known/solved, else black if unsolved.
-  const layout = layoutPuzzle(p);
+  const layout = layoutPuzzle(game.puzzle);
   const acKnown = knownLetters(game, "across");
   const d4Known = knownLetters(game, "down4");
   const d3Known = knownLetters(game, "down3");
@@ -1363,7 +1840,7 @@ function shareText(game) {
     for (let c = 0; c < layout.width; c++) {
       const cell = layout.map[r + "," + c];
       if (!cell) {
-        row += "▪️"; // dark empty to keep alignment
+        row += "▪️";
         continue;
       }
       let known = false;
@@ -1380,22 +1857,25 @@ function shareText(game) {
 }
 
 function winMessage(guessesUsed) {
-  if (guessesUsed <= 3) return "Genius!";
-  if (guessesUsed === 4) return "Magnificent!";
-  if (guessesUsed === 5) return "Impressive!";
-  if (guessesUsed === 6) return "Splendid!";
+  if (guessesUsed <= 1) return "Genius!";
+  if (guessesUsed === 2) return "Magnificent!";
+  if (guessesUsed === 3) return "Impressive!";
+  if (guessesUsed === 4) return "Splendid!";
+  if (guessesUsed === 5) return "Great!";
+  if (guessesUsed === 6) return "Nice!";
   return "Phew!";
 }
 
 const WORD_LABELS = {
-  across: "Across · 5",
-  down4: "Down · 4",
-  down3: "Down · 3",
+  across: "Across",
+  down4: "Down 4",
+  down3: "Down 3",
 };
 
 const ENGINE = {
   MAX_GUESSES,
   LAUNCH_ISO,
+  WORD_KEYS,
   unpack,
   hashString,
   mulberry32,
@@ -1414,18 +1894,30 @@ const ENGINE = {
   validatePuzzle,
   generatePuzzle,
   dailySeed,
+  puzzleKey,
+  catalogForTheme,
+  listsForTheme,
+  themeById,
+  shuffledThemeOrder,
+  themeForDay,
   generateDailyPuzzle,
   generateRandomPuzzle,
   wordOf,
   wordLen,
   emptyGame,
+  syncCrossing,
+  draftWords,
   greensForWord,
   knownLetters,
   isSolved,
   allSolved,
+  bestStatus,
+  cellResultForTry,
   keyboardColors,
-  evaluateGuess,
-  applyGuess,
+  isValidWord,
+  evaluatePuzzle,
+  applyPuzzleGuess,
+  hiddenHintCells,
   applyHint,
   revealHintLetter,
   shareText,
@@ -1440,7 +1932,7 @@ if (typeof window !== "undefined") {
   window.WoordleEngine = ENGINE;
 }
 
-/* Woordle UI */
+/* Woordle UI — whole-puzzle submit + daily themes */
 (function () {
   const E = window.WoordleEngine;
   const LISTS = {
@@ -1453,9 +1945,10 @@ if (typeof window !== "undefined") {
   };
 
   const STORAGE = {
-    prefs: "woordle:v1:prefs",
-    daily: "woordle:v1:daily",
-    practice: "woordle:v1:practice",
+    prefs: "woordle:v2:prefs",
+    prefsV1: "woordle:v1:prefs",
+    daily: "woordle:v2:daily",
+    practice: "woordle:v2:practice",
   };
 
   const SKINS = [
@@ -1474,12 +1967,12 @@ if (typeof window !== "undefined") {
     { id: "h40", n: 40, price: 399, label: "$3.99" },
   ];
   const BUNDLE_PRICE = "$2.99";
-  const FREE_SKINS = new Set(["rivet", "midnight", "contrast"]);
   const KEYS = [
     ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
     ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
     ["enter", "z", "x", "c", "v", "b", "n", "m", "back"],
   ];
+  const WORD_ORDER = ["across", "down4", "down3"];
 
   function defaultPrefs() {
     return {
@@ -1493,21 +1986,32 @@ if (typeof window !== "undefined") {
       lastDailyDate: null,
       lastDailyWinDate: null,
       lastDailyResult: null,
-      distribution: { 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, fail: 0 },
+      distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, fail: 0 },
       practicePlayed: 0,
       practiceWon: 0,
       seenHowTo: false,
+      practiceTheme: "random",
     };
   }
 
   function loadPrefs() {
     try {
       const raw = localStorage.getItem(STORAGE.prefs);
-      if (!raw) return defaultPrefs();
-      return Object.assign(defaultPrefs(), JSON.parse(raw));
-    } catch (e) {
-      return defaultPrefs();
-    }
+      if (raw) return Object.assign(defaultPrefs(), JSON.parse(raw));
+      const v1 = localStorage.getItem(STORAGE.prefsV1);
+      if (v1) {
+        const old = JSON.parse(v1);
+        const p = defaultPrefs();
+        p.hintsRemaining = old.hintsRemaining != null ? old.hintsRemaining : 3;
+        p.currentSkin = old.currentSkin || "rivet";
+        p.unlockedSkins = old.unlockedSkins || p.unlockedSkins;
+        p.currentStreak = old.currentStreak || 0;
+        p.maxStreak = old.maxStreak || 0;
+        p.seenHowTo = false; // show updated how-to
+        return p;
+      }
+    } catch (e) {}
+    return defaultPrefs();
   }
   function savePrefs() {
     localStorage.setItem(STORAGE.prefs, JSON.stringify(prefs));
@@ -1530,7 +2034,6 @@ if (typeof window !== "undefined") {
   let animating = false;
   let toastTimer = 0;
   let countdownTimer = 0;
-  let pendingPurchase = null;
   let endStatsRecorded = false;
 
   const $ = (id) => document.getElementById(id);
@@ -1561,29 +2064,6 @@ if (typeof window !== "undefined") {
     document.documentElement.style.setProperty("--gap", gap + "px");
   }
 
-  function currentKey() {
-    return game.selected;
-  }
-
-  function draftArr(key) {
-    if (!game.draft) game.draft = { across: [], down4: [], down3: [] };
-    const n = E.wordLen(key);
-    if (!game.draft[key] || game.draft[key].length !== n) {
-      game.draft[key] = new Array(n).fill(null);
-    }
-    const known = E.knownLetters(game, key);
-    for (let i = 0; i < n; i++) {
-      if (known[i]) game.draft[key][i] = known[i];
-    }
-    return game.draft[key];
-  }
-
-  function draftWord(key) {
-    const d = draftArr(key);
-    if (d.some((ch) => !ch)) return null;
-    return d.join("");
-  }
-
   function persist() {
     if (!game) return;
     if (game.mode === "daily") saveSlot(STORAGE.daily, game);
@@ -1595,12 +2075,11 @@ if (typeof window !== "undefined") {
     el.textContent = msg;
     el.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove("show"), ms || 1400);
+    toastTimer = setTimeout(() => el.classList.remove("show"), ms || 1600);
   }
 
   function closeOverlays() {
     document.querySelectorAll(".overlay").forEach((o) => o.classList.remove("show"));
-    pendingPurchase = null;
   }
 
   function openOverlay(id) {
@@ -1610,21 +2089,19 @@ if (typeof window !== "undefined") {
     if (id === "overlay-stats") renderStats();
     if (id === "overlay-store") renderStore();
     if (id === "overlay-end") renderEnd();
+    if (id === "overlay-themes") renderThemePicker();
   }
 
   function refreshCountdown() {
-    const node = document.querySelectorAll(".countdown-value");
     const ms = E.msUntilNextLocalMidnight();
     const text = E.formatCountdown(ms);
-    node.forEach((n) => (n.textContent = text));
+    document.querySelectorAll(".countdown-value").forEach((n) => (n.textContent = text));
   }
 
   function maybeResetStreak() {
     const today = E.todayISO();
     if (!prefs.lastDailyDate) return;
     if (prefs.lastDailyDate === today) return;
-    const yesterday = E.todayISO(new Date(Date.now() - 86400000));
-    // More reliable yesterday:
     const d = new Date();
     const yest = E.todayISO(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
     if (prefs.lastDailyDate !== yest) {
@@ -1633,40 +2110,52 @@ if (typeof window !== "undefined") {
     }
   }
 
-  /* ---------- game start / restore ---------- */
+  function themeObj(gameOrId) {
+    if (!gameOrId) return null;
+    if (typeof gameOrId === "string") return E.themeById(gameOrId);
+    if (gameOrId.id) return E.themeById(gameOrId.id) || gameOrId;
+    if (gameOrId.theme) return E.themeById(gameOrId.theme.id) || gameOrId.theme;
+    return null;
+  }
+
+  function resolveSaved(saved) {
+    if (!saved || saved.version !== 2 || !saved.puzzle) return null;
+    if (!saved.draft) {
+      saved.draft = { across: [null, null, null, null, null], down4: [null, null, null, null], down3: [null, null, null] };
+    }
+    return saved;
+  }
+
   function startDaily() {
     const today = E.todayISO();
-    const saved = loadSlot(STORAGE.daily);
-    if (saved && saved.dateISO === today && saved.puzzle) {
+    const saved = resolveSaved(loadSlot(STORAGE.daily));
+    if (saved && saved.dateISO === today) {
       game = saved;
-      if (!game.draft) game.draft = { across: [], down4: [], down3: [] };
       endStatsRecorded = game.status !== "playing";
       afterStart();
       if (game.status !== "playing") setTimeout(() => openOverlay("overlay-end"), 400);
       return;
     }
-    const puzzle = E.generateDailyPuzzle(today, LISTS);
-    game = E.emptyGame(puzzle, "daily", today, E.dailySeed(today));
-    game.draft = { across: [], down4: [], down3: [] };
+    const { puzzle, theme, seed } = E.generateDailyPuzzle(today, LISTS);
+    game = E.emptyGame(puzzle, "daily", today, seed, theme);
     endStatsRecorded = false;
     persist();
     afterStart();
   }
 
-  function startPractice(forceNew) {
+  function startPractice(forceNew, themeId) {
     if (!forceNew) {
-      const saved = loadSlot(STORAGE.practice);
-      if (saved && saved.puzzle && saved.status === "playing") {
+      const saved = resolveSaved(loadSlot(STORAGE.practice));
+      if (saved && saved.status === "playing") {
         game = saved;
-        if (!game.draft) game.draft = { across: [], down4: [], down3: [] };
         endStatsRecorded = false;
         afterStart();
         return;
       }
     }
-    const { puzzle, seed } = E.generateRandomPuzzle(LISTS);
-    game = E.emptyGame(puzzle, "practice", null, seed);
-    game.draft = { across: [], down4: [], down3: [] };
+    const id = themeId || prefs.practiceTheme || "random";
+    const { puzzle, seed, theme } = E.generateRandomPuzzle(LISTS, null, id);
+    game = E.emptyGame(puzzle, "practice", null, seed, theme);
     endStatsRecorded = false;
     persist();
     afterStart();
@@ -1674,7 +2163,6 @@ if (typeof window !== "undefined") {
 
   function afterStart() {
     applySkin();
-    renderChrome();
     renderAll();
     sizeTiles();
     renderAll();
@@ -1696,19 +2184,43 @@ if (typeof window !== "undefined") {
     } else startPractice(true);
   }
 
-  /* ---------- rendering ---------- */
+  /* ---------- render ---------- */
+  function renderAll() {
+    if (!game) return;
+    renderChrome();
+    renderTheme();
+    renderPips();
+    renderHistory();
+    renderBoard();
+    renderKeyboard();
+  }
+
   function renderChrome() {
-    const dailyOn = game && game.mode === "daily";
+    const dailyOn = game.mode === "daily";
     $("btn-daily").classList.toggle("on", dailyOn);
     $("btn-practice").classList.toggle("on", !dailyOn);
     $("btn-daily").setAttribute("aria-pressed", dailyOn ? "true" : "false");
     $("btn-practice").setAttribute("aria-pressed", !dailyOn ? "true" : "false");
     $("btn-new").style.display = dailyOn ? "none" : "";
+    $("btn-theme").style.display = dailyOn ? "none" : "";
     const today = E.todayISO();
     $("mode-date").textContent = dailyOn
       ? shortDailyLabel(game.dateISO || today)
       : "Practice · unlimited";
     $("hint-count").textContent = String(prefs.hintsRemaining);
+    $("try-count").textContent = (game.guessesUsed || 0) + "/" + E.MAX_GUESSES;
+  }
+
+  function renderTheme() {
+    const el = $("theme-banner");
+    const th = game.theme;
+    if (!th) {
+      el.innerHTML = "";
+      return;
+    }
+    const label = game.mode === "daily" ? "Today's theme" : "Theme";
+    el.innerHTML = `<span class="theme-emoji" aria-hidden="true">${th.emoji || ""}</span>
+      <div class="theme-text"><span class="theme-label">${label}</span><span class="theme-name">${th.name}</span></div>`;
   }
 
   function renderPips() {
@@ -1722,69 +2234,67 @@ if (typeof window !== "undefined") {
       if (i < used) s.classList.add("used");
       else if (left <= 1) s.classList.add("danger");
       else if (left <= 2) s.classList.add("left-warn");
-      s.title = i < used ? "Used" : "Remaining";
       el.appendChild(s);
     }
   }
 
-  function cellState(cell) {
-    const key = currentKey();
-    const inSelected =
-      (key === "across" && cell.acrossIndex >= 0) ||
-      (key === "down4" && cell.down4Index >= 0) ||
-      (key === "down3" && cell.down3Index >= 0);
-    let letter = "";
-    let known = false;
-    let hinted = false;
-    let color = null; // last guess color if this word just... we show known greens on grid
-    const acK = E.knownLetters(game, "across");
-    const d4K = E.knownLetters(game, "down4");
-    const d3K = E.knownLetters(game, "down3");
-    if (cell.acrossIndex >= 0 && acK[cell.acrossIndex]) {
-      letter = acK[cell.acrossIndex];
-      known = true;
-    }
-    if (cell.down4Index >= 0 && d4K[cell.down4Index]) {
-      letter = d4K[cell.down4Index];
-      known = true;
-    }
-    if (cell.down3Index >= 0 && d3K[cell.down3Index]) {
-      letter = d3K[cell.down3Index];
-      known = true;
-    }
-    if (cell.acrossIndex >= 0 && game.hints.across[cell.acrossIndex]) hinted = true;
-    if (cell.down4Index >= 0 && game.hints.down4[cell.down4Index]) hinted = true;
-    if (cell.down3Index >= 0 && game.hints.down3[cell.down3Index]) hinted = true;
+  function isLocked(key, index) {
+    return !!E.knownLetters(game, key)[index];
+  }
 
-    if (inSelected && !known) {
-      const d = draftArr(key);
-      const idx = key === "across" ? cell.acrossIndex : key === "down4" ? cell.down4Index : cell.down3Index;
-      if (d[idx]) letter = d[idx];
-    } else if (inSelected && known) {
-      const d = draftArr(key);
-      const idx = key === "across" ? cell.acrossIndex : key === "down4" ? cell.down4Index : cell.down3Index;
-      if (d[idx]) letter = d[idx];
-    }
-    return { letter, known, hinted, inSelected };
+  function letterAtCell(cell) {
+    if (cell.acrossIndex >= 0 && game.draft.across[cell.acrossIndex]) return game.draft.across[cell.acrossIndex];
+    if (cell.down4Index >= 0 && game.draft.down4[cell.down4Index]) return game.draft.down4[cell.down4Index];
+    if (cell.down3Index >= 0 && game.draft.down3[cell.down3Index]) return game.draft.down3[cell.down3Index];
+    return "";
+  }
+
+  function cellOwners(cell) {
+    const o = [];
+    if (cell.acrossIndex >= 0) o.push({ key: "across", index: cell.acrossIndex });
+    if (cell.down4Index >= 0) o.push({ key: "down4", index: cell.down4Index });
+    if (cell.down3Index >= 0) o.push({ key: "down3", index: cell.down3Index });
+    return o;
+  }
+
+  function findCellForIndex(layout, key, idx) {
+    return layout.cells.find((c) =>
+      key === "across" ? c.acrossIndex === idx : key === "down4" ? c.down4Index === idx : c.down3Index === idx
+    );
   }
 
   function renderBoard() {
     const board = $("board");
     const layout = E.layoutPuzzle(game.puzzle);
     board.style.gridTemplateRows = `repeat(${layout.height}, var(--tile))`;
+    const acK = E.knownLetters(game, "across");
+    const d4K = E.knownLetters(game, "down4");
+    const d3K = E.knownLetters(game, "down3");
     const html = [];
+    const cursorCell = findCellForIndex(layout, game.selected, game.cursorIndex);
     for (const cell of layout.cells) {
-      const st = cellState(cell);
+      const owners = cellOwners(cell);
+      const inWord = owners.some((o) => o.key === game.selected);
+      const isCursor = cursorCell && cursorCell.r === cell.r && cursorCell.c === cell.c;
+      let known = false;
+      let hinted = false;
+      if (cell.acrossIndex >= 0 && acK[cell.acrossIndex]) known = true;
+      if (cell.down4Index >= 0 && d4K[cell.down4Index]) known = true;
+      if (cell.down3Index >= 0 && d3K[cell.down3Index]) known = true;
+      if (cell.acrossIndex >= 0 && game.hints.across[cell.acrossIndex]) hinted = true;
+      if (cell.down4Index >= 0 && game.hints.down4[cell.down4Index]) hinted = true;
+      if (cell.down3Index >= 0 && game.hints.down3[cell.down3Index]) hinted = true;
+      const letter = (letterAtCell(cell) || "").toUpperCase();
       const classes = ["tile"];
-      if (st.letter) classes.push("filled");
-      if (st.known) classes.push("known", "flipped", "correct");
-      if (st.inSelected) classes.push("in-word");
-      if (st.hinted) classes.push("hint-mark");
-      const ch = (st.letter || "").toUpperCase();
+      if (letter) classes.push("filled");
+      if (known) classes.push("known", "flipped", "correct");
+      if (inWord) classes.push("in-word");
+      if (isCursor) classes.push("cursor");
+      if (hinted) classes.push("hint-mark");
       html.push(
-        `<button class="${classes.join(" ")}" type="button" data-r="${cell.r}" data-c="${cell.c}" aria-label="Row ${cell.r + 1} column ${cell.c + 1}${ch ? ", " + ch : ""}" style="grid-row:${cell.r + 1};grid-column:${cell.c + 1}">` +
-          `<span class="tile-face tile-front">${ch}</span>` +
-          `<span class="tile-face tile-back">${ch}</span>` +
+        `<button class="${classes.join(" ")}" type="button" data-r="${cell.r}" data-c="${cell.c}" aria-label="Row ${cell.r + 1} column ${cell.c + 1}${letter ? ", " + letter : ""}" style="grid-row:${cell.r + 1};grid-column:${cell.c + 1}">` +
+          `<span class="tile-face tile-front">${letter}</span>` +
+          `<span class="tile-face tile-back">${letter}</span>` +
           `</button>`
       );
     }
@@ -1799,74 +2309,64 @@ if (typeof window !== "undefined") {
     const layout = E.layoutPuzzle(game.puzzle);
     const cell = layout.map[r + "," + c];
     if (!cell) return;
-    const owners = [];
-    if (cell.acrossIndex >= 0) owners.push("across");
-    if (cell.down4Index >= 0) owners.push("down4");
-    if (cell.down3Index >= 0) owners.push("down3");
+    const owners = cellOwners(cell);
     if (!owners.length) return;
-    let next = owners[0];
-    if (owners.length > 1 && owners.includes(game.selected)) {
-      next = owners[(owners.indexOf(game.selected) + 1) % owners.length];
+    const current = findCellForIndex(layout, game.selected, game.cursorIndex);
+    const alreadyHere = current && current.r === r && current.c === c;
+    if (owners.length === 1) {
+      game.selected = owners[0].key;
+      game.cursorIndex = owners[0].index;
+    } else if (alreadyHere) {
+      const keys = owners.map((o) => o.key);
+      const next = keys[(keys.indexOf(game.selected) + 1) % keys.length] || keys[0];
+      game.selected = next;
+      game.cursorIndex = owners.find((o) => o.key === next).index;
+    } else if (owners.some((o) => o.key === game.selected)) {
+      game.cursorIndex = owners.find((o) => o.key === game.selected).index;
+    } else {
+      const prefer = owners.find((o) => o.key === "across") || owners[0];
+      game.selected = prefer.key;
+      game.cursorIndex = prefer.index;
     }
-    selectWord(next);
-  }
-
-  function selectWord(key) {
-    if (!game || animating) return;
-    if (E.isSolved(game, key) && game.status === "playing") {
-      // still allow viewing, and if solved maybe pick it to review
-    }
-    game.selected = key;
     persist();
-    renderAll();
-  }
-
-  function renderTabs() {
-    const el = $("tabs");
-    const keys = ["across", "down4", "down3"];
-    const labels = { across: ["Across", "5 letters"], down4: ["Down", "4 letters"], down3: ["Down", "3 letters"] };
-    el.innerHTML = keys
-      .map((k) => {
-        const solved = E.isSolved(game, k);
-        const on = game.selected === k;
-        return `<button type="button" class="tab${on ? " on" : ""}${solved ? " solved" : ""}" data-key="${k}" aria-pressed="${on}">
-          <span>${labels[k][0]}${solved ? " ✓" : ""}</span><small>${labels[k][1]}</small>
-        </button>`;
-      })
-      .join("");
-    el.querySelectorAll(".tab").forEach((b) => b.addEventListener("click", () => selectWord(b.dataset.key)));
+    renderBoard();
   }
 
   function renderHistory() {
     const el = $("history");
-    const key = game.selected;
-    const rows = game.guesses[key] || [];
-    const vis = rows.filter((r) => !r.auto);
-    if (!vis.length) {
+    const tries = game.guesses || [];
+    if (!tries.length) {
       el.innerHTML = "";
       return;
     }
-    el.innerHTML = vis
-      .map((row) => {
-        const tiles = row.word
-          .split("")
-          .map((ch, i) => `<span class="hist-tile ${row.result[i]}">${ch}</span>`)
-          .join("");
-        return `<div class="hist-row">${tiles}</div>`;
+    const layout = E.layoutPuzzle(game.puzzle);
+    el.innerHTML = tries
+      .map((t, i) => {
+        const mini = [];
+        mini.push(`<div class="hist-mini" style="grid-template-columns:repeat(${layout.width}, 8px);grid-template-rows:repeat(${layout.height}, 8px)">`);
+        for (const cell of layout.cells) {
+          const st = E.cellResultForTry(cell, t) || "absent";
+          mini.push(`<span class="${st}" style="grid-row:${cell.r + 1};grid-column:${cell.c + 1}"></span>`);
+        }
+        mini.push("</div>");
+        const rows = WORD_ORDER.map((k) => {
+          const tiles = t.results[k].map((r) => `<span class="hist-tile ${r}"></span>`).join("");
+          return `<div class="hist-row">${tiles}</div>`;
+        }).join("");
+        return `<div class="hist-try"><div class="hist-num">TRY ${i + 1}</div>${mini.join("")}<div class="hist-rows">${rows}</div></div>`;
       })
       .join("");
-    el.scrollTop = el.scrollHeight;
+    el.scrollLeft = el.scrollWidth;
   }
 
   function renderKeyboard() {
     const el = $("keyboard");
-    const colors = game ? E.keyboardColors(game, game.selected) : {};
+    const colors = game ? E.keyboardColors(game) : {};
     el.innerHTML = KEYS.map((row) => {
       const keys = row
         .map((k) => {
           if (k === "enter") return `<button type="button" class="key wide" data-key="enter" aria-label="Submit">Enter</button>`;
-          if (k === "back")
-            return `<button type="button" class="key wide" data-key="back" aria-label="Delete">Delete</button>`;
+          if (k === "back") return `<button type="button" class="key wide" data-key="back" aria-label="Delete">Delete</button>`;
           const col = colors[k] || "";
           return `<button type="button" class="key ${col}" data-key="${k}" aria-label="${k}">${k}</button>`;
         })
@@ -1874,16 +2374,6 @@ if (typeof window !== "undefined") {
       return `<div class="kb-row">${keys}</div>`;
     }).join("");
     el.querySelectorAll(".key").forEach((b) => b.addEventListener("click", () => onKey(b.dataset.key)));
-  }
-
-  function renderAll() {
-    if (!game) return;
-    renderChrome();
-    renderPips();
-    renderBoard();
-    renderTabs();
-    renderHistory();
-    renderKeyboard();
   }
 
   /* ---------- input ---------- */
@@ -1899,77 +2389,139 @@ if (typeof window !== "undefined") {
     if (/^[a-z]$/.test(k)) typeLetter(k);
   }
 
-  function typeLetter(ch) {
-    const key = currentKey();
-    if (E.isSolved(game, key)) {
-      toast("That word is already solved");
-      return;
+  function nextUnlocked(key, from) {
+    const n = E.wordLen(key);
+    for (let i = from; i < n; i++) if (!isLocked(key, i)) return i;
+    return null;
+  }
+  function prevUnlocked(key, from) {
+    for (let i = from; i >= 0; i--) if (!isLocked(key, i)) return i;
+    return null;
+  }
+  function firstUnfilled(exceptKey) {
+    const order = WORD_ORDER.slice();
+    if (exceptKey) {
+      const i = order.indexOf(exceptKey);
+      if (i >= 0) order.push(...order.splice(0, i + 1));
     }
-    const known = E.knownLetters(game, key);
-    const d = draftArr(key);
-    for (let i = 0; i < d.length; i++) {
-      if (!known[i] && !d[i]) {
-        d[i] = ch;
-        persist();
-        renderBoard();
-        // pop that tile
-        const layout = E.layoutPuzzle(game.puzzle);
-        const cell = findCellForIndex(layout, key, i);
-        if (cell) {
-          const el = document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
-          if (el) {
-            el.classList.remove("pop");
-            void el.offsetWidth;
-            el.classList.add("pop");
-          }
+    for (const key of order) {
+      const n = E.wordLen(key);
+      for (let i = 0; i < n; i++) {
+        if (!isLocked(key, i) && !game.draft[key][i]) return { key, index: i };
+      }
+    }
+    return null;
+  }
+
+  function typeLetter(ch) {
+    const key = game.selected;
+    let idx = game.cursorIndex;
+    if (isLocked(key, idx)) {
+      const n = nextUnlocked(key, idx + 1);
+      if (n == null) {
+        const jump = firstUnfilled(key);
+        if (jump) {
+          game.selected = jump.key;
+          game.cursorIndex = jump.index;
+          return typeLetter(ch);
         }
         return;
       }
+      game.cursorIndex = n;
+      idx = n;
     }
+    E.syncCrossing(game.draft, game.puzzle, key, idx, ch);
+    const nxt = nextUnlocked(key, idx + 1);
+    if (nxt != null) {
+      game.cursorIndex = nxt;
+    } else {
+      const jump = firstUnfilled(key);
+      if (jump) {
+        game.selected = jump.key;
+        game.cursorIndex = jump.index;
+      }
+    }
+    persist();
+    renderBoard();
   }
 
   function backspace() {
-    const key = currentKey();
-    if (E.isSolved(game, key)) return;
-    const known = E.knownLetters(game, key);
-    const d = draftArr(key);
-    for (let i = d.length - 1; i >= 0; i--) {
-      if (!known[i] && d[i]) {
-        d[i] = null;
-        persist();
-        renderBoard();
-        return;
+    const key = game.selected;
+    const idx = game.cursorIndex;
+    if (!isLocked(key, idx) && game.draft[key][idx]) {
+      E.syncCrossing(game.draft, game.puzzle, key, idx, null);
+      persist();
+      renderBoard();
+      return;
+    }
+    const prev = prevUnlocked(key, idx - 1);
+    if (prev != null) {
+      game.selected = key;
+      game.cursorIndex = prev;
+      if (!isLocked(key, prev) && game.draft[key][prev]) {
+        E.syncCrossing(game.draft, game.puzzle, key, prev, null);
+      }
+    } else {
+      const order = ["down3", "down4", "across"]; // previous words
+      const start = order.indexOf(key);
+      const cycle = start >= 0 ? order.slice(start + 1).concat(order.slice(0, start)) : order;
+      for (const k of cycle) {
+        const p = prevUnlocked(k, E.wordLen(k) - 1);
+        if (p != null) {
+          game.selected = k;
+          game.cursorIndex = p;
+          if (!isLocked(k, p) && game.draft[k][p]) {
+            E.syncCrossing(game.draft, game.puzzle, k, p, null);
+          }
+          break;
+        }
+      }
+    }
+    persist();
+    renderBoard();
+  }
+
+  function fillDraftFromWords(words) {
+    const keys = { across: words.across, down4: words.down4, down3: words.down3 };
+    for (const key of WORD_ORDER) {
+      const w = (keys[key] || "").toLowerCase();
+      for (let i = 0; i < w.length; i++) {
+        if (!isLocked(key, i)) E.syncCrossing(game.draft, game.puzzle, key, i, w[i]);
       }
     }
   }
 
-  function findCellForIndex(layout, key, idx) {
-    return layout.cells.find((c) =>
-      key === "across" ? c.acrossIndex === idx : key === "down4" ? c.down4Index === idx : c.down3Index === idx
-    );
+  function invalidMessage(invalid, words) {
+    const labels = invalid.map((k) => {
+      const w = words && words[k] ? words[k].toUpperCase() : E.WORD_LABELS[k];
+      return w;
+    });
+    if (labels.length === 1) return `${labels[0]} isn't in the word list`;
+    if (labels.length === 2) return `${labels[0]} and ${labels[1]} aren't in the word list`;
+    return "None of those are in the word list";
   }
 
   function submit() {
     if (!game || animating || game.status !== "playing") return;
-    const key = currentKey();
-    const word = draftWord(key);
-    if (!word) {
+    const dw = E.draftWords(game);
+    if (!dw.allFilled) {
       shakeBoard();
-      toast("Not enough letters");
+      toast("Fill the whole crossword");
       return;
     }
-    const ev = E.evaluateGuess(game, LISTS, key, word);
+    const ev = E.evaluatePuzzle(game, LISTS, dw);
     if (!ev.ok) {
       if (ev.reason === "not-in-list") {
         shakeBoard();
-        toast("Not in word list");
+        toast(invalidMessage(ev.invalid, ev.words), 2200);
       } else if (ev.reason === "duplicate") {
         shakeBoard();
-        toast("Already guessed");
-      } else if (ev.reason === "already-solved") {
-        toast("That word is already solved");
+        toast("Already tried that");
       } else if (ev.reason === "no-guesses" || ev.reason === "finished") {
         openOverlay("overlay-end");
+      } else if (ev.reason === "short") {
+        shakeBoard();
+        toast("Fill the whole crossword");
       }
       return;
     }
@@ -1985,56 +2537,31 @@ if (typeof window !== "undefined") {
 
   function playFlip(ev) {
     animating = true;
-    E.applyGuess(game, ev);
-    // Clear draft for this word if solved, else reset unknowns
-    if (E.isSolved(game, ev.key)) {
-      game.draft[ev.key] = new Array(E.wordLen(ev.key)).fill(null);
-    } else {
-      const known = E.knownLetters(game, ev.key);
-      game.draft[ev.key] = known.map((ch) => ch || null);
-    }
+    E.applyPuzzleGuess(game, ev);
     persist();
-    renderHistory();
-    renderPips();
-    renderTabs();
-
     const layout = E.layoutPuzzle(game.puzzle);
-    const n = ev.word.length;
+    const last = game.guesses[game.guesses.length - 1];
     const tiles = [];
-    for (let i = 0; i < n; i++) {
-      const cell = findCellForIndex(layout, ev.key, i);
-      const el = cell && document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
-      tiles.push(el);
-    }
-    // Set faces and start unflipped, then flip to result colors
-    tiles.forEach((el, i) => {
+    layout.cells.forEach((cell) => {
+      const el = document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
       if (!el) return;
-      const ch = ev.word[i].toUpperCase();
+      const ch = letterAtCell(cell).toUpperCase();
+      const st = E.cellResultForTry(cell, last) || "absent";
       el.classList.remove("flipped", "known", "correct", "present", "absent");
-      el.classList.add("filled");
+      el.classList.add("filled", st);
       el.querySelector(".tile-front").textContent = ch;
       el.querySelector(".tile-back").textContent = ch;
-      el.classList.add(ev.result[i]);
+      tiles.push({ el, r: cell.r, c: cell.c });
     });
-
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const stagger = reduce ? 0 : 120;
+    const stagger = reduce ? 0 : 70;
     const duration = reduce ? 0 : 500;
-    tiles.forEach((el, i) => {
-      setTimeout(() => {
-        if (el) el.classList.add("flipped");
-      }, i * stagger);
-    });
-
-    const after = n * stagger + duration + 80;
+    tiles.sort((a, b) => a.r - b.r || a.c - b.c);
+    tiles.forEach((t, i) => setTimeout(() => t.el.classList.add("flipped"), i * stagger));
+    const after = tiles.length * stagger + duration + 80;
     setTimeout(() => {
-      // Crossing reveals + keyboard
-      renderBoard();
-      renderKeyboard();
-      renderTabs();
-      if (ev.correct) {
-        celebrateWord(ev.key);
-      }
+      renderAll();
+      if (ev.correct) celebrate();
       const done = game.status !== "playing";
       setTimeout(() => {
         animating = false;
@@ -2043,31 +2570,30 @@ if (typeof window !== "undefined") {
           persist();
           openOverlay("overlay-end");
         } else {
-          // Auto-advance to another unsolved word if this one is solved
-          if (ev.correct) {
-            const next = ["across", "down4", "down3"].find((k) => !E.isSolved(game, k));
-            if (next) selectWord(next);
-            const left = E.MAX_GUESSES - game.guessesUsed;
-            if (left && left <= 2) toast(left === 1 ? "Last guess" : left + " guesses left");
+          const left = E.MAX_GUESSES - game.guessesUsed;
+          if (left <= 2) toast(left === 1 ? "Last try" : left + " tries left");
+          const jump = firstUnfilled(null);
+          if (jump) {
+            game.selected = jump.key;
+            game.cursorIndex = jump.index;
+            renderBoard();
           }
         }
-      }, ev.correct ? 600 : 60);
+      }, ev.correct ? 600 : 80);
     }, after);
   }
 
-  function celebrateWord(key) {
+  function celebrate() {
     const layout = E.layoutPuzzle(game.puzzle);
-    const n = E.wordLen(key);
-    for (let i = 0; i < n; i++) {
-      const cell = findCellForIndex(layout, key, i);
-      const el = cell && document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
-      if (!el) continue;
+    layout.cells.forEach((cell, i) => {
+      const el = document.querySelector(`.tile[data-r="${cell.r}"][data-c="${cell.c}"]`);
+      if (!el) return;
       setTimeout(() => {
         el.classList.remove("win");
         void el.offsetWidth;
         el.classList.add("win");
-      }, i * 70);
-    }
+      }, i * 50);
+    });
   }
 
   function recordFinish() {
@@ -2080,7 +2606,7 @@ if (typeof window !== "undefined") {
       return;
     }
     const today = game.dateISO;
-    if (prefs.lastDailyDate === today) return; // already counted
+    if (prefs.lastDailyDate === today) return;
     maybeResetStreak();
     prefs.gamesPlayed += 1;
     prefs.lastDailyDate = today;
@@ -2090,7 +2616,7 @@ if (typeof window !== "undefined") {
       prefs.currentStreak = (prefs.currentStreak || 0) + 1;
       prefs.lastDailyWinDate = today;
       if (prefs.currentStreak > prefs.maxStreak) prefs.maxStreak = prefs.currentStreak;
-      const g = String(Math.max(3, game.guessesUsed));
+      const g = String(Math.max(1, game.guessesUsed));
       prefs.distribution[g] = (prefs.distribution[g] || 0) + 1;
     } else {
       prefs.currentStreak = 0;
@@ -2099,13 +2625,7 @@ if (typeof window !== "undefined") {
     savePrefs();
   }
 
-  function isYesterdayOf(pastISO, todayISO) {
-    const d = E.parseISODate(todayISO);
-    const yest = E.todayISO(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
-    return pastISO === yest;
-  }
-
-  /* ---------- hints ---------- */
+  /* ---------- hints / share / end / stats / store / themes ---------- */
   function requestHint() {
     if (!game || animating) return;
     if (game.status !== "playing") return openOverlay("overlay-end");
@@ -2115,21 +2635,14 @@ if (typeof window !== "undefined") {
       );
       return;
     }
-    let key = currentKey();
-    if (E.isSolved(game, key)) {
-      key = ["across", "down4", "down3"].find((k) => !E.isSolved(game, k));
-      if (!key) return;
-      selectWord(key);
-    }
-    const info = E.applyHint(game, key);
+    const info = E.applyHint(game);
     if (!info.ok) {
-      if (info.reason === "all-known") toast("Every letter in this word is already known");
+      if (info.reason === "all-known") toast("Every letter is already known");
       return;
     }
-    const label = E.WORD_LABELS[key];
-    openConfirm(`Use 1 hint to reveal a letter in ${label}? You have ${prefs.hintsRemaining}.`, () => {
-      const idx = info.hidden[Math.floor(Math.random() * info.hidden.length)];
-      E.revealHintLetter(game, key, idx);
+    openConfirm(`Use 1 hint to reveal a letter? You have ${prefs.hintsRemaining}.`, () => {
+      const pick = info.hidden[Math.floor(Math.random() * info.hidden.length)];
+      E.revealHintLetter(game, pick.key, pick.index);
       prefs.hintsRemaining -= 1;
       savePrefs();
       persist();
@@ -2143,7 +2656,6 @@ if (typeof window !== "undefined") {
     });
   }
 
-  /* ---------- share / end / stats / store ---------- */
   async function shareResults() {
     if (!game) return;
     const text = E.shareText(game);
@@ -2159,7 +2671,6 @@ if (typeof window !== "undefined") {
       await navigator.clipboard.writeText(text);
       toast("Copied results to clipboard");
     } catch (e) {
-      // fallback
       const ta = document.createElement("textarea");
       ta.value = text;
       document.body.appendChild(ta);
@@ -2180,8 +2691,9 @@ if (typeof window !== "undefined") {
     const won = game.status === "won";
     const title = won ? E.winMessage(game.guessesUsed) : "So close";
     const sub = won
-      ? `Solved in ${game.guessesUsed}/${E.MAX_GUESSES} guesses.`
-      : `You used all ${E.MAX_GUESSES} guesses. The words were:`;
+      ? `Solved in ${game.guessesUsed}/${E.MAX_GUESSES} tries.`
+      : `You used all ${E.MAX_GUESSES} tries. The words were:`;
+    const th = game.theme ? `<p>${game.theme.emoji || ""} Theme: <strong style="color:var(--text)">${game.theme.name}</strong></p>` : "";
     const words = `
       <div class="results-words">
         <div><span>ACROSS</span><div class="rw">${game.puzzle.across.toUpperCase()}</div></div>
@@ -2190,11 +2702,9 @@ if (typeof window !== "undefined") {
       </div>`;
     const daily = game.mode === "daily";
     const cd = daily
-      ? `<div class="countdown"><label>Next daily</label><div class="countdown-value">${E.formatCountdown(
-          E.msUntilNextLocalMidnight()
-        )}</div></div>`
+      ? `<div class="countdown"><label>Next daily</label><div class="countdown-value">${E.formatCountdown(E.msUntilNextLocalMidnight())}</div></div>`
       : "";
-    el.innerHTML = `<h2>${title}</h2><p>${sub}</p>${words}${cd}`;
+    el.innerHTML = `<h2>${title}</h2><p>${sub}</p>${th}${words}${cd}`;
     $("btn-end-practice").textContent = daily ? "Practice" : "New puzzle";
     refreshCountdown();
   }
@@ -2204,6 +2714,8 @@ if (typeof window !== "undefined") {
     const p = prefs;
     const played = p.gamesPlayed;
     const winPct = played ? Math.round((p.gamesWon / played) * 100) : 0;
+    const nums = [1, 2, 3, 4, 5, 6, 7];
+    const max = Math.max(1, ...nums.map((k) => p.distribution[k] || 0), p.distribution.fail || 0);
     $("stats-body").innerHTML = `
       <h2>Statistics</h2>
       <div class="stat-row">
@@ -2212,11 +2724,10 @@ if (typeof window !== "undefined") {
         <div><div class="stat-num">${p.currentStreak}</div><div class="stat-label">Streak</div></div>
         <div><div class="stat-num">${p.maxStreak}</div><div class="stat-label">Max streak</div></div>
       </div>
-      <div class="store-section">Daily guess distribution</div>
-      ${[3, 4, 5, 6, 7]
+      <div class="store-section">Daily try distribution</div>
+      ${nums
         .map((n) => {
           const v = p.distribution[n] || 0;
-          const max = Math.max(1, ...[3, 4, 5, 6, 7].map((k) => p.distribution[k] || 0), p.distribution.fail || 0);
           const pct = Math.round((v / max) * 100);
           const mine = game && game.mode === "daily" && game.status === "won" && game.guessesUsed === n;
           return `<div class="dist-row"><div style="width:16px">${n}</div><div class="dist-bar-wrap"><div class="dist-bar ${v ? "has" : ""} ${mine ? "mine" : ""}" style="width:${v ? Math.max(pct, 8) : 0}%">${v || ""}</div></div></div>`;
@@ -2258,9 +2769,7 @@ if (typeof window !== "undefined") {
       ${skins}
       ${bundle}
     `;
-    $("store-body").querySelectorAll("[data-buy]").forEach((b) => {
-      b.addEventListener("click", () => startPurchase(b.dataset));
-    });
+    $("store-body").querySelectorAll("[data-buy]").forEach((b) => b.addEventListener("click", () => startPurchase(b.dataset)));
     $("store-body").querySelectorAll("[data-equip]").forEach((b) => {
       b.addEventListener("click", () => {
         prefs.currentSkin = b.dataset.equip;
@@ -2279,7 +2788,6 @@ if (typeof window !== "undefined") {
       const s = SKINS.find((x) => x.id === ds.id);
       title = `Unlock ${s.name} for ${ds.label}?`;
     } else if (ds.buy === "bundle") title = `Unlock all paid skins for ${BUNDLE_PRICE}?`;
-    pendingPurchase = ds;
     openConfirm(title + " You won't be charged in this prototype.", () => completePurchase(ds));
   }
 
@@ -2301,39 +2809,44 @@ if (typeof window !== "undefined") {
     savePrefs();
     renderChrome();
     renderStore();
-    // keep store open
     $("overlay-store").classList.add("show");
     $("overlay-confirm").classList.remove("show");
   }
 
+  function renderThemePicker() {
+    const cur = prefs.practiceTheme || "random";
+    const random = `<button type="button" class="theme-pick random${cur === "random" ? " on" : ""}" data-id="random"><span class="em">🎲</span> Random theme</button>`;
+    const grid = THEMES.map((t) => {
+      const on = cur === t.id;
+      return `<button type="button" class="theme-pick${on ? " on" : ""}" data-id="${t.id}"><span class="em">${t.emoji}</span>${t.name}</button>`;
+    }).join("");
+    $("themes-body").innerHTML = `<h2>Practice themes</h2><p>All three words will fit the theme you pick. Random chooses a new one for each puzzle.</p><div class="theme-grid">${random}${grid}</div>`;
+    $("themes-body").querySelectorAll(".theme-pick").forEach((b) => {
+      b.addEventListener("click", () => {
+        prefs.practiceTheme = b.dataset.id;
+        savePrefs();
+        closeOverlays();
+        if (game && game.mode === "practice" && game.status === "playing" && game.guessesUsed > 0) {
+          openConfirm("Start a new puzzle with this theme? Your current one will be lost.", () => startPractice(true, prefs.practiceTheme));
+        } else {
+          startPractice(true, prefs.practiceTheme);
+        }
+      });
+    });
+  }
+
   function openConfirm(message, onYes) {
     $("confirm-msg").textContent = message;
-    const yes = $("btn-confirm-yes");
-    const no = $("btn-confirm-no");
-    const once = (fn) => {
-      const h = () => {
-        yes.removeEventListener("click", hy);
-        no.removeEventListener("click", hn);
-        $("overlay-confirm").classList.remove("show");
-        fn && fn();
-      };
-      const hy = () => h(onYes());
-      const hn = () => h();
-      yes.addEventListener("click", hy);
-      no.addEventListener("click", hn);
-    };
-    // simpler:
-    yes.onclick = () => {
+    $("btn-confirm-yes").onclick = () => {
       $("overlay-confirm").classList.remove("show");
       onYes && onYes();
     };
-    no.onclick = () => {
+    $("btn-confirm-no").onclick = () => {
       $("overlay-confirm").classList.remove("show");
     };
     $("overlay-confirm").classList.add("show");
   }
 
-  /* ---------- events ---------- */
   function bind() {
     $("btn-help").addEventListener("click", () => openOverlay("overlay-help"));
     $("btn-stats").addEventListener("click", () => openOverlay("overlay-stats"));
@@ -2341,6 +2854,7 @@ if (typeof window !== "undefined") {
     $("btn-daily").addEventListener("click", () => switchMode("daily"));
     $("btn-practice").addEventListener("click", () => switchMode("practice"));
     $("btn-new").addEventListener("click", requestNewPractice);
+    $("btn-theme").addEventListener("click", () => openOverlay("overlay-themes"));
     $("btn-hint").addEventListener("click", requestHint);
     $("btn-end-share").addEventListener("click", shareResults);
     $("btn-end-practice").addEventListener("click", () => {
@@ -2348,7 +2862,7 @@ if (typeof window !== "undefined") {
       startPractice(true);
     });
     document.querySelectorAll("[data-close]").forEach((b) => {
-      b.addEventListener("click", (e) => {
+      b.addEventListener("click", () => {
         const id = b.getAttribute("data-close");
         if (id) $(id).classList.remove("show");
         else closeOverlays();
@@ -2377,9 +2891,7 @@ if (typeof window !== "undefined") {
         onKey(e.key.toLowerCase());
       }
     });
-    window.addEventListener("resize", () => {
-      sizeTiles();
-    });
+    window.addEventListener("resize", sizeTiles);
     countdownTimer = setInterval(refreshCountdown, 1000);
   }
 
@@ -2395,7 +2907,6 @@ if (typeof window !== "undefined") {
     }
   }
 
-  // Debug hooks for tests / screenshots
   window.Woordle = {
     get game() {
       return game;
@@ -2407,21 +2918,21 @@ if (typeof window !== "undefined") {
     engine: E,
     startDaily,
     startPractice,
-    startPracticeNew: () => startPractice(true),
-    selectWord,
-    submit,
-    typeLetter,
+    startPracticeNew: (themeId) => startPractice(true, themeId),
     onKey,
+    typeLetter,
+    submit,
+    fillDraftFromWords,
     renderAll,
     openOverlay,
     closeOverlays,
     toast,
-    applyGuess: (key, word) => {
-      const ev = E.evaluateGuess(game, LISTS, key, word);
+    applyPuzzle: (words) => {
+      fillDraftFromWords(words);
+      const dw = E.draftWords(game);
+      const ev = E.evaluatePuzzle(game, LISTS, dw.allFilled ? dw : words);
       if (!ev.ok) return ev;
-      E.applyGuess(game, ev);
-      const known = E.knownLetters(game, key);
-      game.draft[key] = known.map((ch) => ch || null);
+      E.applyPuzzleGuess(game, ev);
       if (game.status !== "playing") recordFinish();
       persist();
       renderAll();

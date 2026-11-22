@@ -27,6 +27,10 @@
 
 /* —— Skins —— */
 html[data-skin="rivet"], :root {
+  --cursor: #f0d78c;
+  --cursor-halo: #000000;
+  --word-tint: #2c281c;
+
   --bg: #101218;
   --bg-elev: #1a1d27;
   --bg-elev-2: #232734;
@@ -55,6 +59,10 @@ html[data-skin="rivet"], :root {
 }
 
 html[data-skin="midnight"] {
+  --cursor: #b8d4ff;
+  --cursor-halo: #000000;
+  --word-tint: #1a2438;
+
   --bg: #07080c;
   --bg-elev: #12141c;
   --bg-elev-2: #1c1f2a;
@@ -81,6 +89,10 @@ html[data-skin="midnight"] {
 }
 
 html[data-skin="dawn"] {
+  --cursor: #8a6500;
+  --cursor-halo: #ffffff;
+  --word-tint: #efe3c4;
+
   --bg: #f6f1e8;
   --bg-elev: #ffffff;
   --bg-elev-2: #efe8db;
@@ -109,6 +121,10 @@ html[data-skin="dawn"] {
 }
 
 html[data-skin="sunset"] {
+  --cursor: #ffe9a8;
+  --cursor-halo: #1a0808;
+  --word-tint: #4a2a22;
+
   --bg: #2a1518;
   --bg-elev: #3a1d22;
   --bg-elev-2: #4a262c;
@@ -135,6 +151,10 @@ html[data-skin="sunset"] {
 }
 
 html[data-skin="ocean"] {
+  --cursor: #9eecf6;
+  --cursor-halo: #021018;
+  --word-tint: #163444;
+
   --bg: #0b1c28;
   --bg-elev: #122838;
   --bg-elev-2: #173348;
@@ -161,6 +181,10 @@ html[data-skin="ocean"] {
 }
 
 html[data-skin="forest"] {
+  --cursor: #eaf6a8;
+  --cursor-halo: #061008;
+  --word-tint: #243224;
+
   --bg: #121a14;
   --bg-elev: #1a261c;
   --bg-elev-2: #223226;
@@ -187,6 +211,10 @@ html[data-skin="forest"] {
 }
 
 html[data-skin="candy"] {
+  --cursor: #ffc2e8;
+  --cursor-halo: #140818;
+  --word-tint: #3a2448;
+
   --bg: #1c1224;
   --bg-elev: #2a1a38;
   --bg-elev-2: #38244a;
@@ -213,6 +241,10 @@ html[data-skin="candy"] {
 }
 
 html[data-skin="contrast"] {
+  --cursor: #ffff00;
+  --cursor-halo: #000000;
+  --word-tint: #222200;
+
   --bg: #000000;
   --bg-elev: #111111;
   --bg-elev-2: #222222;
@@ -465,9 +497,18 @@ button {
   border-color: var(--correct);
   color: var(--correct-text);
 }
-.tile.in-word .tile-front { box-shadow: 0 0 0 2px var(--focus); }
-.tile.in-word.known .tile-front,
-.tile.in-word.flipped { box-shadow: 0 0 0 2px var(--focus); }
+.board { overflow: visible; }
+.board-wrap { overflow: visible; }
+.tile { z-index: 0; }
+.tile.in-word { z-index: 1; }
+.tile.in-word:not(.known) .tile-front {
+  background: var(--word-tint);
+  border-color: var(--cursor, var(--focus));
+}
+.tile.in-word .tile-front,
+.tile.in-word .tile-back {
+  box-shadow: inset 0 0 0 3px var(--cursor, var(--focus));
+}
 .tile.pop { animation: pop 0.12s var(--ease); }
 .tile.shake, .board.shake { animation: shake 0.46s ease; }
 .tile.win { animation: bounce 0.55s var(--ease); }
@@ -818,63 +859,99 @@ button {
   line-height: 1.1;
 }
 
-/* History of full-puzzle tries */
+/* History: letter rows for each try */
 .history {
   min-height: 0;
-  max-height: 96px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 4px 12px 6px;
+  max-height: 118px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 2px 12px 6px;
   flex-shrink: 0;
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 6px;
   -webkit-overflow-scrolling: touch;
 }
 .history:empty { display: none; }
 .hist-try {
-  flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 8px;
 }
 .hist-num {
-  font-size: 9px;
+  flex: 0 0 14px;
+  font-size: 11px;
   font-weight: 800;
   color: var(--muted);
-  letter-spacing: 0.06em;
+  text-align: right;
 }
-.hist-mini {
-  display: grid;
-  gap: 1px;
+.hist-rows {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
 }
-.hist-mini span {
-  width: 8px;
-  height: 8px;
-  border-radius: 1px;
-  background: transparent;
-}
-.hist-mini span.correct { background: var(--correct); }
-.hist-mini span.present { background: var(--present); }
-.hist-mini span.absent { background: var(--absent); }
-.hist-rows { display: flex; flex-direction: column; gap: 2px; }
-.hist-row { display: flex; gap: 2px; justify-content: center; }
+.hist-row { display: flex; gap: 2px; }
 .hist-tile {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
   background: var(--absent);
+  color: var(--absent-text);
+  font-size: 12px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  text-transform: uppercase;
 }
-.hist-tile.correct { background: var(--correct); }
-.hist-tile.present { background: var(--present); }
+.hist-tile.correct { background: var(--correct); color: var(--correct-text); }
+.hist-tile.present { background: var(--present); color: var(--present-text); }
 
-.tile.cursor .tile-front {
-  box-shadow: 0 0 0 2px var(--focus), 0 0 8px var(--focus);
+/* Active cell — thick ring, glow, scale, blinking caret. Visible on green tiles. */
+.tile.cursor {
+  z-index: 6;
+  transform: scale(1.1);
+  outline: 3px solid var(--cursor, var(--focus));
+  outline-offset: 3px;
+  box-shadow: 0 0 0 2px var(--cursor-halo, #000), 0 0 16px 3px var(--cursor, var(--focus));
+  border-radius: calc(var(--radius) + 2px);
+  transition: transform 0.12s var(--ease);
 }
-.tile.in-word .tile-front { box-shadow: 0 0 0 2px var(--focus); }
-.tile.cursor.in-word .tile-front {
-  box-shadow: 0 0 0 2px var(--focus), 0 0 8px var(--focus);
+.tile.cursor.flipped {
+  transform: rotateX(180deg) scale(1.1);
 }
+.tile.cursor .tile-front,
+.tile.cursor .tile-back {
+  box-shadow: inset 0 0 0 3px var(--cursor, var(--focus));
+}
+.tile-caret {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 5px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--cursor, var(--focus));
+  opacity: 0;
+  pointer-events: none;
+  z-index: 8;
+  box-shadow: 0 0 0 1px var(--cursor-halo, #000);
+}
+.tile.cursor .tile-caret {
+  animation: caret-blink 1s step-end infinite;
+}
+.tile.cursor.flipped .tile-caret {
+  transform: rotateX(180deg);
+}
+@keyframes caret-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile.cursor, .tile.cursor.flipped { transition: none; }
+  .tile.cursor .tile-caret { animation: none; opacity: 1; }
+}
+
 
 .theme-grid {
   display: grid;
@@ -1815,9 +1892,8 @@ function revealHintLetter(game, key, index) {
 function shareText(game) {
   const themeBit = game.theme ? ` · ${game.theme.name} ${game.theme.emoji}` : "";
   const n = game.mode === "daily" && game.dateISO ? `#${puzzleNumber(game.dateISO)}` : "Practice";
-  const dateBit = game.mode === "daily" && game.dateISO ? formatPrettyDate(game.dateISO) : "";
   const score = game.status === "won" ? `${game.guessesUsed}/${MAX_GUESSES}` : `X/${MAX_GUESSES}`;
-  const lines = [`Woordle ${n}${themeBit}${dateBit ? " · " + dateBit : ""}`, score, ""];
+  const lines = [`Woordle ${n}${themeBit}`, score, ""];
   const mark = { correct: "🟩", present: "🟨", absent: "⬛" };
   const tries = (game.guesses || []).filter((t) => !t.auto);
   if (!tries.length) {
@@ -1827,32 +1903,11 @@ function shareText(game) {
       const a = t.results.across.map((x) => mark[x]).join("");
       const b = t.results.down4.map((x) => mark[x]).join("");
       const c = t.results.down3.map((x) => mark[x]).join("");
-      lines.push(`${i + 1}  ${a}  ${b}  ${c}`);
+      lines.push(`${i + 1}  ${a}  ·  ${b}  ·  ${c}`);
     });
   }
   lines.push("");
-  const layout = layoutPuzzle(game.puzzle);
-  const acKnown = knownLetters(game, "across");
-  const d4Known = knownLetters(game, "down4");
-  const d3Known = knownLetters(game, "down3");
-  for (let r = 0; r < layout.height; r++) {
-    let row = "";
-    for (let c = 0; c < layout.width; c++) {
-      const cell = layout.map[r + "," + c];
-      if (!cell) {
-        row += "▪️";
-        continue;
-      }
-      let known = false;
-      if (cell.acrossIndex >= 0 && acKnown[cell.acrossIndex]) known = true;
-      if (cell.down4Index >= 0 && d4Known[cell.down4Index]) known = true;
-      if (cell.down3Index >= 0 && d3Known[cell.down3Index]) known = true;
-      row += known ? "🟩" : "⬛";
-    }
-    lines.push(row);
-  }
-  lines.push("");
-  lines.push("Pocket Rivet");
+  lines.push("https://tyvan72.github.io/woordle/");
   return lines.join("\n");
 }
 
@@ -2292,9 +2347,10 @@ if (typeof window !== "undefined") {
       if (isCursor) classes.push("cursor");
       if (hinted) classes.push("hint-mark");
       html.push(
-        `<button class="${classes.join(" ")}" type="button" data-r="${cell.r}" data-c="${cell.c}" aria-label="Row ${cell.r + 1} column ${cell.c + 1}${letter ? ", " + letter : ""}" style="grid-row:${cell.r + 1};grid-column:${cell.c + 1}">` +
+        `<button class="${classes.join(" ")}" type="button" data-r="${cell.r}" data-c="${cell.c}" aria-label="Row ${cell.r + 1} column ${cell.c + 1}${letter ? ", " + letter : ""}${isCursor ? ", selected" : ""}" style="grid-row:${cell.r + 1};grid-column:${cell.c + 1}">` +
           `<span class="tile-face tile-front">${letter}</span>` +
           `<span class="tile-face tile-back">${letter}</span>` +
+          `<span class="tile-caret" aria-hidden="true"></span>` +
           `</button>`
       );
     }
@@ -2339,24 +2395,19 @@ if (typeof window !== "undefined") {
       el.innerHTML = "";
       return;
     }
-    const layout = E.layoutPuzzle(game.puzzle);
     el.innerHTML = tries
-      .map((t, i) => {
-        const mini = [];
-        mini.push(`<div class="hist-mini" style="grid-template-columns:repeat(${layout.width}, 8px);grid-template-rows:repeat(${layout.height}, 8px)">`);
-        for (const cell of layout.cells) {
-          const st = E.cellResultForTry(cell, t) || "absent";
-          mini.push(`<span class="${st}" style="grid-row:${cell.r + 1};grid-column:${cell.c + 1}"></span>`);
-        }
-        mini.push("</div>");
+      .map((tr, i) => {
         const rows = WORD_ORDER.map((k) => {
-          const tiles = t.results[k].map((r) => `<span class="hist-tile ${r}"></span>`).join("");
-          return `<div class="hist-row">${tiles}</div>`;
+          const tiles = tr[k]
+            .split("")
+            .map((ch, j) => `<span class="hist-tile ${tr.results[k][j]}">${ch}</span>`)
+            .join("");
+          return `<div class="hist-row" aria-label="${E.WORD_LABELS[k]}">${tiles}</div>`;
         }).join("");
-        return `<div class="hist-try"><div class="hist-num">TRY ${i + 1}</div>${mini.join("")}<div class="hist-rows">${rows}</div></div>`;
+        return `<div class="hist-try"><div class="hist-num">${i + 1}</div><div class="hist-rows">${rows}</div></div>`;
       })
       .join("");
-    el.scrollLeft = el.scrollWidth;
+    el.scrollTop = el.scrollHeight;
   }
 
   function renderKeyboard() {

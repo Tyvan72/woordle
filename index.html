@@ -46,6 +46,8 @@ html[data-skin="rivet"], :root {
   --present-text: #1a160c;
   --absent: #3a3d4a;
   --absent-text: #c5c1b8;
+  --cross: #5b6ecf;
+  --cross-text: #f3efe6;
   --key: #3e4456;
   --key-text: #f3efe6;
   --tile-bg: #101218;
@@ -78,6 +80,8 @@ html[data-skin="midnight"] {
   --present-text: #1a1404;
   --absent: #2a2d38;
   --absent-text: #b8bcc8;
+  --cross: #7b8ef0;
+  --cross-text: #0a1020;
   --key: #2c3142;
   --key-text: #eef1f7;
   --tile-bg: #07080c;
@@ -108,6 +112,8 @@ html[data-skin="dawn"] {
   --present-text: #1a1404;
   --absent: #78746c;
   --absent-text: #ffffff;
+  --cross: #3d5bd1;
+  --cross-text: #ffffff;
   --key: #e8e1d4;
   --key-text: #1c1a16;
   --tile-bg: #f6f1e8;
@@ -140,6 +146,8 @@ html[data-skin="sunset"] {
   --present-text: #2a1518;
   --absent: #4a2a30;
   --absent-text: #e8c9c2;
+  --cross: #8b6cf0;
+  --cross-text: #f4efff;
   --key: #5a3038;
   --key-text: #ffeae4;
   --tile-bg: #2a1518;
@@ -170,6 +178,8 @@ html[data-skin="ocean"] {
   --present-text: #1a1404;
   --absent: #1c3544;
   --absent-text: #c5d8e0;
+  --cross: #7a6cf0;
+  --cross-text: #f3efe6;
   --key: #1e3c50;
   --key-text: #e6f4fb;
   --tile-bg: #0b1c28;
@@ -200,6 +210,8 @@ html[data-skin="forest"] {
   --present-text: #1a1404;
   --absent: #2a382c;
   --absent-text: #d0dccb;
+  --cross: #6a7ee0;
+  --cross-text: #f3fff4;
   --key: #2c3e30;
   --key-text: #eaf3e6;
   --tile-bg: #121a14;
@@ -230,6 +242,8 @@ html[data-skin="candy"] {
   --present-text: #2a1e04;
   --absent: #3a2a48;
   --absent-text: #e8d0f0;
+  --cross: #9b6bff;
+  --cross-text: #ffffff;
   --key: #3e2c52;
   --key-text: #fdefff;
   --tile-bg: #1c1224;
@@ -260,6 +274,8 @@ html[data-skin="contrast"] {
   --present-text: #000000;
   --absent: #555555;
   --absent-text: #ffffff;
+  --cross: #2979ff;
+  --cross-text: #ffffff;
   --key: #333333;
   --key-text: #ffffff;
   --tile-bg: #000000;
@@ -492,6 +508,7 @@ button {
 .tile.correct .tile-back { background: var(--correct); border-color: var(--correct); color: var(--correct-text); }
 .tile.present .tile-back { background: var(--present); border-color: var(--present); color: var(--present-text); }
 .tile.absent .tile-back { background: var(--absent); border-color: var(--absent); color: var(--absent-text); }
+.tile.cross .tile-back { background: var(--cross); border-color: var(--cross); color: var(--cross-text); }
 .tile.known .tile-front {
   background: var(--correct);
   border-color: var(--correct);
@@ -605,6 +622,7 @@ button {
 }
 .hist-tile.correct { background: var(--correct); color: var(--correct-text); }
 .hist-tile.present { background: var(--present); color: var(--present-text); }
+.hist-tile.cross { background: var(--cross); color: var(--cross-text); }
 .hist-tile.pending { background: var(--bg-elev-2); color: var(--text); border: 1px solid var(--tile-border); }
 
 /* Keyboard */
@@ -637,6 +655,7 @@ button {
 .key.correct { background: var(--correct); color: var(--correct-text); }
 .key.present { background: var(--present); color: var(--present-text); }
 .key.absent { background: var(--absent); color: var(--absent-text); }
+.key.cross { background: var(--cross); color: var(--cross-text); }
 
 /* Toast */
 .toast {
@@ -720,6 +739,7 @@ button {
 .swatch.correct { background: var(--correct); }
 .swatch.present { background: var(--present); color: var(--present-text); }
 .swatch.absent { background: var(--absent); color: var(--absent-text); }
+.swatch.cross { background: var(--cross); color: var(--cross-text); }
 .btn-row { display: flex; gap: 8px; margin-top: 16px; }
 .btn {
   flex: 1;
@@ -964,6 +984,7 @@ button {
 }
 .hist-tile.correct { background: var(--correct); color: var(--correct-text); }
 .hist-tile.present { background: var(--present); color: var(--present-text); }
+.hist-tile.cross { background: var(--cross); color: var(--cross-text); }
 
 /* Active cell — thick ring, glow, scale, blinking caret. Visible on green tiles. */
 .tile.cursor {
@@ -1089,13 +1110,14 @@ button {
         <button type="button" class="close-x" data-close="overlay-help" aria-label="Close">×</button>
         <h2 id="help-title">How to play</h2>
         <p>Woordle is a mini crossword Wordle. Every puzzle has three words: a <strong style="color:var(--text)">5-letter word across</strong>, a <strong style="color:var(--text)">4-letter word down</strong>, and a <strong style="color:var(--text)">3-letter word down</strong>, and all three fit a <strong style="color:var(--text)">theme</strong> — like Farm, Space, or Ocean — shown above the board as a clue.</p>
-        <p>The two down words each cross the across word at one shared letter. Crossing spots are random, and a letter you type in a crossing cell counts for both words.</p>
+        <p>The two down words each cross the across word at one shared letter. Crossing spots are random, and those two shared letters are <strong style="color:var(--text)">already filled in</strong> to get you started. A letter you type in a crossing cell counts for both words.</p>
         <p>Fill in the <strong style="color:var(--text)">entire crossword</strong>, then press Enter. That uses <strong style="color:var(--text)">1 of your 7 tries</strong>. You submit the whole puzzle at once, not one word at a time.</p>
         <div class="how-swatch"><span class="swatch correct">A</span> Green — right letter, right spot.</div>
         <div class="how-swatch"><span class="swatch present">A</span> Yellow — in <em>that</em> word, but in a different spot.</div>
-        <div class="how-swatch"><span class="swatch absent">A</span> Gray — not in that word.</div>
-        <p>Yellow is only about the word that letter sits in, not the other two. Green letters stay locked for the next try.</p>
-        <p>Tap a cell to type there. On a crossing, tap again to switch between across and down. There's a new themed Daily every day, the same for everyone in the same timezone. Practice anytime, and pick any theme you like.</p>
+        <div class="how-swatch"><span class="swatch cross">A</span> Blue — not in this word, but it is in one of the other two words.</div>
+        <div class="how-swatch"><span class="swatch absent">A</span> Gray — not in any of the three words.</div>
+        <p>Yellow is only about the word that letter sits in. Blue means the letter belongs somewhere else in the puzzle. Green letters stay locked for the next try.</p>
+        <p>Tap a cell to type there. On a crossing, tap again to switch between across and down. There's a new themed Daily every day, the same for everyone in the same timezone. You get <strong style="color:var(--text)">one extra free hint each day</strong>. Practice anytime, and pick any theme you like.</p>
         <div class="btn-row"><button type="button" class="btn primary" data-close="overlay-help">Play</button></div>
       </div>
     </div>
@@ -1165,84 +1187,85 @@ function unpack(str, n) {
 }
 
 // Themed answer lists for Woordle. Answers are themed; guesses still use the full dictionary.
+// Curated for common, instantly recognizable, clearly on-theme words (no obscure or plural-only answers).
 const THEMES = [
   {
     id: 'farm', name: 'Farm', emoji: '🚜',
-    answers3: unpack('haycowpighenrameweoatryehogstymudpeapodearcobsowvetkidleayew', 3),
-    answers4: unpack('barncornfarmsilowoolcalflambgoatplowseedsoilherdcropfeedbullduckmuleponyfoalvinebeanyokeacrelandrakecoopmilkoatseggshenspensbalestudcoltewesramspigscows', 4),
-    answers5: unpack('wheatsheephorsegrainranchflockgoosechickfarmsbarnsseedscropsstallfielddairygoatslambsbalesciderapplegeeseherds', 5),
+    answers3: unpack('haycowpighenramoathogpeasowmudegg', 3),
+    answers4: unpack('barncornfarmsilowoolcalflambgoatplowseedsoilherdcropfeedbullduckmuleponyrakecoopmilkcolt', 4),
+    answers5: unpack('wheatsheephorsegrainranchflockgoosechickstallfielddairyfencestrawwagon', 5),
   },
   {
     id: 'space', name: 'Space', emoji: '🚀',
-    answers3: unpack('sunskyorbgasionsolrayreddip', 3),
-    answers4: unpack('starmoonmarsbeamvoidnovaglowaurabeltdarkrocklunaaxispolespinfluxdustraysdiskpaleblue', 4),
-    answers5: unpack('orbitcometlunarsolarearthspacestarsmoonsvenusalienprobetitanringsquarkplutoflaredwarfskiesvoidsbelts', 5),
+    answers3: unpack('sunskyorb', 3),
+    answers4: unpack('starmoonmarsnova', 4),
+    answers5: unpack('orbitcometearthspacevenusalienplutolunarsolarprobe', 5),
   },
   {
     id: 'ocean', name: 'Ocean', emoji: '🌊',
-    answers3: unpack('seabayebbeelrayfincodoilice', 3),
-    answers4: unpack('wavefishreeftideshipsurfsandkelpcrabboatportdockdeepsaltclamtunasolebassorcawindgulfcoveflowfoamweedpier', 4),
-    answers5: unpack('oceansharkwhalecoralbeachcoastwaterswellpearlshellfleetscubadiverwreckwavestidesreefsshipsboatsportsbrine', 5),
+    answers3: unpack('seabayeelrayfincod', 3),
+    answers4: unpack('wavefishreeftideshipsurfsandkelpcrabboatdockdeepsaltclamtunaorcapierportgulf', 4),
+    answers5: unpack('oceansharkwhalecoralbeachcoastwaterswellpearlshellscubadiverwreck', 5),
   },
   {
     id: 'food', name: 'Food', emoji: '🍕',
-    answers3: unpack('piehamjamteanutfigryeeggoilbunpeacobsoydip', 3),
-    answers4: unpack('cakesoupricemeatmealtacocornmilkbeefporkstewpearplumfoodforkdishtartwrapchiprollbitedietcookbakecrabtunaclamsaltherb', 4),
-    answers5: unpack('breadpizzaapplebaconcandycreampastasaladsteakfruitsugartoastsaucelemonberryoniongravydonutmangopeachmelonolivegrainwheatsnack', 5),
+    answers3: unpack('piehamjamteanutfigryeeggbunpea', 3),
+    answers4: unpack('cakesoupricemeatmealtacocornmilkbeefporkstewpearplumtartwrapchiprollcrabtunaclamsaltherb', 4),
+    answers5: unpack('breadpizzaapplebaconcandycreampastasaladsteakfruitsugartoastsaucelemonberryoniongravydonutmangopeachmelonolivesnack', 5),
   },
   {
     id: 'animals', name: 'Animals', emoji: '🐾',
-    answers3: unpack('catdogpighencowrameweelkantapebatbeefoxcubpupsowyakowlkid', 3),
-    answers4: unpack('lionbearwolffrogbirdmuleponyduckgoatcrabfishcalflambtoadharedeerfawnboarbullsealswandovemolepumalynxorca', 4),
-    answers5: unpack('tigerhorsemousesheepsnakewhalesharkeaglecamelzebramoosegoosechickpandallamakoalahyenaslothrhinohippobisonotter', 5),
+    answers3: unpack('catdogpighencowramelkantbatfoxcubpupowlbeebugfly', 3),
+    answers4: unpack('lionbearwolffrogbirdmuleponyduckgoatcrabfishcalflambtoadharedeerfawnboarbullsealswandovemolemothwaspworm', 4),
+    answers5: unpack('tigerhorsemousesheepsnakewhalesharkeaglecamelzebramoosegoosechickpandallamakoalaslothrhinohippobisonotter', 5),
   },
   {
     id: 'sports', name: 'Sports', emoji: '⚽',
     answers3: unpack('gymrunskibatteenetboxlapwin', 3),
-    answers4: unpack('ballgoalteamracegolfswimjumpheatplayclubgamekickpassshotyardmeetdiveboutpoolringpark', 4),
-    answers5: unpack('trackscorecourtsportcoachmatchrugbyboxerskatecyclemedalpitchfieldriderracerteamsgamesballsgoals', 5),
+    answers4: unpack('ballgoalteamracegolfswimjumpheatplayclubgamekickpassshotyardmeetdivepoolringpark', 4),
+    answers5: unpack('trackscorecourtsportcoachmatchrugbyboxerskatecyclemedalpitchfieldriderracer', 5),
   },
   {
     id: 'weather', name: 'Weather', emoji: '☔',
     answers3: unpack('sunfogiceskydewwethoticydry', 3),
-    answers4: unpack('rainwindsnowhailheatwarmcoldmistgalegustthawdamphazesmogdropdrip', 4),
-    answers5: unpack('stormcloudsunnyrainywindysnowyfrostsleetvaporhumidblazefloodshinewindsrains', 5),
+    answers4: unpack('rainwindsnowhailheatwarmcoldmistgalegustthawdamphazedrop', 4),
+    answers5: unpack('stormcloudsunnyrainywindysnowyfrostsleethumidfloodshine', 5),
   },
   {
     id: 'music', name: 'Music', emoji: '🎵',
-    answers3: unpack('rappopjamhitduosaxamppitbarkey', 3),
-    answers4: unpack('songbeatdrumnotebandtunejazzrockbasshymnsoloharpgongoboeariafolksingplaykeys', 4),
-    answers5: unpack('pianomusicchoirfluteorgantempoverseaudiooperadancebluescelloalbumlyricnotessongsdrumsbeatstunesbands', 5),
+    answers3: unpack('rappopjamhitduosaxampkey', 3),
+    answers4: unpack('songbeatdrumnotebandtunejazzrockbasshymnsoloharpfolksingplay', 4),
+    answers5: unpack('pianomusicchoirfluteorgantempoverseoperadancebluescelloalbumlyric', 5),
   },
   {
     id: 'kitchen', name: 'Kitchen', emoji: '🍳',
-    answers3: unpack('panpotlidcupmugjarwokoilbunhamdip', 3),
-    answers4: unpack('ovenforkdishbowlchefsinkwhipbakecookfoodmealricesoupstewsalttrayrack', 4),
-    answers5: unpack('stoveplateknifemixergrilltoastsauceladleapronwhiskbakerroastbowlsforksmeals', 5),
+    answers3: unpack('panpotlidcupmugjarwokoilbunham', 3),
+    answers4: unpack('ovenforkdishbowlchefsinkwhipbakecookmealricesoupstewsalttrayrack', 4),
+    answers5: unpack('stoveplateknifemixergrilltoastsauceladleapronwhiskbakerroast', 5),
   },
   {
     id: 'garden', name: 'Garden', emoji: '🌱',
-    answers3: unpack('peapodivyoakelmyewhaybudsap', 3),
-    answers4: unpack('roseleafseedsoilvineweedlawnfernbushtwigrootbulbmossherblilypotsbedsplot', 4),
-    answers5: unpack('bloomplantgrassflorapetalshrubtulipdaisyprunestemsgreenrosesseedsvinesweeds', 5),
+    answers3: unpack('peapodivyoakelmhaybudsap', 3),
+    answers4: unpack('roseleafseedsoilvineweedlawnfernbushtwigrootbulbmossherblilyplot', 4),
+    answers5: unpack('bloomplantgrassflorapetalshrubtulipdaisyprunegreen', 5),
   },
   {
     id: 'camping', name: 'Camping', emoji: '⛺',
-    answers3: unpack('buglogmappitashhutnaprodmugpanpot', 3),
+    answers3: unpack('buglogmappitashhutrodmugpanpot', 3),
     answers4: unpack('tentfirecamphikepacklampwoodpathhilllakecookgearropemosssiteparktrek', 4),
-    answers5: unpack('trailcanoewoodsrivercabinscoutembersleepnightblazecampstentslampshikessites', 5),
+    answers5: unpack('trailcanoewoodsrivercabinscoutsleepnightblaze', 5),
   },
   {
-    id: 'pirates', name: 'Pirates', emoji: '🏴\u200d☠️',
+    id: 'pirates', name: 'Pirates', emoji: '🏴‍☠️',
     answers3: unpack('rumseabaymapeyepegcaphatgun', 3),
-    answers4: unpack('shipgoldsailcrewdeckflagboatportlootmatecoinmastahoygrogcoveraid', 4),
-    answers5: unpack('swordchestskullplankavastbrineshipssailsflagsboatscrewsdecksraidscovesreefsstormocean', 5),
+    answers4: unpack('shipgoldsailcrewdeckflagboatportlootmatecoinmastraid', 4),
+    answers5: unpack('swordchestskullplankstormocean', 5),
   },
   {
     id: 'winter', name: 'Winter', emoji: '❄️',
-    answers3: unpack('iceskysunfogicyskiniphat', 3),
-    answers4: unpack('snowcoldcoatsledhailwindbootthawwrapwoolcozycapemufffireglow', 4),
-    answers5: unpack('frostsleetstormsnowyscarfskateflakechillsnowscoatssledsbootswindsskier', 5),
+    answers3: unpack('iceskysunfogicyskihat', 3),
+    answers4: unpack('snowcoldcoatsledhailwindbootthawwrapwoolcozyfireglow', 4),
+    answers5: unpack('frostsleetstormsnowyscarfskateflakechillskier', 5),
   },
   {
     id: 'body', name: 'Body', emoji: '🧠',
@@ -1252,93 +1275,87 @@ const THEMES = [
   },
   {
     id: 'colors', name: 'Colors', emoji: '🎨',
-    answers3: unpack('redtanhuedyeinkskyashpea', 3),
+    answers3: unpack('redtandyeinkhue', 3),
     answers4: unpack('bluepinkgoldgrayteallimenavyrustplumrosecyangreypaledark', 4),
-    answers5: unpack('greenblackwhitebrowncoralivoryoliveamberbeigekhakipeachcolortones', 5),
+    answers5: unpack('greenblackwhitebrowncoralivoryoliveamberbeigekhakipeach', 5),
   },
   {
     id: 'school', name: 'School', emoji: '📚',
     answers3: unpack('peninkpadmapbaglabsumkid', 3),
     answers4: unpack('bookdesktestquizexamclubhallpagenotereadtermpassfailmarkyearworkroom', 4),
-    answers5: unpack('classchalkgradestudytutorpaperruleressaybookstestspupilteachfinallearnnotesdesksexams', 5),
+    answers5: unpack('classchalkgradestudytutorpaperruleressaypupilteachfinallearn', 5),
   },
   {
     id: 'city', name: 'City', emoji: '🏙️',
-    answers3: unpack('buscabvanmapcaraveelmway', 3),
+    answers3: unpack('buscabvanmapcaraveway', 3),
     answers4: unpack('roadtaxiparkshopcurblanemallcafetowntramwalksign', 4),
-    answers5: unpack('blocklighthotelplazatowermetrocivicurbanalleyroadsshopsparks', 5),
+    answers5: unpack('blocklighthotelplazatowermetrourbanalleytrain', 5),
   },
   {
     id: 'forest', name: 'Forest', emoji: '🌲',
-    answers3: unpack('oakelmyewivyfirsaplog', 3),
+    answers3: unpack('oakelmivyfirsaplog', 3),
     answers4: unpack('treepinedeermosspathwoodferntwigvineleafbearwolf', 4),
-    answers5: unpack('woodstrailtreespinesgrovecedarmaplebirchflorafaunaglade', 5),
+    answers5: unpack('woodstrailgrovecedarmaplebirch', 5),
   },
   {
     id: 'beach', name: 'Beach', emoji: '🏖️',
-    answers3: unpack('sunseabaytanwetdipebbdry', 3),
+    answers3: unpack('sunseabaytanwet', 3),
     answers4: unpack('sandwavesurftidepalmboatdockpierswimheatcove', 4),
-    answers5: unpack('beachoceancoastcoraltowelshoresunnywavestidespalmsboats', 5),
+    answers5: unpack('beachoceancoastcoraltowelshoresunny', 5),
   },
   {
     id: 'magic', name: 'Magic', emoji: '✨',
-    answers3: unpack('elforbheximpfayhagjin', 3),
-    answers4: unpack('wandrunemagemythbrewtomesagejinxpactveilmoonstardarkoathwishluck', 4),
-    answers5: unpack('magiccharmspellwitchfairystaffrunesghosthauntwandshexescursedemondevilangelmages', 5),
+    answers3: unpack('elforbheximpzap', 3),
+    answers4: unpack('wandrunemagemythbrewsagemoonstarwishluckjinx', 4),
+    answers5: unpack('magiccharmspellwitchfairystaffghosthauntcursedemondevilangel', 5),
   },
   {
     id: 'cars', name: 'Cars', emoji: '🚗',
-    answers3: unpack('carvanbuscabramoilgaspitrod', 3),
-    answers4: unpack('tireroadjeephoodgearparkrampaxlefuelautomilehornlockseatbeltdentrustidlepump', 4),
-    answers5: unpack('brakewheelsedanmotordrivecrashshiftroadstiresjeepscoupepedalspeedgaugecabintrunkwagonturbo', 5),
+    answers3: unpack('carvanbuscaboilgaspit', 3),
+    answers4: unpack('tireroadjeephoodgearparkrampaxlefuelautomilehornlockseatbeltdentpump', 4),
+    answers5: unpack('brakewheelsedanmotordrivecrashshiftcoupepedalspeedgaugecabintrunkwagonturbo', 5),
   },
   {
     id: 'clothes', name: 'Clothes', emoji: '👕',
-    answers3: unpack('hatcaptiebowfurhembibsoxrag', 3),
+    answers3: unpack('hatcaptiebowhemsox', 3),
     answers4: unpack('sockcoatshoebeltvestgownrobesilkwoolcufflacewrap', 4),
-    answers5: unpack('shirtpantsdressscarfbootsjeansskirtsocksclothcoatsshoesbelts', 5),
+    answers5: unpack('shirtpantsdressscarfbootsjeansskirtcloth', 5),
   },
   {
     id: 'house', name: 'House', emoji: '🏠',
     answers3: unpack('bedmatrugdenhutcotpadtub', 3),
     answers4: unpack('doorwallroofroomlampsofaloftstephallyardhomebathsink', 4),
-    answers5: unpack('atticporchfloorhousestoolcouchroomsdoorswallsroofslampsyards', 5),
+    answers5: unpack('atticporchfloorhousestoolcouchtable', 5),
   },
   {
     id: 'nature', name: 'Nature', emoji: '🌍',
-    answers3: unpack('sunskyoakivydewfogiceseamudsapelmyewfir', 3),
-    answers4: unpack('hilllakerocktreewindrainmossfernleafpondglen', 4),
-    answers5: unpack('earthplantriveroceanwoodsflorastonecreekbloomlakeshillsrockstreeswinds', 5),
+    answers3: unpack('sunskyoakivydewfogiceseamudsapfir', 3),
+    answers4: unpack('hilllakerocktreewindrainmossfernleafpond', 4),
+    answers5: unpack('earthplantriveroceanwoodsstonecreekbloom', 5),
   },
   {
     id: 'birds', name: 'Birds', emoji: '🐦',
-    answers3: unpack('owlhenjayemucobaukpiedaw', 3),
+    answers3: unpack('owlhenjayemuegg', 3),
     answers4: unpack('hawkdoveswancrowduckfowlbeakwingnestbirdlarkwren', 4),
-    answers5: unpack('eaglegoosechickstorkheronrobincranequailbirdsnestswingsbeaksducksswans', 5),
-  },
-  {
-    id: 'insects', name: 'Insects', emoji: '🐛',
-    answers3: unpack('antbeebugflynitwebegg', 3),
-    answers4: unpack('mothwaspwormfleatickgnatgrubmitepestsilkbitehill', 4),
-    answers5: unpack('roachlarvamothsflieswaspswormsticksfleasgrubsstingswarmdronequeenaphid', 5),
+    answers5: unpack('eaglegoosechickstorkheronrobincranequail', 5),
   },
   {
     id: 'tools', name: 'Tools', emoji: '🔧',
-    answers3: unpack('sawaxepinnutawlbitjigtapdiekeyrod', 3),
-    answers4: unpack('nailtoolboltfileraspvicetaperuleplugworkshopweldhookringlockgear', 4),
-    answers5: unpack('drillscrewbladepunchtoolsnailsboltsfilestapesgrindleveranvillathelevel', 5),
+    answers3: unpack('sawaxepinnutkeyrod', 3),
+    answers4: unpack('nailtoolboltfileraspvicetaperuleplugweldhookringlockgear', 4),
+    answers5: unpack('drillscrewbladepunchgrindleveranvillevelclamp', 5),
   },
   {
     id: 'sweets', name: 'Sweets', emoji: '🍬',
     answers3: unpack('piejambunfigicenutpop', 3),
-    answers4: unpack('caketartmintchewpuffbitesodacolawhipdropfizz', 4),
-    answers5: unpack('candyfudgecocoasugaricingdonutsweetcakestartsmints', 5),
+    answers4: unpack('caketartmintchewpuffsodacolawhipfizz', 4),
+    answers5: unpack('candyfudgecocoasugaricingdonutsweet', 5),
   },
   {
     id: 'holiday', name: 'Holiday', emoji: '🎉',
     answers3: unpack('bowtoyelfjoyfireve', 3),
     answers4: unpack('giftcardcaketreebellwishnoelyulesnow', 4),
-    answers5: unpack('partyfeastcarolcandycheergiftscardscakestreesbellsmerrytoast', 5),
+    answers5: unpack('partyfeastcarolcandycheermerrytoast', 5),
   },
 ];
 
@@ -1454,6 +1471,30 @@ function scoreGuess(guess, answer) {
     }
   }
   return result;
+}
+
+/** After Wordle scoring, mark absents that appear in another answer word as "cross". */
+function applyCrossHints(results, words, puzzle) {
+  const answers = {
+    across: puzzle.across,
+    down4: puzzle.down4,
+    down3: puzzle.down3,
+  };
+  const keys = ["across", "down4", "down3"];
+  for (let k = 0; k < keys.length; k++) {
+    const key = keys[k];
+    const res = results[key];
+    const guess = words[key];
+    if (!res || !guess) continue;
+    let others = "";
+    for (let j = 0; j < keys.length; j++) {
+      if (j !== k) others += answers[keys[j]];
+    }
+    for (let i = 0; i < res.length; i++) {
+      if (res[i] === "absent" && others.includes(guess[i])) res[i] = "cross";
+    }
+  }
+  return results;
 }
 
 function buildIndex(words, len) {
@@ -1637,21 +1678,64 @@ function puzzleKey(p) {
   return p.across + "|" + p.down4 + "|" + p.down3 + "|" + p.col4 + "," + p.pos4 + "|" + p.col3 + "," + p.pos3;
 }
 
+function enumeratePuzzles(lists) {
+  const answers3 = lists.ANSWERS3;
+  const answers4 = lists.ANSWERS4;
+  const answers5 = lists.ANSWERS5;
+  const index3 = lists._index3 || (lists._index3 = buildIndex(answers3, 3));
+  const index4 = lists._index4 || (lists._index4 = buildIndex(answers4, 4));
+  const out = [];
+  for (let a = 0; a < answers5.length; a++) {
+    const across = answers5[a];
+    for (let col4 = 0; col4 < 5; col4++) {
+      for (let col3 = 0; col3 < 5; col3++) {
+        if (col4 === col3) continue;
+        const gap = Math.abs(col4 - col3);
+        const letter4 = across[col4];
+        const letter3 = across[col3];
+        for (let pos4 = 0; pos4 < 4; pos4++) {
+          const cands4 = index4[pos4][letter4];
+          if (!cands4) continue;
+          for (let i = 0; i < cands4.length; i++) {
+            const down4 = cands4[i];
+            for (let pos3 = 0; pos3 < 3; pos3++) {
+              const cands3 = index3[pos3][letter3];
+              if (!cands3) continue;
+              for (let j = 0; j < cands3.length; j++) {
+                out.push({
+                  across,
+                  down4,
+                  down3: cands3[j],
+                  col4,
+                  pos4,
+                  col3,
+                  pos3,
+                  adjacent: gap < 2,
+                });
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return out;
+}
+
 function catalogForTheme(theme, lists, target) {
   if (theme._catalog) return theme._catalog;
   const themed = listsForTheme(theme, lists);
-  const seen = Object.create(null);
-  const catalog = [];
-  const want = target || 600;
-  for (let i = 0; i < 20000 && catalog.length < want; i++) {
-    const rng = mulberry32(hashString("woordle-cat-v1-" + theme.id + "-" + i));
-    const p = generatePuzzle(rng, themed);
-    if (!p) continue;
-    const k = puzzleKey(p);
-    if (seen[k]) continue;
-    seen[k] = 1;
-    catalog.push(p);
+  const all = enumeratePuzzles(themed);
+  const preferred = [];
+  const adjacent = [];
+  for (let i = 0; i < all.length; i++) {
+    if (all[i].adjacent) adjacent.push(all[i]);
+    else preferred.push(all[i]);
   }
+  shuffleInPlace(preferred, mulberry32(hashString("woordle-cat-v2-" + theme.id)));
+  shuffleInPlace(adjacent, mulberry32(hashString("woordle-cat-v2-adj-" + theme.id)));
+  let catalog = preferred.concat(adjacent);
+  if (target && catalog.length > target) catalog = catalog.slice(0, target);
   theme._catalog = catalog;
   return catalog;
 }
@@ -1683,7 +1767,7 @@ function generateRandomPuzzle(lists, seed, themeId) {
   return { puzzle, seed: s, theme };
 }
 
-function emptyGame(puzzle, mode, dateISO, seed, theme) {
+function emptyGameDraft(puzzle, mode, dateISO, seed, theme) {
   return {
     version: 2,
     mode: mode || "practice",
@@ -1711,6 +1795,35 @@ function emptyGame(puzzle, mode, dateISO, seed, theme) {
     startedAt: Date.now(),
     finishedAt: null,
   };
+}
+
+function emptyGame(puzzle, mode, dateISO, seed, theme) {
+  const game = emptyGameDraft(puzzle, mode, dateISO, seed, theme);
+  return revealStartingCrossings(game);
+}
+
+/** Pre-fill and lock both crossing letters so every new puzzle starts with those two cells revealed. */
+function revealStartingCrossings(game) {
+  const p = game.puzzle;
+  if (!p) return game;
+  const letter4 = p.across[p.col4];
+  const letter3 = p.across[p.col3];
+  game.hints.across[p.col4] = letter4;
+  game.hints.down4[p.pos4] = letter4;
+  game.hints.across[p.col3] = letter3;
+  game.hints.down3[p.pos3] = letter3;
+  syncCrossing(game.draft, p, "across", p.col4, letter4);
+  syncCrossing(game.draft, p, "across", p.col3, letter3);
+  // Start typing on the first unlocked across cell.
+  game.selected = "across";
+  game.cursorIndex = 0;
+  for (let i = 0; i < 5; i++) {
+    if (i !== p.col4 && i !== p.col3) {
+      game.cursorIndex = i;
+      break;
+    }
+  }
+  return game;
 }
 
 const WORD_KEYS = ["across", "down4", "down3"];
@@ -1791,7 +1904,7 @@ function allSolved(game) {
 }
 
 function bestStatus(a, b) {
-  const priority = { absent: 1, present: 2, correct: 3 };
+  const priority = { absent: 1, cross: 2, present: 3, correct: 4 };
   if (!a) return b;
   if (!b) return a;
   return priority[a] >= priority[b] ? a : b;
@@ -1854,11 +1967,15 @@ function evaluatePuzzle(game, lists, words) {
   if (prev.some((t) => t.across === cleaned.across && t.down4 === cleaned.down4 && t.down3 === cleaned.down3)) {
     return { ok: false, reason: "duplicate", words: cleaned };
   }
-  const results = {
-    across: scoreGuess(cleaned.across, game.puzzle.across),
-    down4: scoreGuess(cleaned.down4, game.puzzle.down4),
-    down3: scoreGuess(cleaned.down3, game.puzzle.down3),
-  };
+  const results = applyCrossHints(
+    {
+      across: scoreGuess(cleaned.across, game.puzzle.across),
+      down4: scoreGuess(cleaned.down4, game.puzzle.down4),
+      down3: scoreGuess(cleaned.down3, game.puzzle.down3),
+    },
+    cleaned,
+    game.puzzle
+  );
   const correct =
     cleaned.across === game.puzzle.across &&
     cleaned.down4 === game.puzzle.down4 &&
@@ -2026,6 +2143,10 @@ const ENGINE = {
   wordOf,
   wordLen,
   emptyGame,
+  emptyGameDraft,
+  revealStartingCrossings,
+  applyCrossHints,
+  enumeratePuzzles,
   syncCrossing,
   draftWords,
   greensForWord,
@@ -2111,6 +2232,8 @@ if (typeof window !== "undefined") {
       practicePlayed: 0,
       practiceWon: 0,
       seenHowTo: false,
+      rulesVersion: 3,
+      lastHintGrantDate: null,
       practiceTheme: "random",
     };
   }
@@ -2118,7 +2241,14 @@ if (typeof window !== "undefined") {
   function loadPrefs() {
     try {
       const raw = localStorage.getItem(STORAGE.prefs);
-      if (raw) return Object.assign(defaultPrefs(), JSON.parse(raw));
+      if (raw) {
+        const p = Object.assign(defaultPrefs(), JSON.parse(raw));
+        if ((p.rulesVersion || 0) < 3) {
+          p.seenHowTo = false;
+          p.rulesVersion = 3;
+        }
+        return p;
+      }
       const v1 = localStorage.getItem(STORAGE.prefsV1);
       if (v1) {
         const old = JSON.parse(v1);
@@ -2283,10 +2413,27 @@ if (typeof window !== "undefined") {
   }
 
   function afterStart() {
+    if (game && game.status === "playing" && isLocked(game.selected, game.cursorIndex)) {
+      const jump = firstUnfilled() || firstUnlocked();
+      if (jump) {
+        game.selected = jump.key;
+        game.cursorIndex = jump.index;
+      }
+    }
     applySkin();
     renderAll();
     sizeTiles();
     renderAll();
+  }
+
+  function firstUnlocked() {
+    for (const key of WORD_ORDER) {
+      const n = E.wordLen(key);
+      for (let i = 0; i < n; i++) {
+        if (!isLocked(key, i)) return { key, index: i };
+      }
+    }
+    return null;
   }
 
   function switchMode(mode) {
@@ -2664,7 +2811,7 @@ if (typeof window !== "undefined") {
       if (!el) return;
       const ch = letterAtCell(cell).toUpperCase();
       const st = E.cellResultForTry(cell, last) || "absent";
-      el.classList.remove("flipped", "known", "correct", "present", "absent");
+      el.classList.remove("flipped", "known", "correct", "present", "cross", "absent");
       el.classList.add("filled", st);
       el.querySelector(".tile-front").textContent = ch;
       el.querySelector(".tile-back").textContent = ch;
@@ -3201,15 +3348,28 @@ if (typeof window !== "undefined") {
     countdownTimer = setInterval(refreshCountdown, 1000);
   }
 
+  function grantDailyHintIfNeeded() {
+    const today = E.todayISO();
+    if (prefs.lastHintGrantDate === today) return false;
+    const returning = !!prefs.lastHintGrantDate;
+    prefs.hintsRemaining = (prefs.hintsRemaining || 0) + 1;
+    prefs.lastHintGrantDate = today;
+    savePrefs();
+    return returning;
+  }
+
   function boot() {
     applySkin();
     bind();
     maybeResetStreak();
+    const hintToast = grantDailyHintIfNeeded();
     startDaily();
     if (!prefs.seenHowTo) {
       prefs.seenHowTo = true;
       savePrefs();
       setTimeout(() => openOverlay("overlay-help"), 250);
+    } else if (hintToast) {
+      toast("Daily hint added");
     }
   }
 
@@ -3223,6 +3383,7 @@ if (typeof window !== "undefined") {
     lists: LISTS,
     engine: E,
     startDaily,
+    grantDailyHintIfNeeded,
     startPractice,
     startPracticeNew: (themeId) => startPractice(true, themeId),
     onKey,

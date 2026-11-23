@@ -798,14 +798,72 @@ button {
 .dot { width: 12px; height: 12px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); }
 
 /* Results */
+.results-theme { color: var(--muted); margin: 4px 0 8px; }
+.results-theme strong { color: var(--text); }
+.results-answers {
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 20px;
+  text-align: center;
+  margin: 10px 0 4px;
+  color: var(--text);
+}
 .results-words {
   display: flex;
-  justify-content: space-around;
-  margin: 12px 0 8px;
-  text-align: center;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0 12px;
+  padding: 0 8px;
 }
-.rw { font-weight: 800; letter-spacing: 0.12em; font-size: 18px; }
-.rw span { display: block; font-size: 11px; color: var(--muted); letter-spacing: 0.06em; font-weight: 700; margin-bottom: 4px; }
+.results-words > div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.results-words .rw-label {
+  display: block;
+  flex: 0 0 68px;
+  width: 68px;
+  text-align: right;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  margin-bottom: 0;
+}
+.rw-tiles { display: flex; justify-content: flex-start; gap: 4px; flex-wrap: nowrap; }
+.rw-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border-radius: 5px;
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0;
+}
+.rw-tile.correct { background: var(--correct); color: var(--correct-text); }
+.rw-tile.missed {
+  background: var(--bg-elev-2);
+  color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--danger);
+}
+.share-preview-wrap {
+  margin: 8px 0 10px;
+  display: flex;
+  justify-content: center;
+}
+.share-preview {
+  width: 100%;
+  max-width: 280px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  display: block;
+}
 .countdown {
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -1889,26 +1947,33 @@ function revealHintLetter(game, key, index) {
   return { index, letter: answer[index], key };
 }
 
+const PLAY_URL = "https://tyvan72.github.io/woordle/";
+
 function shareText(game) {
-  const themeBit = game.theme ? ` · ${game.theme.name} ${game.theme.emoji}` : "";
-  const n = game.mode === "daily" && game.dateISO ? `#${puzzleNumber(game.dateISO)}` : "Practice";
-  const score = game.status === "won" ? `${game.guessesUsed}/${MAX_GUESSES}` : `X/${MAX_GUESSES}`;
-  const lines = [`Woordle ${n}${themeBit}`, score, ""];
-  const mark = { correct: "🟩", present: "🟨", absent: "⬛" };
-  const tries = (game.guesses || []).filter((t) => !t.auto);
-  if (!tries.length) {
-    lines.push("(no guesses)");
+  const theme = game.theme;
+  const themeBit = theme ? `${theme.name}${theme.emoji ? " " + theme.emoji : ""}` : "";
+  const words = [game.puzzle.across, game.puzzle.down4, game.puzzle.down3]
+    .map((w) => w.toUpperCase())
+    .join(", ");
+  const url = PLAY_URL;
+  let line;
+  if (game.mode === "daily" && game.dateISO) {
+    const n = puzzleNumber(game.dateISO);
+    const label = themeBit ? `Woordle #${n} (${themeBit})` : `Woordle #${n}`;
+    if (game.status === "won") {
+      line = `I solved ${label} in ${game.guessesUsed} of ${MAX_GUESSES} tries: ${words}!`;
+    } else {
+      line = `I didn't solve ${label}. The words were ${words}.`;
+    }
   } else {
-    tries.forEach((t, i) => {
-      const a = t.results.across.map((x) => mark[x]).join("");
-      const b = t.results.down4.map((x) => mark[x]).join("");
-      const c = t.results.down3.map((x) => mark[x]).join("");
-      lines.push(`${i + 1}  ${a}  ·  ${b}  ·  ${c}`);
-    });
+    const label = themeBit ? `a Practice Woordle (${themeBit})` : "a Practice Woordle";
+    if (game.status === "won") {
+      line = `I solved ${label} in ${game.guessesUsed} of ${MAX_GUESSES} tries: ${words}!`;
+    } else {
+      line = `I didn't solve ${label}. The words were ${words}.`;
+    }
   }
-  lines.push("");
-  lines.push("https://tyvan72.github.io/woordle/");
-  return lines.join("\n");
+  return line + "\n" + url;
 }
 
 function winMessage(guessesUsed) {
@@ -1929,6 +1994,7 @@ const WORD_LABELS = {
 
 const ENGINE = {
   MAX_GUESSES,
+  PLAY_URL,
   LAUNCH_ISO,
   WORD_KEYS,
   unpack,
@@ -2707,17 +2773,181 @@ if (typeof window !== "undefined") {
     });
   }
 
+  function cssVar(name, fallback) {
+    const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+
+  function cellAnswer(g, cell) {
+    if (cell.acrossIndex >= 0) return g.puzzle.across[cell.acrossIndex];
+    if (cell.down4Index >= 0) return g.puzzle.down4[cell.down4Index];
+    if (cell.down3Index >= 0) return g.puzzle.down3[cell.down3Index];
+    return "";
+  }
+
+  function cellFound(g, cell) {
+    if (cell.acrossIndex >= 0 && E.knownLetters(g, "across")[cell.acrossIndex]) return true;
+    if (cell.down4Index >= 0 && E.knownLetters(g, "down4")[cell.down4Index]) return true;
+    if (cell.down3Index >= 0 && E.knownLetters(g, "down3")[cell.down3Index]) return true;
+    return false;
+  }
+
+  function renderShareCanvas(g) {
+    const layout = E.layoutPuzzle(g.puzzle);
+    const tile = 92;
+    const gap = 10;
+    const padX = 56;
+    const headerH = 200;
+    const footerH = 110;
+    const boardW = layout.width * tile + (layout.width - 1) * gap;
+    const boardH = layout.height * tile + (layout.height - 1) * gap;
+    const w = Math.max(640, boardW + padX * 2);
+    const h = headerH + boardH + footerH;
+    const dpr = 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(w * dpr);
+    canvas.height = Math.round(h * dpr);
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const bg = cssVar("--bg", "#101218");
+    const text = cssVar("--text", "#f3efe6");
+    const muted = cssVar("--muted", "#9a9488");
+    const accent = cssVar("--accent", "#d7b15a");
+    const correct = cssVar("--correct", "#3f8f6d");
+    const correctText = cssVar("--correct-text", "#f3efe6");
+    const danger = cssVar("--danger", "#d46a6a");
+    const missFill = cssVar("--bg-elev-2", "#232734");
+
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = text;
+    ctx.font = "800 28px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillText("WOORDLE", w / 2, 46);
+
+    const theme = g.theme;
+    if (theme) {
+      ctx.font = "800 26px -apple-system, BlinkMacSystemFont, 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif";
+      ctx.fillStyle = accent;
+      const label = ((theme.emoji ? theme.emoji + "  " : "") + String(theme.name || "")).toUpperCase();
+      ctx.fillText(label, w / 2, 90);
+    }
+
+    ctx.font = "700 20px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillStyle = text;
+    const status =
+      g.status === "won"
+        ? "Solved in " + g.guessesUsed + " of " + E.MAX_GUESSES
+        : "The answers  ·  " + g.guessesUsed + "/" + E.MAX_GUESSES;
+    ctx.fillText(status, w / 2, 132);
+
+    const ox = Math.round((w - boardW) / 2);
+    const oy = headerH;
+    const radius = 14;
+    for (let i = 0; i < layout.cells.length; i++) {
+      const cell = layout.cells[i];
+      const x = ox + cell.c * (tile + gap);
+      const y = oy + cell.r * (tile + gap);
+      const letter = (cellAnswer(g, cell) || "").toUpperCase();
+      const missed = g.status !== "won" && !cellFound(g, cell);
+
+      ctx.save();
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, y, tile, tile, radius);
+      else {
+        ctx.rect(x, y, tile, tile);
+      }
+      ctx.fillStyle = missed ? missFill : correct;
+      ctx.fill();
+      if (missed) {
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = danger;
+        ctx.stroke();
+      }
+      ctx.fillStyle = missed ? text : correctText;
+      ctx.font = "800 46px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(letter, x + tile / 2, y + tile / 2 + 1);
+      ctx.restore();
+    }
+
+    ctx.fillStyle = muted;
+    ctx.font = "700 14px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("POCKET RIVET", w / 2, h - 54);
+    ctx.font = "600 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+    ctx.fillStyle = accent;
+    ctx.fillText("tyvan72.github.io/woordle", w / 2, h - 30);
+    return canvas;
+  }
+
+  function shareImageBlob(g) {
+    return new Promise((resolve) => {
+      const canvas = renderShareCanvas(g);
+      if (canvas.toBlob) {
+        canvas.toBlob((blob) => resolve(blob || null), "image/png");
+      } else {
+        const data = canvas.toDataURL("image/png");
+        const bin = atob(data.split(",")[1]);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        resolve(new Blob([arr], { type: "image/png" }));
+      }
+    });
+  }
+
   async function shareResults() {
     if (!game) return;
+    if (game.status === "playing") {
+      toast("Finish the puzzle to share");
+      return;
+    }
     const text = E.shareText(game);
+    let file = null;
     try {
-      if (navigator.share && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent || "")) {
-        await navigator.share({ text });
+      const blob = await shareImageBlob(game);
+      if (blob) file = new File([blob], "woordle.png", { type: "image/png" });
+    } catch (e) {
+      file = null;
+    }
+    try {
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: "Woordle", text, files: [file] });
         return;
+      }
+      if (navigator.share) {
+        try {
+          const payload = file ? { title: "Woordle", text, files: [file] } : { title: "Woordle", text };
+          await navigator.share(payload);
+          return;
+        } catch (e) {
+          if (e && e.name === "AbortError") return;
+          if (file) {
+            /* fall through to clipboard / text share */
+          } else {
+            throw e;
+          }
+        }
       }
     } catch (e) {
       if (e && e.name === "AbortError") return;
     }
+    try {
+      if (file && window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "image/png": file,
+            "text/plain": new Blob([text], { type: "text/plain" }),
+          }),
+        ]);
+        toast("Copied picture and results");
+        return;
+      }
+    } catch (e) {}
     try {
       await navigator.clipboard.writeText(text);
       toast("Copied results to clipboard");
@@ -2736,28 +2966,53 @@ if (typeof window !== "undefined") {
     }
   }
 
+  function resultTiles(key) {
+    const word = E.wordOf(game.puzzle, key);
+    const solved = E.isSolved(game, key) || game.status === "won";
+    return word
+      .split("")
+      .map((ch, i) => {
+        const found = !!E.knownLetters(game, key)[i] || solved;
+        const cls = found ? "correct" : "missed";
+        return `<span class="rw-tile ${cls}">${ch.toUpperCase()}</span>`;
+      })
+      .join("");
+  }
+
   function renderEnd() {
     const el = $("end-body");
     if (!game) return;
     const won = game.status === "won";
     const title = won ? E.winMessage(game.guessesUsed) : "So close";
+    const wordsLine = [game.puzzle.across, game.puzzle.down4, game.puzzle.down3]
+      .map((w) => w.toUpperCase())
+      .join("  ·  ");
     const sub = won
-      ? `Solved in ${game.guessesUsed}/${E.MAX_GUESSES} tries.`
+      ? `You solved it in ${game.guessesUsed} of ${E.MAX_GUESSES} tries.`
       : `You used all ${E.MAX_GUESSES} tries. The words were:`;
-    const th = game.theme ? `<p>${game.theme.emoji || ""} Theme: <strong style="color:var(--text)">${game.theme.name}</strong></p>` : "";
+    const th = game.theme
+      ? `<p class="results-theme">${game.theme.emoji || ""} Theme: <strong>${game.theme.name}</strong></p>`
+      : "";
     const words = `
+      <p class="results-answers">${wordsLine}</p>
       <div class="results-words">
-        <div><span>ACROSS</span><div class="rw">${game.puzzle.across.toUpperCase()}</div></div>
-        <div><span>DOWN 4</span><div class="rw">${game.puzzle.down4.toUpperCase()}</div></div>
-        <div><span>DOWN 3</span><div class="rw">${game.puzzle.down3.toUpperCase()}</div></div>
+        <div><span class="rw-label">ACROSS</span><div class="rw-tiles">${resultTiles("across")}</div></div>
+        <div><span class="rw-label">DOWN 4</span><div class="rw-tiles">${resultTiles("down4")}</div></div>
+        <div><span class="rw-label">DOWN 3</span><div class="rw-tiles">${resultTiles("down3")}</div></div>
       </div>`;
     const daily = game.mode === "daily";
     const cd = daily
       ? `<div class="countdown"><label>Next daily</label><div class="countdown-value">${E.formatCountdown(E.msUntilNextLocalMidnight())}</div></div>`
       : "";
-    el.innerHTML = `<h2>${title}</h2><p>${sub}</p>${th}${words}${cd}`;
+    el.innerHTML = `<h2>${title}</h2><p>${sub}</p>${th}${words}<div class="share-preview-wrap"><img class="share-preview" id="share-preview-img" alt="Share picture of your crossword"></div>${cd}`;
     $("btn-end-practice").textContent = daily ? "Practice" : "New puzzle";
+    $("btn-end-share").style.display = game.status === "playing" ? "none" : "";
     refreshCountdown();
+    try {
+      const canvas = renderShareCanvas(game);
+      const img = $("share-preview-img");
+      if (img) img.src = canvas.toDataURL("image/png");
+    } catch (e) {}
   }
 
   function renderStats() {
@@ -2978,6 +3233,9 @@ if (typeof window !== "undefined") {
     openOverlay,
     closeOverlays,
     toast,
+    renderShareCanvas,
+    shareImageBlob,
+    shareText: (g) => E.shareText(g || game),
     applyPuzzle: (words) => {
       fillDraftFromWords(words);
       const dw = E.draftWords(game);
